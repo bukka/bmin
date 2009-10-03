@@ -1,0 +1,7 @@
+sphere-radius = 0.1
+cube-size = 1.0
+animated-sphere-radius = 0.02
+line-radius = 0.02
+display-width = 0.36
+display-height = 0.12
+display-deep = 0.08
