@@ -34,56 +34,56 @@ class QString;
 // GUIManager class
 class GUIManager : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	// singleton method which returns instance of GUIManager
-	static GUIManager *instance();
-	// destroy instance
-	static void destroy();
-	// actualize function and return function string
-	QString getActualFce() { emit fceRead(); return m_actualFce; }
-	// whether formula is correct
-	bool isCorrectFormula() const { return m_isCorrect; }
+    // singleton method which returns instance of GUIManager
+    static GUIManager *instance();
+    // destroy instance
+    static void destroy();
+    // actualize function and return function string
+    QString getActualFce() { emit fceRead(); return m_actualFce; }
+    // whether formula is correct
+    bool isCorrectFormula() const { return m_isCorrect; }
 
-	// static instance
-	static GUIManager *s_instance;
+    // static instance
+    static GUIManager *s_instance;
 private:
-	GUIManager();
-	~GUIManager();
+    GUIManager();
+    ~GUIManager();
 
-	// boolean function
-	Formula *m_formula;
-	// string with actual formula
-	QString m_actualFce;
-	// whether formula is correct
-	bool m_isCorrect;
+    // boolean function
+    Formula *m_formula;
+    // string with actual formula
+    QString m_actualFce;
+    // whether formula is correct
+    bool m_isCorrect;
 
 public slots:
-	// minimization variables
-	void minimizeFormula();
-	// changing formula
-	void setFormula(const QString &);
-	// updating formula - the same like setFormule and fceChanged is emitted
-	void updateFormula(const QString &);
-	// changes term in formula
-	void setTerm(int idx, tval value);
+    // minimization variables
+    void minimizeFormula();
+    // changing formula
+    void setFormula(const QString &);
+    // updating formula - the same like setFormule and fceChanged is emitted
+    void updateFormula(const QString &);
+    // changes term in formula
+    void setTerm(int idx, tval value);
 
 signals:
-	// emitted when it is essential to change formula in the text field
-	void fceChanged(const QString &);
-	// emitted before formula is saved
-	void fceRead();
-	// emitted when it is essential to change minimized formula label
-	void minFceChanged(const QString &);
-	// emitted when it is essential to change the formula's term
-	void formulaChanged(Formula *);
-	// emitted when formula is minimized
-	void formulaMinimized();
-	// emitted when user sets invalid formula string
-	void formulaInvalidated();
-	// emitted when error message is required
-	void errorInvoked(const QString &);
+    // emitted when it is essential to change formula in the text field
+    void fceChanged(const QString &);
+    // emitted before formula is saved
+    void fceRead();
+    // emitted when it is essential to change minimized formula label
+    void minFceChanged(const QString &);
+    // emitted when it is essential to change the formula's term
+    void formulaChanged(Formula *);
+    // emitted when formula is minimized
+    void formulaMinimized();
+    // emitted when user sets invalid formula string
+    void formulaInvalidated();
+    // emitted when error message is required
+    void errorInvoked(const QString &);
 
 };
 

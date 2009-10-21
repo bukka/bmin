@@ -33,18 +33,18 @@ class Formula;
 // BooleanCube class - superstructure for cube drawer
 class CubeWidget : public ModuleWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	// CubeWidget constructor
-	CubeWidget(const QString &name, int pos);
+    // CubeWidget constructor
+    CubeWidget(const QString &name, int pos);
 
 signals:
-	void activated(bool); // activity of cube was changed
+    void activated(bool); // activity of cube was changed
 
 public slots:
-	// make or remove new border symbolized the focus of drawer widget
-	void showFocus(bool isFocused);
+    // make or remove new border symbolized the focus of drawer widget
+    void showFocus(bool isFocused);
 
 };
 

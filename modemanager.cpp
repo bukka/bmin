@@ -33,45 +33,45 @@ ModeManager *ModeManager::s_instance = 0;
 // constructor - init modes
 ModeManager::ModeManager()
 {
-	// welcome
-	m_welcome = new WelcomeWidget(tr("Welcome"), 0);
-	m_modules << m_welcome;
+    // welcome
+    m_welcome = new WelcomeWidget(tr("Welcome"), 0);
+    m_modules << m_welcome;
 
-	// map
-	m_map = new MapWidget(tr("K-map"), 1);
-	m_modules << m_map;
-	connect(this, SIGNAL(mapActivated(bool)), m_map, SLOT(setActivity(bool)));
+    // map
+    m_map = new MapWidget(tr("K-map"), 1);
+    m_modules << m_map;
+    connect(this, SIGNAL(mapActivated(bool)), m_map, SLOT(setActivity(bool)));
 
 #ifdef Q_WS_WIN
-	// cube
-	m_cube = new CubeWidget(tr("Boolean n-Cube"), 2);
-	m_modules << m_cube;
-	connect(this, SIGNAL(cubeActivated(bool)), m_cube, SIGNAL(activated(bool)));
+    // cube
+    m_cube = new CubeWidget(tr("Boolean n-Cube"), 2);
+    m_modules << m_cube;
+    connect(this, SIGNAL(cubeActivated(bool)), m_cube, SIGNAL(activated(bool)));
 #endif
 }
 
 // return instance of ModeManager
 ModeManager *ModeManager::instance()
 {
-	if (s_instance == 0)
-		s_instance = new ModeManager();
+    if (s_instance == 0)
+        s_instance = new ModeManager();
 
-	return s_instance;
+    return s_instance;
 }
 
 // delete and clear static instance of ModeManager
 void ModeManager::destroy()
 {
-	delete s_instance;
-	s_instance = 0;
+    delete s_instance;
+    s_instance = 0;
 }
 
 // set mode
 void ModeManager::setMode(int modeId)
 {
-	emit mapActivated(modeId == MAP_ID);
+    emit mapActivated(modeId == MAP_ID);
 #ifdef Q_WS_WIN
-	emit cubeActivated(modeId == CUBE_ID);
+    emit cubeActivated(modeId == CUBE_ID);
 #endif
-	emit modeChanged(modeId);
+    emit modeChanged(modeId);
 }

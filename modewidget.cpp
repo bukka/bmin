@@ -38,92 +38,92 @@
 // left tab bar constructor
 ModeTabBar::ModeTabBar(int modesSize) : m_modesSize(modesSize)
 {
-	m_winColor = style()->standardPalette().color(QPalette::Window);
-	setStyle(new QWindowsStyle);
-	setUsesScrollButtons(false);
+    m_winColor = style()->standardPalette().color(QPalette::Window);
+    setStyle(new QWindowsStyle);
+    setUsesScrollButtons(false);
 }
 
 // paint event for paintin all tabs
 void ModeTabBar::paintEvent(QPaintEvent *event)
 {
-	Q_UNUSED(event);
+    Q_UNUSED(event);
 
-	QPainter p(this);
-	for (int i = 0; i < m_modesSize; i++)
-		paintTab(p, i);
+    QPainter p(this);
+    for (int i = 0; i < m_modesSize; i++)
+        paintTab(p, i);
 }
 
 // paint tab by idx
 void ModeTabBar::paintTab(QPainter &p, int idx)
 {
-	QStyleOptionTab tab;
-	initStyleOption(&tab, idx);
-	QRect rect = tab.rect;
-	QRect textRect(0, 0, rect.height(), rect.width());
-	QString tabText = tab.text;
-	bool selected = tab.state & QStyle::State_Selected;
-	QFont boldFont = font();
-	boldFont.setPixelSize(12);
-	boldFont.setBold(true);
+    QStyleOptionTab tab;
+    initStyleOption(&tab, idx);
+    QRect rect = tab.rect;
+    QRect textRect(0, 0, rect.height(), rect.width());
+    QString tabText = tab.text;
+    bool selected = tab.state & QStyle::State_Selected;
+    QFont boldFont = font();
+    boldFont.setPixelSize(12);
+    boldFont.setBold(true);
 
-	if (selected) {
-		p.fillRect(rect, QColor(Qt::white));
-		p.setPen(Qt::black);
-	}
-	else {
-		p.fillRect(rect, QColor(160, 160, 160));
-		p.setPen(Qt::white);
-	}
-	// paint text
-	p.save();
-	p.translate(rect.left(), rect.top());
-	p.rotate(-90.0);
-	p.translate(-rect.height(), 0);
-	p.setFont(boldFont);
-	p.drawText(textRect, Qt::AlignCenter, tabText);
-	p.restore();
+    if (selected) {
+        p.fillRect(rect, QColor(Qt::white));
+        p.setPen(Qt::black);
+    }
+    else {
+        p.fillRect(rect, QColor(160, 160, 160));
+        p.setPen(Qt::white);
+    }
+    // paint text
+    p.save();
+    p.translate(rect.left(), rect.top());
+    p.rotate(-90.0);
+    p.translate(-rect.height(), 0);
+    p.setFont(boldFont);
+    p.drawText(textRect, Qt::AlignCenter, tabText);
+    p.restore();
 
-	if (idx < m_modesSize - 1) {
-		QPen pen(m_winColor);
-		pen.setWidth(2);
-		p.setPen(pen);
-		p.drawLine(rect.bottomLeft(), rect.bottomRight());
-	}
+    if (idx < m_modesSize - 1) {
+        QPen pen(m_winColor);
+        pen.setWidth(2);
+        p.setPen(pen);
+        p.drawLine(rect.bottomLeft(), rect.bottomRight());
+    }
 }
 
 // size hint for tab
 QSize ModeTabBar::tabSizeHint(int index) const
 {
-	int h = height() / m_modesSize;
-	if (index == m_modesSize - 1)
-		h += height() % m_modesSize;
-	return QSize(30, h);
+    int h = height() / m_modesSize;
+    if (index == m_modesSize - 1)
+        h += height() % m_modesSize;
+    return QSize(30, h);
 }
 
 // ModeWidget constructor - bottom widget at main window
 ModeWidget::ModeWidget()
 {
-	ModeManager *mm = ModeManager::instance();
-	QList<ModuleWidget *> modules = mm->getModules();
+    ModeManager *mm = ModeManager::instance();
+    QList<ModuleWidget *> modules = mm->getModules();
 
-	m_tabBar = new ModeTabBar(modules.size());
-	m_tabBar->setShape(QTabBar::RoundedEast);
-	m_tabBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-	connect(m_tabBar, SIGNAL(currentChanged(int)), mm, SLOT(setMode(int)));
+    m_tabBar = new ModeTabBar(modules.size());
+    m_tabBar->setShape(QTabBar::RoundedEast);
+    m_tabBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
+    connect(m_tabBar, SIGNAL(currentChanged(int)), mm, SLOT(setMode(int)));
 
-	m_modes = new QStackedLayout;
-	connect(mm, SIGNAL(modeChanged(int)), m_modes, SLOT(setCurrentIndex(int)));
+    m_modes = new QStackedLayout;
+    connect(mm, SIGNAL(modeChanged(int)), m_modes, SLOT(setCurrentIndex(int)));
 
-	foreach (ModuleWidget *m, modules) {
-		m_tabBar->insertTab(m->position(), m->name());
-		m_modes->insertWidget(m->position(), m);
-	}
+    foreach (ModuleWidget *m, modules) {
+        m_tabBar->insertTab(m->position(), m->name());
+        m_modes->insertWidget(m->position(), m);
+    }
 
-	QHBoxLayout *modeLayout = new QHBoxLayout;
-	modeLayout->addWidget(m_tabBar);
-	modeLayout->addLayout(m_modes);
-	modeLayout->setStretchFactor(m_modes, 100);
-	modeLayout->setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout *modeLayout = new QHBoxLayout;
+    modeLayout->addWidget(m_tabBar);
+    modeLayout->addLayout(m_modes);
+    modeLayout->setStretchFactor(m_modes, 100);
+    modeLayout->setContentsMargins(0, 0, 0, 0);
 
-	setLayout(modeLayout);
+    setLayout(modeLayout);
 }

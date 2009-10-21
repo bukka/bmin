@@ -32,19 +32,19 @@
 #define STRINGIFY(_s) STRINGIFY_INTERNAL(_s)
 
 #define BMIN_VESION_STRING STRINGIFY(BMIN_VERSION_MAJOR) \
-	"." STRINGIFY(BMIN_VERSION_MINOR) \
-	"." STRINGIFY(BMIN_VERSION_RELEASE)
+    "." STRINGIFY(BMIN_VERSION_MINOR) \
+    "." STRINGIFY(BMIN_VERSION_RELEASE)
 
 namespace Constants {
 
-	// Version string
-	const char * const VERSION = BMIN_VESION_STRING;
+    // Version string
+    const char * const VERSION = BMIN_VESION_STRING;
 
-	// Whether show default formula
-	const bool DEFAULT_FORMULA = false;
+    // Whether show default formula
+    const bool DEFAULT_FORMULA = false;
 
-	// Color in grey scale for main widget separator
-	const int SEP_COLOR_GS = 180;
+    // Color in grey scale for main widget separator
+    const int SEP_COLOR_GS = 180;
 
 }
 

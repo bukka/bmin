@@ -30,41 +30,41 @@ class QString;
 class MapCell
 {
 public:
-	static const int DEF_SIZE = 25;
-	static const qreal DEF_BORDER = 2.0;
+    static const int DEF_SIZE = 25;
+    static const qreal DEF_BORDER = 2.0;
 
-	static const int UNDEF = 0;
-	static const int ZERO = 1;
-	static const int ONE = 2;
-	static const int DONT_CARE = 3;
-	static const int DONT_CARE2 = 4;
+    static const int UNDEF = 0;
+    static const int ZERO = 1;
+    static const int ONE = 2;
+    static const int DONT_CARE = 3;
+    static const int DONT_CARE2 = 4;
 
-	static int getNextValue(int val);
+    static int getNextValue(int val);
 
-	MapCell(int xPos, int yPos, int s = DEF_SIZE,
-		qreal b = DEF_BORDER, int val = UNDEF);
+    MapCell(int xPos, int yPos, int s = DEF_SIZE,
+        qreal b = DEF_BORDER, int val = UNDEF);
 
-	void draw(QPainter & painter) const;
+    void draw(QPainter & painter) const;
 
-	int getValue() const { return value; }
-	int getX() const { return x; }
-	int getY() const { return y; }
-	int getSize() const { return size; }
-	qreal getBorder() const { return border; }
+    int getValue() const { return value; }
+    int getX() const { return x; }
+    int getY() const { return y; }
+    int getSize() const { return size; }
+    qreal getBorder() const { return border; }
 
-	void setValue(int val);
-	void setPosition(int xPos, int yPos) { x = xPos; y = yPos; }
-	void setSize(int s) { size = s; }
-	void setBorder(qreal b) { border = b; }
+    void setValue(int val);
+    void setPosition(int xPos, int yPos) { x = xPos; y = yPos; }
+    void setSize(int s) { size = s; }
+    void setBorder(qreal b) { border = b; }
 
 private:
-	int x;	// X position
-	int y;	// Y position
-	int size;
-	qreal border;
-	int value;
+    int x;	// X position
+    int y;	// Y position
+    int size;
+    qreal border;
+    int value;
 
-	QString getValueText() const;
+    QString getValueText() const;
 };
 #endif // MAPCELL_H
 

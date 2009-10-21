@@ -30,16 +30,16 @@ class QPaintEvent;
 class WelcomeWidget : public ModuleWidget
 {
 public:
-	WelcomeWidget(const QString &name, int pos);
+    WelcomeWidget(const QString &name, int pos);
 
 protected:
-	void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *event);
 
 private:
-	// welcome box width
-	static const int BOX_W = 440;
-	// welcome box height
-	static const int BOX_H = 160;
+    // welcome box width
+    static const int BOX_W = 440;
+    // welcome box height
+    static const int BOX_H = 160;
 
 };
 

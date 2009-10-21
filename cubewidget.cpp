@@ -33,53 +33,53 @@
 // BooleanCube constructor - makes CubeGLDrawer, which draws - too much
 // Boolean n-Cube. It connects all required signals and slots
 CubeWidget::CubeWidget(const QString &name, int pos)
-		: ModuleWidget(name, pos)
+        : ModuleWidget(name, pos)
 {
-	// OpenGL format
-	QGLFormat fmt;
-	fmt.setDepth(true);
-	fmt.setAlpha(true);
-	CubeGLDrawer *drawer = new CubeGLDrawer(fmt);
+    // OpenGL format
+    QGLFormat fmt;
+    fmt.setDepth(true);
+    fmt.setAlpha(true);
+    CubeGLDrawer *drawer = new CubeGLDrawer(fmt);
 
-	GUIManager *gm = GUIManager::instance();
-	// changing one term in drawer
-	connect(drawer, SIGNAL(cubeChanged(int, tval)),
-			gm, SLOT(setTerm(int, tval)));
-	// formula is minimized
-	connect(drawer, SIGNAL(minRequested()),
-			gm, SLOT(minimizeFormula()));
-	// cube is focused
-	connect(drawer, SIGNAL(cubeFocused(bool)),
-			this, SLOT(showFocus(bool)));
+    GUIManager *gm = GUIManager::instance();
+    // changing one term in drawer
+    connect(drawer, SIGNAL(cubeChanged(int, tval)),
+            gm, SLOT(setTerm(int, tval)));
+    // formula is minimized
+    connect(drawer, SIGNAL(minRequested()),
+            gm, SLOT(minimizeFormula()));
+    // cube is focused
+    connect(drawer, SIGNAL(cubeFocused(bool)),
+            this, SLOT(showFocus(bool)));
 
-	// creating new formula
-	connect(gm, SIGNAL(formulaChanged(Formula *)),
-			drawer, SLOT(setFormula(Formula *)));
-	// request for minimizing cube
-	connect(gm, SIGNAL(formulaMinimized()),
-			drawer, SLOT(minimizeCube()));
-	// request for invalidating cube
-	connect(gm, SIGNAL(formulaInvalidated()),
-			drawer, SLOT(invalidateCube()));
-	// setting drawer activity
-	connect(this, SIGNAL(activated(bool)),
-			drawer, SLOT(setActivity(bool)));
+    // creating new formula
+    connect(gm, SIGNAL(formulaChanged(Formula *)),
+            drawer, SLOT(setFormula(Formula *)));
+    // request for minimizing cube
+    connect(gm, SIGNAL(formulaMinimized()),
+            drawer, SLOT(minimizeCube()));
+    // request for invalidating cube
+    connect(gm, SIGNAL(formulaInvalidated()),
+            drawer, SLOT(invalidateCube()));
+    // setting drawer activity
+    connect(this, SIGNAL(activated(bool)),
+            drawer, SLOT(setActivity(bool)));
 
-	// for changing background color
-	setPalette(QPalette(Qt::black));
-	setAutoFillBackground(true);
+    // for changing background color
+    setPalette(QPalette(Qt::black));
+    setAutoFillBackground(true);
 
-	// place drawer to this widget
-	QVBoxLayout *mainLayout = new QVBoxLayout;
-	mainLayout->setContentsMargins(2, 2, 2, 2);
-	mainLayout->addWidget(drawer);
-	setLayout(mainLayout);
+    // place drawer to this widget
+    QVBoxLayout *mainLayout = new QVBoxLayout;
+    mainLayout->setContentsMargins(2, 2, 2, 2);
+    mainLayout->addWidget(drawer);
+    setLayout(mainLayout);
 
 }
 
 // make or remove border symbolized focusing of the drawer widget
 void CubeWidget::showFocus(bool isFocused)
 {
-	setBackgroundRole(isFocused? QPalette::Highlight: QPalette::NoRole);
+    setBackgroundRole(isFocused? QPalette::Highlight: QPalette::NoRole);
 }
 

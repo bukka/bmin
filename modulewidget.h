@@ -28,20 +28,20 @@
 class ModuleWidget : public QWidget
 {
 public:
-	ModuleWidget(const QString &name, int pos);
+    ModuleWidget(const QString &name, int pos);
 
-	QSize minimumSizeHint() const;
-	QSize sizeHint() const;
+    QSize minimumSizeHint() const;
+    QSize sizeHint() const;
 
-	// getter for module name
-	QString name() const { return m_name; }
-	// getter for position
-	int position() const { return m_position; }
+    // getter for module name
+    QString name() const { return m_name; }
+    // getter for position
+    int position() const { return m_position; }
 private:
-	// module name
-	QString m_name;
-	// position
-	int m_position;
+    // module name
+    QString m_name;
+    // position
+    int m_position;
 };
 
 #endif // MODULEWIDGET_H

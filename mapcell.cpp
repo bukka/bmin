@@ -34,53 +34,53 @@
 // cell constructor
 MapCell::MapCell(int xPos, int yPos, int s, qreal b, int val)
 {
-	x = xPos;
-	y = yPos;
-	size = s;
-	border = b;
-	setValue(val);
+    x = xPos;
+    y = yPos;
+    size = s;
+    border = b;
+    setValue(val);
 }
 
 void MapCell::draw(QPainter & painter) const
 {
-	painter.setPen(QPen(QBrush(Qt::SolidPattern),border));
+    painter.setPen(QPen(QBrush(Qt::SolidPattern),border));
 
-	QRect rect(x,y,size,size);
-	painter.drawRect(rect);
+    QRect rect(x,y,size,size);
+    painter.drawRect(rect);
 
-	if (value != UNDEF)
-		painter.drawText(rect,Qt::AlignCenter,getValueText());
+    if (value != UNDEF)
+        painter.drawText(rect,Qt::AlignCenter,getValueText());
 }
 
 void MapCell::setValue(int val)
 {
-	if (val > UNDEF && val <= DONT_CARE)
-		value = val;
-	else
-		value = UNDEF;
+    if (val > UNDEF && val <= DONT_CARE)
+        value = val;
+    else
+        value = UNDEF;
 }
 
 QString MapCell::getValueText() const
 {
-	switch (value) {
-		case ZERO:
-			return "0";
-		case ONE:
-			return "1";
-		case DONT_CARE:
-			return "X";
-		default:
-			return "";
-	}
+    switch (value) {
+        case ZERO:
+            return "0";
+        case ONE:
+            return "1";
+        case DONT_CARE:
+            return "X";
+        default:
+            return "";
+    }
 }
 
 int MapCell::getNextValue(int val)
 {
-	if (val < 0 || val > 3)
-		return UNDEF;
-	val++;
-	if (val == 4)
-		val = 1;
-	return val;
+    if (val < 0 || val > 3)
+        return UNDEF;
+    val++;
+    if (val == 4)
+        val = 1;
+    return val;
 }
 

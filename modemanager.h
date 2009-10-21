@@ -34,46 +34,46 @@ class CubeWidget;
 // mode manager class
 class ModeManager : public QObject
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	// singleton method for returning instance of ModeManager
-	static ModeManager *instance();
-	// destroy instance method
-	static void destroy();
+    // singleton method for returning instance of ModeManager
+    static ModeManager *instance();
+    // destroy instance method
+    static void destroy();
 
-	// modes' identifiers
-	static const int WELCOME_ID = 0;
-	static const int MAP_ID     = 1;
+    // modes' identifiers
+    static const int WELCOME_ID = 0;
+    static const int MAP_ID     = 1;
 #ifdef Q_WS_WIN
-	static const int CUBE_ID    = 2;
+    static const int CUBE_ID    = 2;
 #endif
 
-	// return modules
-	QList<ModuleWidget *> getModules() const { return m_modules; }
+    // return modules
+    QList<ModuleWidget *> getModules() const { return m_modules; }
 
-	// static instance of ModeManager
-	static ModeManager *s_instance;
+    // static instance of ModeManager
+    static ModeManager *s_instance;
 
 private:
-	ModeManager();
+    ModeManager();
 
-	WelcomeWidget *m_welcome;
-	MapWidget *m_map;
+    WelcomeWidget *m_welcome;
+    MapWidget *m_map;
 #ifdef Q_WS_WIN
-	CubeWidget *m_cube;
+    CubeWidget *m_cube;
 #endif
-	QList<ModuleWidget *> m_modules;
+    QList<ModuleWidget *> m_modules;
 
 public slots:
-	void setMode(int);
+    void setMode(int);
 
 signals:
-	// emitted when mode is changed
-	void modeChanged(int);
-	void mapActivated(bool);
+    // emitted when mode is changed
+    void modeChanged(int);
+    void mapActivated(bool);
 #ifdef Q_WS_WIN
-	void cubeActivated(bool);
+    void cubeActivated(bool);
 #endif
 };
 

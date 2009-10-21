@@ -33,49 +33,49 @@ class Formula;
 
 class MapWidget : public ModuleWidget
 {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	static const int MAX_SIZE = 6;
+    static const int MAX_SIZE = 6;
 
-	MapWidget(const QString &name, int pos);
+    MapWidget(const QString &name, int pos);
 
-	void setCellSize(int size) { cellSize = size; }
-	void setBorderSize(qreal border) { cellBorder = border; }
+    void setCellSize(int size) { cellSize = size; }
+    void setBorderSize(qreal border) { cellBorder = border; }
 
-	int getMapSize() { return mapSize; }
-	int getCellSize() { return cellSize; }
-	qreal getCellBorder() { return cellBorder; }
+    int getMapSize() { return mapSize; }
+    int getCellSize() { return cellSize; }
+    qreal getCellBorder() { return cellBorder; }
 
 signals:
-	void mapChanged(int idx, tval value);
+    void mapChanged(int idx, tval value);
 
 public slots:
-	void invalidateMap();
-	void setMapData(Formula *formula);
-	void setActivity(bool active);
-	void setAllValues(int val);
+    void invalidateMap();
+    void setMapData(Formula *formula);
+    void setActivity(bool active);
+    void setAllValues(int val);
 
 protected:
-	void paintEvent(QPaintEvent *event);
-	void mousePressEvent(QMouseEvent *event);
+    void paintEvent(QPaintEvent *event);
+    void mousePressEvent(QMouseEvent *event);
 
 private:
-	static const int transX = 150;
-	static const int transY = 100;
+    static const int transX = 150;
+    static const int transY = 100;
 
-	enum {MSG_OVER, MSG_INVALID, MSG_NONE} msg;
+    enum {MSG_OVER, MSG_INVALID, MSG_NONE} msg;
 
-	bool isActive;
-	int mapSize;
-	int cellSize;
-	qreal cellBorder;
-	std::vector<MapCell *> cells;
-	std::vector<char> vars;
+    bool isActive;
+    int mapSize;
+    int cellSize;
+    qreal cellBorder;
+    std::vector<MapCell *> cells;
+    std::vector<char> vars;
 
-	void updateMap() { update(); }
-	void setValues(std::vector<int> idx, int value, int size);
-	void clearCells();
-	void showMsg(QPainter &, QString &);
+    void updateMap() { update(); }
+    void setValues(std::vector<int> idx, int value, int size);
+    void clearCells();
+    void showMsg(QPainter &, QString &);
 };
 #endif // MAPWIDGET_H

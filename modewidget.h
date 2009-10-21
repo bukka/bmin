@@ -32,34 +32,34 @@ class QStackedLayout;
 class ModeTabBar : public QTabBar
 {
 public:
-	ModeTabBar(int modesSize);
+    ModeTabBar(int modesSize);
 
 protected:
-	void paintEvent(QPaintEvent *event);
-	void paintTab(QPainter &p, int idx);
-	QSize tabSizeHint(int index) const;
+    void paintEvent(QPaintEvent *event);
+    void paintTab(QPainter &p, int idx);
+    QSize tabSizeHint(int index) const;
 
 private:
-	// modes count
-	int m_modesSize;
-	// window color
-	QColor m_winColor;
+    // modes count
+    int m_modesSize;
+    // window color
+    QColor m_winColor;
 };
 
 // Mode widget
 class ModeWidget : public QWidget
 {
 public:
-	ModeWidget();
+    ModeWidget();
 
 private:
-	// loading modes
-	void loadModes();
+    // loading modes
+    void loadModes();
 
-	// stacked layout (only one is visible) for modes
-	QStackedLayout *m_modes;
-	// tab bar for selecting modes
-	ModeTabBar *m_tabBar;
+    // stacked layout (only one is visible) for modes
+    QStackedLayout *m_modes;
+    // tab bar for selecting modes
+    ModeTabBar *m_tabBar;
 };
 
 #endif // MODEWIDGET_H

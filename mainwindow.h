@@ -40,59 +40,59 @@ public:
     ~MainWindow();
 
 private:
-	// creates menu actions
-	void createActions();
-	// create menus
-	void createMenus();
+    // creates menu actions
+    void createActions();
+    // create menus
+    void createMenus();
 
-	// menu actions
-	QAction *m_newAction;
-	QAction *m_loadAction;
-	QAction *m_saveAction;
-	QAction *m_exitAction;
-	QAction *m_aboutAction;
-	//QAction *m_helpAction;
+    // menu actions
+    QAction *m_newAction;
+    QAction *m_loadAction;
+    QAction *m_saveAction;
+    QAction *m_exitAction;
+    QAction *m_aboutAction;
+    //QAction *m_helpAction;
 
-	// menus
-	QMenu *m_fileMenu;
-	QMenu *m_helpMenu;
+    // menus
+    QMenu *m_fileMenu;
+    QMenu *m_helpMenu;
 
-	// settings
-	QSettings m_settings;
+    // settings
+    QSettings m_settings;
 
-	// central widgets
-	ControlWidget *m_control;
-	ModeWidget *m_mode;
-	GUIManager *m_gm;
+    // central widgets
+    ControlWidget *m_control;
+    ModeWidget *m_mode;
+    GUIManager *m_gm;
 
 private slots:
-	// slots for menu
-	// FILE
-	void newFormula();
-	void loadFormula();
-	void saveFormula();
-	// HELP
-	//void help();
-	void about();
+    // slots for menu
+    // FILE
+    void newFormula();
+    void loadFormula();
+    void saveFormula();
+    // HELP
+    //void help();
+    void about();
 
-	// Message's slots
-	void showMsg(const QString &msg, const QString &title,
-				 QMessageBox::Icon iconType) const;
-	// error msg
-	void showError(const QString &msg) const
-	{
-		showMsg(msg, tr("error"), QMessageBox::Critical);
-	}
-	// warning msg
-	void showWarning(const QString &msg) const
-	{
-		showMsg(msg, tr("warning"), QMessageBox::Warning);
-	}
-	// info msg
-	void showInfo(const QString &msg) const
-	{
-		showMsg(msg, tr("information"), QMessageBox::Information);
-	}
+    // Message's slots
+    void showMsg(const QString &msg, const QString &title,
+                 QMessageBox::Icon iconType) const;
+    // error msg
+    void showError(const QString &msg) const
+    {
+        showMsg(msg, tr("error"), QMessageBox::Critical);
+    }
+    // warning msg
+    void showWarning(const QString &msg) const
+    {
+        showMsg(msg, tr("warning"), QMessageBox::Warning);
+    }
+    // info msg
+    void showInfo(const QString &msg) const
+    {
+        showMsg(msg, tr("information"), QMessageBox::Information);
+    }
 };
 
 #endif // MAINWINDOW_H

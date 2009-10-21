@@ -36,41 +36,41 @@ class ControlWidget : public QWidget
 Q_OBJECT
 
 public:
-	// constructor (no implicit construnctor)
-	ControlWidget(QWidget *parent = 0);
+    // constructor (no implicit construnctor)
+    ControlWidget(QWidget *parent = 0);
 
 protected:
-	// paint event for drawing lines
-	virtual void paintEvent(QPaintEvent* e);
+    // paint event for drawing lines
+    virtual void paintEvent(QPaintEvent* e);
 
 private:
-	// line input
-	QLineEdit *m_fceLine;
-	// minimize button
-	QPushButton *m_minBtn;
-	// label with minimized function
-	QLabel *m_minFceLabel;
+    // line input
+    QLineEdit *m_fceLine;
+    // minimize button
+    QPushButton *m_minBtn;
+    // label with minimized function
+    QLabel *m_minFceLabel;
 
-	// previous function
-	QString m_prevFce;
-	// prefix for minimized function
-	QString m_minFcePrefix;
-	// separator color
-	QColor m_sepColor;
+    // previous function
+    QString m_prevFce;
+    // prefix for minimized function
+    QString m_minFcePrefix;
+    // separator color
+    QColor m_sepColor;
 
 public slots:
-	// sets fceLine to new value
-	void setFce(const QString &fceStr);
-	// sets minFceLabel to new value
-	void setMinFce(const QString &minFceStr);
+    // sets fceLine to new value
+    void setFce(const QString &fceStr);
+    // sets minFceLabel to new value
+    void setMinFce(const QString &minFceStr);
 
 private slots:
-	// called when QLineEdit with fce is changed
-	void sendFce();
+    // called when QLineEdit with fce is changed
+    void sendFce();
 
 signals:
-	// emited by changing boolean function
-	void fceChanged(const QString &);
+    // emited by changing boolean function
+    void fceChanged(const QString &);
 };
 
 #endif // CONTROLWIDGET_H

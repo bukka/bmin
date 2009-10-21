@@ -23,14 +23,14 @@
 #include "modulewidget.h"
 
 ModuleWidget::ModuleWidget(const QString &name, int pos)
-		: m_name(name), m_position(pos) {}
+        : m_name(name), m_position(pos) {}
 
 QSize ModuleWidget::minimumSizeHint() const
 {
-	return QSize(500, 400);
+    return QSize(500, 400);
 }
 
 QSize ModuleWidget::sizeHint() const
 {
-	return QSize(600, 500);
+    return QSize(600, 500);
 }

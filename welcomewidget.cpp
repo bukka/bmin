@@ -29,26 +29,26 @@
 
 WelcomeWidget::WelcomeWidget(const QString &name, int pos) : ModuleWidget(name, pos)
 {
-	setPalette(QPalette(Qt::white));
-	setAutoFillBackground(true);
+    setPalette(QPalette(Qt::white));
+    setAutoFillBackground(true);
 
-	QFont newFont = font();
-	newFont.setPixelSize(18);
-	newFont.setBold(true);
-	setFont(newFont);
+    QFont newFont = font();
+    newFont.setPixelSize(18);
+    newFont.setBold(true);
+    setFont(newFont);
 }
 
 // paint welcome text
 void WelcomeWidget::paintEvent(QPaintEvent *event)
 {
-	Q_UNUSED(event);
+    Q_UNUSED(event);
 
-	QPainter p(this);
-	p.translate((width() - BOX_W) / 2, (height() - BOX_H) / 2);
-	p.setPen(QColor(200, 200, 200));
-	QRect rect(0, 0, BOX_W, BOX_H);
-	p.drawRect(rect);
-	p.setPen(QColor(60, 60, 240));
-	p.drawText(rect, Qt::AlignCenter, tr("Welcome to Bmin (Boolean minimizer)"));
+    QPainter p(this);
+    p.translate((width() - BOX_W) / 2, (height() - BOX_H) / 2);
+    p.setPen(QColor(200, 200, 200));
+    QRect rect(0, 0, BOX_W, BOX_H);
+    p.drawRect(rect);
+    p.setPen(QColor(60, 60, 240));
+    p.drawText(rect, Qt::AlignCenter, tr("Welcome to Bmin (Boolean minimizer)"));
 
 }

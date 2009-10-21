@@ -28,13 +28,13 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-	// data for QSettings
-	a.setOrganizationName("bukka");
-	a.setApplicationName("bmin");
+    // data for QSettings
+    a.setOrganizationName("bukka");
+    a.setApplicationName("bmin");
 
-	// Main window class
+    // Main window class
     MainWindow w;
-	w.setGeometry(50, 50, 800, 600);
+    w.setGeometry(50, 50, 800, 600);
     w.show();
     return a.exec();
 }

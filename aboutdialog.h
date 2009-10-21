@@ -30,7 +30,7 @@ class QWidget;
 class AboutDialog : public QDialog
 {
 public:
-	AboutDialog(QWidget *parent);
+    AboutDialog(QWidget *parent);
 };
 
 #endif // ABOUTDIALOG_H

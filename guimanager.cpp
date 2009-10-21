@@ -32,102 +32,102 @@ GUIManager *GUIManager::s_instance = 0;
 // constructor
 GUIManager::GUIManager()
 {
-	// set empty formula
-	m_formula = 0;
+    // set empty formula
+    m_formula = 0;
 }
 
 // destructor
 GUIManager::~GUIManager()
 {
-	delete m_formula;
+    delete m_formula;
 }
 
 // return instance of GUIManager
 GUIManager *GUIManager::instance()
 {
-	if (s_instance == 0)
-		s_instance = new GUIManager();
+    if (s_instance == 0)
+        s_instance = new GUIManager();
 
-	return s_instance;
+    return s_instance;
 }
 
 // destroy and clear instance
 void GUIManager::destroy()
 {
-	delete s_instance;
-	s_instance = 0;
+    delete s_instance;
+    s_instance = 0;
 }
 
 // by changing formula
 void GUIManager::setFormula(const QString &fce)
 {
-	if (fce == m_actualFce)
-		return;
+    if (fce == m_actualFce)
+        return;
 
-	// save as actual
-	m_actualFce = fce;
+    // save as actual
+    m_actualFce = fce;
 
-	// check whether formula is empty
-	if (fce == "") {
-		//emit errorInvoked(tr("Formula isn't available!"));
-		m_isCorrect = false;
-		emit formulaInvalidated();
-		return;
-	}
-	try {
-		// make formula
-		Formula *tmp = new Formula(fce.toStdString());
+    // check whether formula is empty
+    if (fce == "") {
+        //emit errorInvoked(tr("Formula isn't available!"));
+        m_isCorrect = false;
+        emit formulaInvalidated();
+        return;
+    }
+    try {
+        // make formula
+        Formula *tmp = new Formula(fce.toStdString());
 
-		if (m_formula)
-			delete m_formula;
-		m_formula = tmp;
-		emit formulaChanged(m_formula);
-		m_isCorrect = true;
-	}
-	catch (std::exception &exc) {
-		emit errorInvoked(exc.what());
-		emit formulaInvalidated();
-		m_isCorrect = false;
-	}
-	emit minFceChanged("");
+        if (m_formula)
+            delete m_formula;
+        m_formula = tmp;
+        emit formulaChanged(m_formula);
+        m_isCorrect = true;
+    }
+    catch (std::exception &exc) {
+        emit errorInvoked(exc.what());
+        emit formulaInvalidated();
+        m_isCorrect = false;
+    }
+    emit minFceChanged("");
 }
 
 // update formula
 void GUIManager::updateFormula(const QString &fce)
 {
-	setFormula(fce);
-	emit fceChanged(fce);
+    setFormula(fce);
+    emit fceChanged(fce);
 }
 
 // minimization of the variables
 void GUIManager::minimizeFormula()
 {
-	if (!m_formula || !m_isCorrect) {
-		emit errorInvoked(tr("Incorrect boolean function!"));
-		return;
-	}
-	if (m_formula->is_minimized()) {
-		return;
-	}
+    if (!m_formula || !m_isCorrect) {
+        emit errorInvoked(tr("Incorrect boolean function!"));
+        return;
+    }
+    if (m_formula->is_minimized()) {
+        return;
+    }
 
-	m_formula->minimize();
-	emit minFceChanged(QString::fromStdString(m_formula->to_string()));
-	emit formulaMinimized();
+    m_formula->minimize();
+    emit minFceChanged(QString::fromStdString(m_formula->to_string()));
+    emit formulaMinimized();
 }
 
 // changes term in formula
 void GUIManager::setTerm(int idx, tval value)
 {
-	if (!m_formula)
-		return;
+    if (!m_formula)
+        return;
 
-	if (value == Term::zero)
-		m_formula->remove_term(idx);
-	else
-		m_formula->push_term(idx,value == Term::dont_care);
+    if (value == Term::zero)
+        m_formula->remove_term(idx);
+    else
+        m_formula->push_term(idx,value == Term::dont_care);
 
-	m_actualFce = QString::fromStdString(m_formula->to_string(true));
-	emit fceChanged(m_actualFce);
-	emit minFceChanged("");
-	emit formulaChanged(m_formula);
+    m_actualFce = QString::fromStdString(m_formula->to_string(true));
+    emit fceChanged(m_actualFce);
+    emit minFceChanged("");
+    emit formulaChanged(m_formula);
 }

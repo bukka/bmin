@@ -31,30 +31,30 @@
 
 // AboutDilog constructor - show dialog
 AboutDialog::AboutDialog(QWidget *parent)
-		: QDialog(parent)
+        : QDialog(parent)
 {
-	setWindowTitle(tr("About Bmin"));
-	setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
+    setWindowTitle(tr("About Bmin"));
+    setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-	QVBoxLayout *layout = new QVBoxLayout(this);
-	layout->setSizeConstraint(QLayout::SetFixedSize);
+    QVBoxLayout *layout = new QVBoxLayout(this);
+    layout->setSizeConstraint(QLayout::SetFixedSize);
 
-	// dialog text
-	QString desc = tr(
-			"<h3>Bmin</h3>"
-			"Boolean minimizer<br/><br/>"
-			"Version: %1<br/>"
-			"Copyright 2007-2009 Jakub Zelenka<br/><br/>"
-			).arg(Constants::VERSION);
+    // dialog text
+    QString desc = tr(
+            "<h3>Bmin</h3>"
+            "Boolean minimizer<br/><br/>"
+            "Version: %1<br/>"
+            "Copyright 2007-2009 Jakub Zelenka<br/><br/>"
+            ).arg(Constants::VERSION);
 
-	QLabel *descLabel = new QLabel(desc);
-	descLabel->setWordWrap(true);
-	descLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+    QLabel *descLabel = new QLabel(desc);
+    descLabel->setWordWrap(true);
+    descLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
-	QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
-	connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
+    connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-	layout->addWidget(descLabel);
-	layout->addWidget(buttonBox);
-	layout->setAlignment(buttonBox, Qt::AlignCenter);
+    layout->addWidget(descLabel);
+    layout->addWidget(buttonBox);
+    layout->setAlignment(buttonBox, Qt::AlignCenter);
 }
