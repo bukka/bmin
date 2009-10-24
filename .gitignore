@@ -1,0 +1,12 @@
+# object files
+*.o
+
+# moc files
+moc*
+
+# qrc source file
+qrc_*
+
+# other files
+bmin.pro.user
+Makefile
