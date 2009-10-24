@@ -139,15 +139,15 @@ Formula::Formula(vector<Term> & t) throw(InvalidTermExc, NoTermExc)
     if (t.size() == 0) // t is empty
         throw NoTermExc();
 
-    int tsize = t[0].get_size(); // variables size
+    int tsize = t[0].getSize(); // variables size
     for (unsigned i = 1; i < t.size(); i++)
-        if (t[i].get_size() != tsize) // check correct size of term
-            throw InvalidTermExc(t[i].get_size(),tsize);
+        if (t[i].getSize() != tsize) // check correct size of term
+            throw InvalidTermExc(t[i].getSize(),tsize);
 
     // default setting
     minimized = false;
     debug = false;
-    set_vars(tsize);
+    setVars(tsize);
     original_terms = terms = t;
 }
 
@@ -157,13 +157,13 @@ Formula::Formula(Term * t, int n) throw(InvalidTermExc, NoTermExc)
     if (n == 0) // array is emtpy
         throw NoTermExc();
 
-    int tsize = t[0].get_size(); // variables size
+    int tsize = t[0].getSize(); // variables size
     try
     {
         for (int i = 0; i < n; i++)
         {
-            if (t[i].get_size() != tsize) // check correct size of term
-                throw InvalidTermExc(t[i].get_size(),tsize);
+            if (t[i].getSize() != tsize) // check correct size of term
+                throw InvalidTermExc(t[i].getSize(),tsize);
             terms.push_back(t[i]);
         }
     }
@@ -174,7 +174,7 @@ Formula::Formula(Term * t, int n) throw(InvalidTermExc, NoTermExc)
     }
     // default setting
     minimized = false;
-    set_vars(tsize);
+    setVars(tsize);
     debug = false;
 
     original_terms = terms;
@@ -288,7 +288,7 @@ void Formula::save_terms(string & line, int & pos,
             num = get_digit(line,pos);
             if (num >= max_idx) // too big index
                 throw BigIndexExc(pos);
-            if (!has_term(t = Term(num,n_vars,is_dc)))
+            if (!hasTerm(t = Term(num,n_vars,is_dc)))
                 terms.push_back(t);
             comma = true;
         }
@@ -305,15 +305,15 @@ void Formula::save_terms(string & line, int & pos,
     pos++;
 }
 
-void Formula::push_term(int idx, bool is_dc)
+void Formula::pushTerm(int idx, bool is_dc)
 {
     int max_idx = ipow(2,vars.size());
     if (idx >= max_idx)
         return;
     minimized = false;
     for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).get_index()) {
-            (*it).set_dont_care(is_dc);
+        if (idx == (*it).getIdx()) {
+            (*it).setDC(is_dc);
             terms = original_terms;
             return;
         }
@@ -322,10 +322,10 @@ void Formula::push_term(int idx, bool is_dc)
     terms = original_terms;
 }
 
-void Formula::remove_term(int idx)
+void Formula::removeTerm(int idx)
 {
     for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).get_index()) {
+        if (idx == (*it).getIdx()) {
             original_terms.erase(it);
             terms = original_terms;
             minimized = false;
@@ -334,11 +334,11 @@ void Formula::remove_term(int idx)
     }
 }
 
-tval Formula::get_term_value(int idx)
+tval Formula::getTermValue(int idx)
 {
     for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).get_index()) {
-            if ((*it).is_dont_care())
+        if (idx == (*it).getIdx()) {
+            if ((*it).isDC())
                 return Term::dont_care;
             else
                 return Term::one;
@@ -348,7 +348,7 @@ tval Formula::get_term_value(int idx)
 }
 
 
-vector<int> Formula::get_terms_idx(tval val)
+vector<int> Formula::getTermsIdx(tval val)
 {
     vector<int> values;
     bool is_dc;
@@ -360,21 +360,21 @@ vector<int> Formula::get_terms_idx(tval val)
         return values;
 
     for (unsigned i = 0; i < original_terms.size(); i++) {
-        if ((is_dc && original_terms[i].is_dont_care()) || (!is_dc && !original_terms[i].is_dont_care()))
-            values.push_back(original_terms[i].get_index());
+        if ((is_dc && original_terms[i].isDC()) || (!is_dc && !original_terms[i].isDC()))
+            values.push_back(original_terms[i].getIdx());
     }
     return values;
 }
 
 // set default names for n variables
-void Formula::set_vars(int n)
+void Formula::setVars(int n)
 {
     for (char var = FIRST_VAR + n - 1; var >= FIRST_VAR; var--)
         vars.push_back(var);
 }
 
 // sets variables name by array of characters v
-void Formula::set_vars(char * v, int n) throw(Term::InvalidVarsExc)
+void Formula::setVars(char * v, int n) throw(Term::InvalidVarsExc)
 {
     // checks correct size of variables
     if (n != static_cast<int>(vars.size()))
@@ -384,18 +384,18 @@ void Formula::set_vars(char * v, int n) throw(Term::InvalidVarsExc)
     for (int i = 0; i < n; i++)
         tmp[i] = v[i];
     // checks correct names of variables
-    Term::check_vars(tmp);
+    Term::checkVars(tmp);
     vars = tmp;
 }
 
 // sets variables name by vector v
-void Formula::set_vars(vector<char> & v) throw(Term::InvalidVarsExc)
+void Formula::setVars(vector<char> & v) throw(Term::InvalidVarsExc)
 {
     // checks correct size of variables
     if (v.size() != vars.size())
         throw Term::InvalidVarsExc();
     // checks correct names of variables
-    Term::check_vars(v);
+    Term::checkVars(v);
     vars = v;
 }
 
@@ -404,12 +404,12 @@ void Formula::minimize()
 {
     if (debug)
         *dbg_os << "Boolean function:\n" << *this << "\n\n";
-    find_prime_implicants();
-    find_final_implicants();
+    findPrimeImplicants();
+    findFinalImplicants();
 }
 
 // creates prime implicant and saves it to terms vector
-void Formula::find_prime_implicants()
+void Formula::findPrimeImplicants()
 {
     // inicialization
     int dont_cares, ones, num_vars;
@@ -420,7 +420,7 @@ void Formula::find_prime_implicants()
     map<Term *,vector<int> > dbg_map;
 
     minimized = false;
-    bool expanded = to_minterms();
+    bool expanded = toMinterms();
     if (debug)
     {
         sort(terms.begin(),terms.end());
@@ -438,12 +438,12 @@ void Formula::find_prime_implicants()
     for (unsigned i = 0; i < original_terms.size(); i++)
     {
         pterm = &original_terms[i];
-        ones = pterm->count_values(Term::one);
+        ones = pterm->valuesCount(Term::one);
         table[0][ones].push_back(pterm);
         if (debug)
         {
             vector<int> v;
-            v.push_back(pterm->get_index());
+            v.push_back(pterm->getIdx());
             dbg_map.insert(pair<Term *,vector<int> >(pterm,v));
         }
     }
@@ -523,7 +523,7 @@ void Formula::find_prime_implicants()
 }
 
 // makes consequential functions
-void Formula::find_final_implicants()
+void Formula::findFinalImplicants()
 {
     int impl, term, num_impls, num_terms;
 
@@ -581,7 +581,7 @@ vector<Term> * Formula::copy_main_terms(vector<Term> & v) const
 {
     vector<Term> * pv = new vector<Term>;
     for (unsigned i = 0; i < v.size(); i++)
-        if (!v[i].is_dont_care())
+        if (!v[i].isDC())
             pv->push_back(v[i]);
     return pv;
 }
@@ -773,12 +773,12 @@ void Formula::show_covering_table(ostream & os, bool **table, vector<Term> & ori
     // head row
     os << setw(vsize + 1) << '|';
     for (j = 0; j < n_terms; j++)
-        os << setw(cell_width) << orig_main_terms[j].get_index() << '|';
+        os << setw(cell_width) << orig_main_terms[j].getIdx() << '|';
     os << endl;
     // body
     for (i = n_impls-1; i >= 0; i--)
     {
-        os << setw(vsize) << terms[i].to_string(vars) << '|';
+        os << setw(vsize) << terms[i].toString(vars) << '|';
         for (j = 0; j < n_terms; j++)
             os << setw(cell_width) << (table[i][j]? '*':' ') <<  '|';
         os << endl;
@@ -798,14 +798,14 @@ bool Formula::operator==(const Formula & f)
 }
 
 // sets debugging ostream and enabling it
-void Formula::set_debug(std::ostream & os, bool enabled)
+void Formula::setDebug(std::ostream & os, bool enabled)
 {
     dbg_os = &os;
     debug = enabled;
 }
 
 // enabling debugging
-bool Formula::enable_debug(bool enabled)
+bool Formula::enableDebug(bool enabled)
 {
     if (enabled)
     {
@@ -824,9 +824,9 @@ bool Formula::enable_debug(bool enabled)
 
 
 // finds out whether term t is in terms vector
-bool Formula::has_term(const Term & t)
+bool Formula::hasTerm(const Term & t)
 {
-    if (terms.size() == 0 || terms[0].get_size() != t.get_size())
+    if (terms.size() == 0 || terms[0].getSize() != t.getSize())
         return false;
     return find(terms.begin(),terms.end(),t) != terms.end();
 }
@@ -835,14 +835,14 @@ bool Formula::has_term(const Term & t)
 bool expand_term(vector<Term> & v, Term & t)
 {
     Term * pt;
-    if (t.count_values(Term::dont_care) == 0)
+    if (t.valuesCount(Term::dont_care) == 0)
     {
         v.push_back(t);
         return false;
     }
     else
     {
-        pt = t.replace_first_dont_care();
+        pt = t.replaceFirstDC();
         if (pt)
         {
             expand_term(v, pt[0]);
@@ -853,7 +853,7 @@ bool expand_term(vector<Term> & v, Term & t)
     }
 }
 
-bool Formula::to_minterms()
+bool Formula::toMinterms()
 {
     bool is_expanded = false;
     vector<Term> tmp;
@@ -866,7 +866,7 @@ bool Formula::to_minterms()
 }
 
 // statement of formula
-string Formula::to_string(bool idx_form) throw(Term::InvalidVarsExc)
+string Formula::toString(bool idx_form) throw(Term::InvalidVarsExc)
 {
     ostringstream outstr;
 
@@ -881,7 +881,7 @@ string Formula::to_string(bool idx_form) throw(Term::InvalidVarsExc)
     outstr << ") = ";
     if (idx_form) { // format: Em(...) + Ed(...)
         bool is_first = true;
-        vector<int> ti = get_terms_idx(Term::one);
+        vector<int> ti = getTermsIdx(Term::one);
         sort(ti.begin(),ti.end());
         outstr << "Em(";
         for (unsigned i = 0; i < ti.size(); i++) {
@@ -892,7 +892,7 @@ string Formula::to_string(bool idx_form) throw(Term::InvalidVarsExc)
             outstr << ti[i];
         }
         outstr << ")";
-        ti = get_terms_idx(Term::dont_care);
+        ti = getTermsIdx(Term::dont_care);
         if (ti.size()) {
             sort(ti.begin(),ti.end());
             outstr << " + Ed(";
@@ -910,11 +910,11 @@ string Formula::to_string(bool idx_form) throw(Term::InvalidVarsExc)
     else { // minimized format: abc + c'a (example)
         for (i = 0; i < terms.size(); i++)
         {
-            if (terms[i].is_dont_care())
+            if (terms[i].isDC())
                 continue;
             if (i != 0)
                 outstr << " + ";
-            outstr << terms[i].to_string(vars);
+            outstr << terms[i].toString(vars);
         }
     }
     return outstr.str();
@@ -925,7 +925,7 @@ ostream & operator<<(std::ostream & os, Formula & f)
 {
     try
     {
-        os << f.to_string();
+        os << f.toString();
     }
     catch (Term::InvalidVarsExc & e)
     {

@@ -112,54 +112,54 @@ public:
         throw(InvalidCharExc, BigIndexExc, NoTermExc);
 
     // adds new term to formula
-    void push_term(int idx, bool is_dc = false);
+    void pushTerm(int idx, bool is_dc = false);
     // removes term with idx
-    void remove_term(int idx);
+    void removeTerm(int idx);
 
     // returns value of term with idx
-    tval get_term_value(int idx);
+    tval getTermValue(int idx);
 
     // complete minimization
     void minimize();
     // whether formula is minimized
-    bool is_minimized() { return minimized; }
+    bool isMinimized() { return minimized; }
     // creates prime implicant and saves it to terms vector
-    void find_prime_implicants();
+    void findPrimeImplicants();
     // makes consequential functions
-    void find_final_implicants();
+    void findFinalImplicants();
 
     // eqaulity operator
     bool operator==(const Formula & f);
 
     /* returns terms id with val from original terms */
-    std::vector<int> get_terms_idx(tval val);
+    std::vector<int> getTermsIdx(tval val);
     /* returns actual minterms */
-    std::vector<Term> get_minterms() { return terms; }
+    std::vector<Term> getMinterms() { return terms; }
 
     //returns size of formula terms
-    int get_original_size() { return original_terms.size(); }
-    int get_size() { return terms.size(); }
+    int getOriginalSize() { return original_terms.size(); }
+    int getSize() { return terms.size(); }
 
     // sets debugging ostream and enabling it
-    void set_debug(std::ostream & os, bool enabled = true);
+    void setDebug(std::ostream & os, bool enabled = true);
     // enabling debugging
-    bool enable_debug(bool enabled);
+    bool enableDebug(bool enabled);
     // finds out whether term t is in terms vector
-    bool has_term(const Term & t);
+    bool hasTerm(const Term & t);
     // set default names for n variables
-    void set_vars(int n);
+    void setVars(int n);
     // sets variables name by array of characters v
-    void set_vars(char * v, int n) throw(Term::InvalidVarsExc);
+    void setVars(char * v, int n) throw(Term::InvalidVarsExc);
     // sets variables name by vector v
-    void set_vars(std::vector<char> & v) throw(Term::InvalidVarsExc);
+    void setVars(std::vector<char> & v) throw(Term::InvalidVarsExc);
     // returns variables
-    std::vector<char> & get_vars() { return vars; }
+    std::vector<char> & getVars() { return vars; }
     // returns number of varibles
-    int get_var_count() { return vars.size(); }
+    int getVarCount() { return vars.size(); }
     // replace actual temrs by minterms
-    bool to_minterms();
+    bool toMinterms();
     // statement of formula
-    std::string to_string(bool idx_form = false) throw(Term::InvalidVarsExc);
+    std::string toString(bool idx_form = false) throw(Term::InvalidVarsExc);
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, Formula & t);
 private:

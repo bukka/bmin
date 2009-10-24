@@ -362,7 +362,7 @@ void MapWidget::invalidateMap()
 void MapWidget::setMapData(Formula *formula)
 {
     int size;
-    if (!formula ||	(size = formula->get_var_count()) > MAX_SIZE) {
+    if (!formula ||	(size = formula->getVarCount()) > MAX_SIZE) {
         mapSize = 0;
         msg = MSG_OVER;
         updateMap();
@@ -370,7 +370,7 @@ void MapWidget::setMapData(Formula *formula)
     }
 
     msg = MSG_NONE;
-    vars = formula->get_vars();
+    vars = formula->getVars();
     int zero = MapCell::ZERO;
 
     if (size != mapSize) {
@@ -409,9 +409,8 @@ void MapWidget::setMapData(Formula *formula)
     else
         setAllValues(zero);
 
-    setValues(formula->get_terms_idx(Term::one),MapCell::ONE,size);
-    setValues(formula->get_terms_idx(Term::dont_care),
-        MapCell::DONT_CARE, size);
+    setValues(formula->getTermsIdx(Term::one),MapCell::ONE,size);
+    setValues(formula->getTermsIdx(Term::dont_care), MapCell::DONT_CARE, size);
 
 
     updateMap();

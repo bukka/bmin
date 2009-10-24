@@ -192,14 +192,14 @@ CubeGLDrawer::~CubeGLDrawer()
 void CubeGLDrawer::setFormula(Formula *f)
 {
     stopMin();
-    if (f->get_var_count() > MAX_N) {
+    if (f->getVarCount() > MAX_N) {
         actualCube = -1;
         paintedMsg = MSG_OVER;
     }
     else {
         makeCurrent();
         formula = f;
-        actualCube = f->get_var_count();
+        actualCube = f->getVarCount();
         drawCube(actualCube);
         paintedMsg = MSG_NONE;
     }
@@ -208,10 +208,10 @@ void CubeGLDrawer::setFormula(Formula *f)
 
 void CubeGLDrawer::minimizeCube()
 {
-    if (!formula->is_minimized())
+    if (!formula->isMinimized())
         return;
     makeCurrent();
-    terms = formula->get_minterms();
+    terms = formula->getMinterms();
     bindTermsTextures();
 
     if (isMin) {
@@ -274,7 +274,7 @@ void CubeGLDrawer::bindTermsTextures()
 
     for (unsigned i = 0; i < terms.size(); i++) {
         texId = bindTextTextures(QString::fromStdString(
-            terms[i].to_string(formula->get_vars())), getI(TERM_IMG_W),
+            terms[i].toString(formula->getVars())), getI(TERM_IMG_W),
             getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
         termsTextures.push_back(texId);
     }
@@ -569,7 +569,7 @@ void CubeGLDrawer::drawMin()
     }
 
     // number of ones and zeros
-    int ozSize = terms[minPos].get_size(false);
+    int ozSize = terms[minPos].getSize(false);
     if (ozSize == 0)
         return;
 
@@ -707,7 +707,7 @@ void CubeGLDrawer::drawSphere(int idx, GLenum mode,
     if (actualCube < 0)
         diffuse = zeroDiffuse;
     else {
-        tval value = formula->get_term_value(idx);
+        tval value = formula->getTermValue(idx);
         switch (value) {
             case Term::zero:
                 diffuse = zeroDiffuse;
@@ -1349,7 +1349,7 @@ void CubeGLDrawer::keyPressEvent(QKeyEvent *event)
             }
             else {
                 isMin = true;
-                if (formula->is_minimized()) {
+                if (formula->isMinimized()) {
                     minTimer->start(getI(TIMER_CLOCK));
                     minPos = 0;
                     dynamicPos = 0;
@@ -1606,7 +1606,7 @@ void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
     hits = glRenderMode(GL_RENDER);
     if (hits)
         emit cubeChanged(sBuff[3],
-            Term::get_next_value(formula->get_term_value(sBuff[3])));
+            Term::getNextValue(formula->getTermValue(sBuff[3])));
 
 }
 

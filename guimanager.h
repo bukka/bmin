@@ -46,11 +46,12 @@ public:
     // whether formula is correct
     bool isCorrectFormula() const { return m_isCorrect; }
 
-    // static instance
-    static GUIManager *s_instance;
 private:
     GUIManager();
     ~GUIManager();
+
+     // static instance
+    static GUIManager *s_instance;
 
     // boolean function
     Formula *m_formula;

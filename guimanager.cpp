@@ -106,12 +106,12 @@ void GUIManager::minimizeFormula()
         emit errorInvoked(tr("Incorrect boolean function!"));
         return;
     }
-    if (m_formula->is_minimized()) {
+    if (m_formula->isMinimized()) {
         return;
     }
 
     m_formula->minimize();
-    emit minFceChanged(QString::fromStdString(m_formula->to_string()));
+    emit minFceChanged(QString::fromStdString(m_formula->toString()));
     emit formulaMinimized();
 }
 
@@ -122,11 +122,11 @@ void GUIManager::setTerm(int idx, tval value)
         return;
 
     if (value == Term::zero)
-        m_formula->remove_term(idx);
+        m_formula->removeTerm(idx);
     else
-        m_formula->push_term(idx,value == Term::dont_care);
+        m_formula->pushTerm(idx,value == Term::dont_care);
 
-    m_actualFce = QString::fromStdString(m_formula->to_string(true));
+    m_actualFce = QString::fromStdString(m_formula->toString(true));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
     emit formulaChanged(m_formula);

@@ -63,7 +63,7 @@ const char * Term::BadIndexExc::what() const throw()
 }
 
 // check term vars correctness
-void Term::check_vars(const vector<char> & var_names) throw(InvalidVarsExc)
+void Term::checkVars(const vector<char> & var_names) throw(InvalidVarsExc)
 {
     if (var_names.size() == 0)
         throw InvalidVarsExc();
@@ -138,7 +138,7 @@ Term::~Term()
 }
 
 // returns the count of values in term
-int Term::count_values(tval value) const
+int Term::valuesCount(tval value) const
 {
     int count = 0;
     for(int i = 0; i < size; i++)
@@ -155,22 +155,19 @@ Term * Term::combine(const Term & t) const
     // check
     int pos = -1;
 
-    for (int i = 0; i < size; i++)
-    {
-        if (vars[i] != t.vars[i])
-        {
+    for (int i = 0; i < size; i++) {
+        if (vars[i] != t.vars[i]) {
             if (pos == -1)
                 pos = i;
             else // difference in two places
                 return 0;
         }
-
     }
     if (pos == -1)
         return 0;
     // if it's possible to combine the terms, creates new Term
     Term * combined_term = new Term(t);
-    combined_term->set_dont_care(false);
+    combined_term->setDC(false);
     // sets position where values are different as dont_care
     combined_term->vars[pos] = dont_care;
     return combined_term;
@@ -188,36 +185,36 @@ bool Term::implies(Term & t) const
 }
 
 // replace first dont care by zero and one
-Term * Term::replace_first_dont_care() const
+Term * Term::replaceFirstDC() const
 {
-    for (int i = 0; i < size; i++)
-        if (vars[i] == dont_care)
-        {
+    for (int i = 0; i < size; i++) {
+        if (vars[i] == dont_care) {
             Term *t = new Term[2];
             t[0] = t[1] = *this;
             t[0].vars[i] = zero;
             t[1].vars[i] = one;
             return t;
         }
+    }
     return 0;
 }
 
-int Term::get_size(bool all) const
+int Term::getSize(bool all) const
 {
     if (all)
         return size;
     int count = 0;
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
         if (vars[i] != dont_care)
             count++;
+    }
     return count;
 }
 
 // assignment operator
 Term & Term::operator=(const Term & term)
 {
-    if (&term != this)
-    {
+    if (&term != this) {
         size = term.size;
         dc = term.dc;
         delete [] vars;
@@ -232,20 +229,21 @@ Term & Term::operator=(const Term & term)
 bool Term::operator==(const Term & term) const
 {
     // check
-    for (int i = 0; i < size; i++)
+    for (int i = 0; i < size; i++) {
         if (vars[i] != term.vars[i])
             return false;
+    }
     return true;
 }
 
 bool Term::operator<(const Term & t) const
 {
-    return get_index() < t.get_index();
+    return getIdx() < t.getIdx();
 }
 
 bool Term::operator>(const Term & t) const
 {
-    return get_index() > t.get_index();
+    return getIdx() > t.getIdx();
 }
 
 // index operator
@@ -257,7 +255,7 @@ tval & Term::operator[](int idx) throw(BadIndexExc)
 }
 
 // returns terms index of boolean function
-int Term::get_index() const
+int Term::getIdx() const
 {
     int idx = 0;
     for (int i = 0, j = size-1; i < size; i++, j--)
@@ -266,7 +264,7 @@ int Term::get_index() const
 }
 
 // term in string form: { 0 X 1 0 }
-string Term::to_string() const
+string Term::toString() const
 {
     string s;
     for (int i = 0; i < size; i++)
@@ -287,18 +285,18 @@ string Term::to_string() const
     return s;
 }
 
-bool char_comparing(char c1, char c2)
+bool charComparing(char c1, char c2)
 {
     return c1 > c2;
 }
 
 // term in string form: AcD (upper case are negation)
-string Term::to_string(vector<char> names) const throw(InvalidVarsExc)
+string Term::toString(vector<char> names) const throw(InvalidVarsExc)
 {
     // sorting characters
-    sort(names.begin(), names.end(),char_comparing);
+    sort(names.begin(), names.end(), charComparing);
 
-    check_vars(names);
+    checkVars(names);
     vector<char> t;
     string s;
     for (int i = size-1; i >= 0; i--)
@@ -316,7 +314,7 @@ string Term::to_string(vector<char> names) const throw(InvalidVarsExc)
 
 
 
-tval Term::get_next_value(tval value)
+tval Term::getNextValue(tval value)
 {
     switch (value) {
         case zero:
@@ -332,7 +330,7 @@ tval Term::get_next_value(tval value)
 // friend function to place term to ostream
 ostream & operator<<(ostream & os, const Term & term)
 {
-    os << term.to_string();
+    os << term.toString();
     return os;
 }
 

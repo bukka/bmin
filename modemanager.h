@@ -52,11 +52,12 @@ public:
     // return modules
     QList<ModuleWidget *> getModules() const { return m_modules; }
 
-    // static instance of ModeManager
-    static ModeManager *s_instance;
 
 private:
     ModeManager();
+
+    // static instance of ModeManager
+    static ModeManager *s_instance;
 
     WelcomeWidget *m_welcome;
     MapWidget *m_map;

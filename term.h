@@ -44,7 +44,7 @@ public:
     static const tval one = 1;
     static const tval dont_care = 2;
 
-    static tval get_next_value(tval value);
+    static tval getNextValue(tval value);
 
     // exception by the invalid variables value (only lower case is accepted)
     class InvalidVarsExc : public std::exception
@@ -69,7 +69,7 @@ public:
     };
 
     // checks the variables validity
-    static void check_vars(const std::vector<char> & var_names) throw(InvalidVarsExc);
+    static void checkVars(const std::vector<char> & var_names) throw(InvalidVarsExc);
 
     // default constructor to creating array of Terms
     Term();
@@ -84,20 +84,20 @@ public:
     // destructor - deletes vars array
     ~Term();
     // true if this is don't care term
-    bool is_dont_care() const { return dc; }
+    bool isDC() const { return dc; }
     // sets whether this is dont care term
-    void set_dont_care(bool is_dc) { dc = is_dc; }
+    void setDC(bool is_dc) { dc = is_dc; }
     // returns size of term, if all is false returns size reduced of dont cares
-    int get_size(bool all = true) const;
+    int getSize(bool all = true) const;
     // returns terms index of boolean function
-    int get_index() const;
+    int getIdx() const;
     // returns the count of values in term
-    int count_values(tval value) const;
+    int valuesCount(tval value) const;
     // returns the new term combined (only by difference of one varible)
     // with *this and t, for example 0010 & 0000 => 00X0
     Term * combine(const Term & t) const;
     // replace first dont care by zero and one
-    Term * replace_first_dont_care() const;
+    Term * replaceFirstDC() const;
     // returns true if *this term implies term t
     bool implies(Term & t) const;
 
@@ -111,9 +111,9 @@ public:
     tval & operator[](int idx) throw(BadIndexExc);
 
     // term in string form: { 0 X 1 0 }
-    std::string to_string() const;
+    std::string toString() const;
     // term in string form: A'BC
-    std::string to_string(std::vector<char> var_names) const throw(InvalidVarsExc);
+    std::string toString(std::vector<char> var_names) const throw(InvalidVarsExc);
 
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
