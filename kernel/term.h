@@ -42,7 +42,7 @@ public:
     // possible logical states
     static const tval zero = 0;
     static const tval one = 1;
-    static const tval missing = 2;
+    static const tval dont_care = 2;
 
     static tval getNextValue(tval value);
 
