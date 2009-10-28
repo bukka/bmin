@@ -2,7 +2,7 @@
 *.o
 
 # moc files
-moc*
+moc_*
 
 # qrc source file
 qrc_*

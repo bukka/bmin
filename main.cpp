@@ -20,7 +20,7 @@
  * 02111-1307 USA.
  */
 
-#include "mainwindow.h"
+#include "qtgui/mainwindow.h"
 
 #include <QtGui/QApplication>
 
