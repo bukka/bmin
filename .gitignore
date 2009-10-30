@@ -8,5 +8,6 @@ moc_*
 qrc_*
 
 # other files
+bmin
 bmin.pro.user
 Makefile

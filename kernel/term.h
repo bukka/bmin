@@ -23,66 +23,45 @@
 #ifndef TERM_H
 #define TERM_H
 
+#include "exceptions.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
-#include <exception>
+#include <limits.h>
 
-// type represented the logical value (term's value)
-typedef char tval;
+// term mask
+typedef int term_t;
+
+// maximum number of literals ( -1 means sign in int
+#define TERM_MAX_SIZE (sizeof (term_t) * 8 - 1)
+
+enum TermValue { ZERO, ONE, DC };
 
 // Class represented product term
 class Term
 {
 private:
-    tval * vars;	// array or the logical states (dynamic allocation)
-    int size;		// size of the vars array
-    bool dc;		// dont care term
+    term_t liters;     // literals value
+    term_t missing;    // which literals are missing literals
+    int size;		   // number of literals
+    bool dc;		   // dont care term
+
+    // term initialization
+    void init(term_t lit, term_t mis, int s, bool isDC);
+
 public:
-    // possible logical states
-    static const tval zero = 0;
-    static const tval one = 1;
-    static const tval dont_care = 2;
-
-    static tval getNextValue(tval value);
-
-    // exception by the invalid variables value (only lower case is accepted)
-    class InvalidVarsExc : public std::exception
-    {
-        // invalid variables names
-        std::vector<char> invalid_names;
-    public:
-        // default constructor (used by bad count of variables)
-        InvalidVarsExc() {}
-        // constructor (used by invalid varibles name)
-        InvalidVarsExc(const std::vector<char> & names) : std::exception(), invalid_names(names) {}
-        ~InvalidVarsExc() throw() {}
-        const char * what() const throw();
-    };
-
-    class BadIndexExc : public std::exception
-    {
-        int index;
-    public:
-        BadIndexExc(int idx) : index(idx) {}
-        const char * what() const throw();
-    };
-
     // checks the variables validity
-    static void checkVars(const std::vector<char> & var_names) throw(InvalidVarsExc);
+    static void checkVars(const std::vector<char> & var_names)
+            throw(InvalidVarsExc);
 
-    // default constructor to creating array of Terms
-    Term();
-    // constructor - the term of size s with all variables setted to dont care
-    Term(int s, bool is_dc = false);
-    // construcor - copies the values form v arrya to vars array
-    Term(const tval * v, int s, bool is_dc = false);
-    // constructor - makes the variables array with size s by idx (index of boolean function)
-    Term(int idx, int s, bool is_dc = false);
-    // copy constructor
-    Term(const Term &);
-    // destructor - deletes vars array
-    ~Term();
+    // constructor - the term of size s with all variables setted to missing value
+    Term(int s = 0, bool isDC = false);
+    // constructor - makes the variables array with size s by index idx
+    Term(int idx, int s, bool isDC = false);
+    // constructor - internal usage
+    Term(term_t lit, term_t miss, int size, bool isDC = false);
+
     // true if this is don't care term
     bool isDC() const { return dc; }
     // sets whether this is dont care term
@@ -92,23 +71,28 @@ public:
     // returns terms index of boolean function
     int getIdx() const;
     // returns the count of values in term
-    int valuesCount(tval value) const;
+    int valuesCount(int value) const;
+    inline int valuesCount(const LiteralValue & value) const
+    {
+        return valuesCount(value.getValue());
+    }
     // returns the new term combined (only by difference of one varible)
     // with *this and t, for example 0010 & 0000 => 00X0
-    Term * combine(const Term & t) const;
+    Term *combine(const Term & t) const;
     // replace first dont care by zero and one
-    Term * replaceFirstDC() const;
+    Term *expandMissingValue() const;
     // returns true if *this term implies term t
     bool implies(Term & t) const;
 
-    // assignment operator
-    Term & operator=(const Term & t);
     // eqaulity operators
     bool operator==(const Term & t) const;
     bool operator<(const Term & t) const;
     bool operator>(const Term & t) const;
     // index operator
-    tval & operator[](int idx) throw(BadIndexExc);
+    LiteralValue operator[](int position);
+    LiteralValue at(int position) throw(BadIndexExc);
+    int getValueAt(int position);
+
 
     // term in string form: { 0 X 1 0 }
     std::string toString() const;
@@ -118,8 +102,5 @@ public:
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 };
-
-// returns the value of val raised to the power of exp
-int ipow(int val, int exp);
 
 #endif /* TERM_H */

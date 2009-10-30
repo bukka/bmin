@@ -23,93 +23,35 @@
 #ifndef FORMULA_H
 #define FORMULA_H
 
+#include "term.h"
+#include "exceptions.h"
+
 #include <iostream>
 #include <string>
 #include <vector>
 #include <map>
 #include <exception>
 #include <stdexcept>
-#include "term.h"
 
 // class represented logical formula
 class Formula
 {
 private:
-    // show debugging
-    bool debug;
-    // whether formula is minimized
-    bool minimized;
-    // debug ostream
-    std::ostream * dbg_os;
-    // modified terms
-    std::vector<Term> terms;
-    // first added terms
-    std::vector<Term> original_terms;
+    TermsTree terms;
+
     // names of variables
     std::vector<char> vars;
 
+    bool minimized;
+
 public:
-    // exceptions
-
-    // bad format of file that is read
-    class BadFileExc : public std::exception
-    {
-    private:
-        int col;
-    protected:
-        const char * get_position(bool with_col = true) const;
-    public:
-        static bool show_row;
-        BadFileExc() : std::exception() {}
-        BadFileExc(int c) : std::exception(), col(c) {}
-        int get_pos() const { return col; }
-        const char * what() const throw();
-    };
-    // invalid char in file
-    class InvalidCharExc : public BadFileExc
-    {
-        char character;
-    public:
-        InvalidCharExc(char ch, int c)
-            : BadFileExc(c), character(ch) {}
-        char get_char() const { return character; }
-        const char * what() const throw();
-    };
-    // too big index of term
-    class BigIndexExc : public BadFileExc
-    {
-    public:
-        BigIndexExc(int c) : BadFileExc(c) {}
-        const char * what() const throw();
-    };
-    // bad format of inserted term (bad count of variables)
-    class InvalidTermExc : public BadFileExc
-    {
-        int n_set;
-        int n_req;
-    public:
-        InvalidTermExc(int ns, int nr)
-            : BadFileExc(), n_set(ns), n_req(nr) {}
-        InvalidTermExc(int ns, int nr, int c)
-            : BadFileExc(c), n_set(ns), n_req(nr) {}
-        const char * what() const throw();
-    };
-    // no terms was added
-    class NoTermExc : public std::exception
-    {
-    public:
-        NoTermExc() {}
-        const char * what() const throw();
-    };
-
     // Constructors
+    // gets terms from TermTree
+    Formula(TermsTree & tt);
     // gets terms from vector t
-    Formula(std::vector<Term> & t) throw(InvalidTermExc, NoTermExc);
+    Formula(std::vector<Term> & tv) throw(InvalidTermExc, NoTermExc);
     // gets terms from t array of terms
-    Formula(Term * t, int n) throw(InvalidTermExc, NoTermExc);
-    // gets terms from string s
-    Formula(std::string s)
-        throw(InvalidCharExc, BigIndexExc, NoTermExc);
+    Formula(Term * ta, int n) throw(InvalidTermExc, NoTermExc);
 
     // adds new term to formula
     void pushTerm(int idx, bool is_dc = false);
@@ -117,72 +59,38 @@ public:
     void removeTerm(int idx);
 
     // returns value of term with idx
-    tval getTermValue(int idx);
+    TermValue getTermValue(int idx);
 
-    // complete minimization
-    void minimize();
     // whether formula is minimized
     bool isMinimized() { return minimized; }
-    // creates prime implicant and saves it to terms vector
-    void findPrimeImplicants();
-    // makes consequential functions
-    void findFinalImplicants();
 
     // eqaulity operator
     bool operator==(const Formula & f);
 
     /* returns terms id with val from original terms */
-    std::vector<int> getTermsIdx(tval val);
-    /* returns actual minterms */
-    std::vector<Term> getMinterms() { return terms; }
-
-    //returns size of formula terms
-    int getOriginalSize() { return original_terms.size(); }
+    std::vector<int> getTermsIdx(TermValue val);
+    // returns number of terms
     int getSize() { return terms.size(); }
 
-    // sets debugging ostream and enabling it
-    void setDebug(std::ostream & os, bool enabled = true);
-    // enabling debugging
-    bool enableDebug(bool enabled);
     // finds out whether term t is in terms vector
     bool hasTerm(const Term & t);
     // set default names for n variables
     void setVars(int n);
     // sets variables name by array of characters v
-    void setVars(char * v, int n) throw(Term::InvalidVarsExc);
+    void setVars(char * v, int n) throw(InvalidVarsExc);
     // sets variables name by vector v
-    void setVars(std::vector<char> & v) throw(Term::InvalidVarsExc);
+    void setVars(std::vector<char> & v) throw(InvalidVarsExc);
     // returns variables
     std::vector<char> & getVars() { return vars; }
     // returns number of varibles
-    int getVarCount() { return vars.size(); }
-    // replace actual temrs by minterms
-    bool toMinterms();
+    int getVarsCount() { return vars.size(); }
+
     // statement of formula
-    std::string toString(bool idx_form = false) throw(Term::InvalidVarsExc);
+    std::string toString(bool idx_form = false) throw(InvalidVarsExc);
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, Formula & t);
-private:
-    // saves terms from buffer - creates from their idxs
-    void save_terms(std::string & s, int & pos, int n_vars, bool is_dc)
-        throw(std::out_of_range, InvalidCharExc, BigIndexExc);
 
-    // duplicates vector with terms, but dont care terms are ignored
-    std::vector<Term> * copy_main_terms(std::vector<Term> & v) const;
-
-    // text statement of covering table
-    void show_covering_table(std::ostream & os, bool ** table, std::vector<Term> & orig_main_terms) const;
-    // text statement of implicant's table
-    void show_implicants_table(std::ostream & os,
-        std::vector<Term *> ** table, std::map<Term *,std::vector<int> > & m) const;
-
-    // finds essential prime implicants
-    int extract_essential_implicant(bool ** table, int n_impls, int n_terms) const;
-    // finds implicant by largest covering
-    int extract_largest_implicant(bool ** table, int n_impls, int n_terms) const;
-    // sets false value for all terms (remove term cell from table)
-    // which are implicated by implicant impl
-    void extract_implicant(bool ** table, int n_impls, int n_terms, int impl) const;
+    friend class MinimizingAlgorithm;
 };
 
 #endif /* FORMULA_H */

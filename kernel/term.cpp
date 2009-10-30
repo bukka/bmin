@@ -20,47 +20,17 @@
  * 02111-1307 USA.
  */
 
+#include "term.h"
+#include "exceptions.h"
+
 #include <iostream>
 #include <algorithm>
 #include <string>
 #include <sstream>
 #include <vector>
 #include <cctype>
-#include "term.h"
 
 using namespace std;
-
-// statement of InvalidVarsExc
-const char * Term::InvalidVarsExc::what() const throw()
-{
-    string s = "Invalid Variables: ";
-    if (invalid_names.size() == 0) // by using default contrucor
-        s += "bad variables count";
-    else
-    {
-        // appends invalid variables names to statemnt
-        for (unsigned i = 0; i < invalid_names.size(); i++)
-        {
-            if (i != 0)
-                s += ", ";
-            s += invalid_names[i];
-        }
-        s += " (You have to use only lower case)";
-    }
-    return s.c_str();
-}
-
-// statement of BadIndexExc
-const char * Term::BadIndexExc::what() const throw()
-{
-    ostringstream oss;
-    oss << "Invalid index: " << index;
-    if (index < 0)
-        oss << " (it cannot be negative number)";
-    else
-        oss << " (it's too big)";
-    return oss.str().c_str();
-}
 
 // check term vars correctness
 void Term::checkVars(const vector<char> & var_names) throw(InvalidVarsExc)
@@ -75,165 +45,128 @@ void Term::checkVars(const vector<char> & var_names) throw(InvalidVarsExc)
         throw InvalidVarsExc(v);
 }
 
-// default construcor
-Term::Term()
+// term initialization
+void Term::init(term_t lit, term_t mis, int s, bool isDC)
 {
-    size = 0;
-    dc = false;
-    // creating new array to correct using destructor
-    vars = new tval[1];
+    liters = lit;
+    missing = mis;
+    size = s;
+    dc = isDC;
 }
 
-// constructor - the term of size s with all variables setted to dont care
-Term::Term(int s, bool is_dc)
+// default constructor - the term of size s with all variables setted to dont care
+Term::Term(int s, bool isDC)
 {
-    dc = is_dc;
-    size = s;
-    vars = new tval[s];
-    for (int i = 0; i < s; i++)
-        vars[i] = dont_care;
+    init(0, 0, s, isDC);
 }
 
-// construcor - copies the values form v arrya to vars array
-Term::Term(const tval * v, int s, bool is_dc)
-{
-    dc = is_dc;
-    size = s;
-    vars = new tval[s];
-    for (int i = 0; i < s; i++)
-        vars[i] = v[i];
-}
 
 // constructor - makes the variables array with size s by idx (index of boolean function)
-Term::Term(int idx, int s, bool is_dc)
+Term::Term(int idx, int s, bool isDC)
 {
-    dc = is_dc;
-    size = s;
-    vars = new tval[s];
-    int mask = 1; // bit mask
-    for (int i = size - 1; i >= 0; i--, mask <<= 1)
-    {
-        // if bit in position i is 1, sets vars[i] to one
-        if ((idx & mask) == mask)
-            vars[i] = one;
-        else
-            vars[i] = zero;
-    }
+    init(idx, 0, s, isDC);
 }
 
-// copy constructor
-Term::Term(const Term & t)
+// constructor - internal usage
+Term::Term(term_t lit, term_t miss, int size, bool isDC)
 {
-    size = t.size;
-    dc = t.dc;
-    vars = new tval[size];
-    for (int i = 0; i < size; i++)
-        vars[i] = t.vars[i];
-}
-
-// destructor
-Term::~Term()
-{
-    delete [] vars;
+    init(lit, miss, size, isDC);
 }
 
 // returns the count of values in term
-int Term::valuesCount(tval value) const
+int Term::valuesCount(int value) const
 {
-    int count = 0;
-    for(int i = 0; i < size; i++)
-        if (vars[i] == value)
-            count++;
+    term_t mask, pos;
+    int i, count;
+    count = 0;
+
+    switch (value.getValue()) {
+    case LiteralValue::ONE:
+        mask = liters;
+        break;
+    case LiteralValue::ZERO:
+        mask = ~liters; // bits invertion - finding zeros
+        break;
+    default:
+        mask = missing;
+    }
+
+    for(i = 0, pos = 1; i < size; i++, pos <<= 1) {
+         if (pos & mask)
+             count++;
+     }
 
     return count;
 }
 
 // returns the new term combined (only by difference of one varible)
 // with *this and t, for example 0010 & 0000 => 00X0
+// note that it's expected that term size are the same
 Term * Term::combine(const Term & t) const
 {
-    // check
-    int pos = -1;
+    term_t diff_mask, pos;
+    int i;
+    bool isOne = false;
 
-    for (int i = 0; i < size; i++) {
-        if (vars[i] != t.vars[i]) {
-            if (pos == -1)
-                pos = i;
-            else // difference in two places
+    diff_mask = (t.liters ^ liters) & ~missing; // difference mask
+
+    if (!diff_mask) // no difference
+        return 0;
+
+    for (i = 0, pos = 1; i < size; i++, pos <<= 1) {
+        if (pos & diff_mask) {
+            if (isOne)
                 return 0;
+            else
+                isOne = true;
         }
     }
-    if (pos == -1)
+
+    // if it's possible to combine the terms, return new Term
+    return new Term(liters, diff_mask | missing, size);
+}
+
+// replace first missing value by zero and one
+Term *Term::expandMissingValue() const
+{
+    if (!missing) // no missing value
         return 0;
-    // if it's possible to combine the terms, creates new Term
-    Term * combined_term = new Term(t);
-    combined_term->setDC(false);
-    // sets position where values are different as dont_care
-    combined_term->vars[pos] = dont_care;
-    return combined_term;
-}
 
-// returns true if *this term implies term t
-bool Term::implies(Term & t) const
-{
-    if (t.size != size)
-        return false;
-    for (int i = 0; i < size; i++)
-        if (vars[i] != dont_care && vars[i] != t.vars[i])
-            return false;
-    return true;
-}
-
-// replace first dont care by zero and one
-Term * Term::replaceFirstDC() const
-{
-    for (int i = 0; i < size; i++) {
-        if (vars[i] == dont_care) {
+    term_t pos = 1;
+    for (int i = 0; i < size; i++, pos <<= 1) {
+        if (missing & pos) {
+            term_t newMissing = missing & ~pos;
             Term *t = new Term[2];
-            t[0] = t[1] = *this;
-            t[0].vars[i] = zero;
-            t[1].vars[i] = one;
+            t[0] = Term(liters | pos, newMissing, size, dc);  // 1
+            t[0] = Term(liters & ~pos, newMissing, size, dc); // 0
             return t;
         }
     }
     return 0;
 }
 
-int Term::getSize(bool all) const
+// returns true if this term implies term t
+bool Term::implies(Term & t) const
 {
-    if (all)
-        return size;
-    int count = 0;
-    for (int i = 0; i < size; i++) {
-        if (vars[i] != dont_care)
-            count++;
-    }
-    return count;
+    return !((t.liters ^ liters) & ~missing);
 }
 
-// assignment operator
-Term & Term::operator=(const Term & term)
+// size of term. when all is false, than without missing values
+int Term::getSize(bool all) const
 {
-    if (&term != this) {
-        size = term.size;
-        dc = term.dc;
-        delete [] vars;
-        vars = new tval[size];
-        for (int i = 0; i < size; i++)
-            vars[i] = term.vars[i];
-    }
-    return *this;
+    return all? size: size - valuesCount(LiteralValue::MISSING);
+}
+
+// returns index of minterm
+int Term::getIdx() const
+{
+    return missing? -1: int(liters);
 }
 
 // eqaulity operator
-bool Term::operator==(const Term & term) const
+bool Term::operator==(const Term & t) const
 {
-    // check
-    for (int i = 0; i < size; i++) {
-        if (vars[i] != term.vars[i])
-            return false;
-    }
-    return true;
+    return t.missing == missing && !((t.liters ^ liters) & ~missing);
 }
 
 bool Term::operator<(const Term & t) const
@@ -247,41 +180,44 @@ bool Term::operator>(const Term & t) const
 }
 
 // index operator
-tval & Term::operator[](int idx) throw(BadIndexExc)
+LiteralValue Term::operator[](int position)
 {
-    if (idx < 0 || idx >= size)
+    term_t pos = 1 << position;
+    if (missing & pos)
+        return LiteralValue(LiteralValue::MISSING);
+    else if (liters & pos)
+        return LiteralValue(LiteralValue::ONE);
+    else
+        return LiteralValue(LiteralValue::ZERO);
+}
+
+// get literal value at position
+LiteralValue Term::at(int position) throw(BadIndexExc)
+{
+    if (position < 0 || position >= size)
         throw BadIndexExc(idx);
-    return vars[idx];
+
+    return operator[](position);
 }
 
-// returns terms index of boolean function
-int Term::getIdx() const
+// get int value at position
+int Term::getValueAt(int position)
 {
-    int idx = 0;
-    for (int i = 0, j = size-1; i < size; i++, j--)
-         idx += vars[j] * ipow(2,i);
-    return idx;
+    term_t pos = 1 << position;
+    if (missing & pos)
+        return 2;
+    else if (liters & pos)
+        return 1;
+    else
+        return 0;
 }
 
-// term in string form: { 0 X 1 0 }
+// term in string form: 0X10
 string Term::toString() const
 {
     string s;
     for (int i = 0; i < size; i++)
-    {
-        switch (vars[i])
-        {
-            case zero:
-                s += "0";
-                break;
-            case one:
-                s += "1";
-                break;
-            case dont_care:
-                s += "-";
-                break;
-        }
-    }
+        s += operator[](i).toString();
     return s;
 }
 
@@ -290,55 +226,28 @@ bool charComparing(char c1, char c2)
     return c1 > c2;
 }
 
-// term in string form: AcD (upper case are negation)
+// term in string form: ab'c
 string Term::toString(vector<char> names) const throw(InvalidVarsExc)
 {
     // sorting characters
     sort(names.begin(), names.end(), charComparing);
 
-    checkVars(names);
-    vector<char> t;
     string s;
-    for (int i = size-1; i >= 0; i--)
-    {
-        if (vars[i] == dont_care)
+    for (int i = size-1; i >= 0; i--) {
+        LiteralValue value = operator[](i);
+        if (value.isMissing())
             continue;
-        t.push_back(names[i]);
-        if (vars[i] == zero)
+        s += names[i];
+        if (value.isZero())
             t.push_back('\'');;
     }
-    for (unsigned i = 0; i < t.size(); i++)
-        s += t[i];
+
     return s;
 }
-
-
-
-tval Term::getNextValue(tval value)
-{
-    switch (value) {
-        case zero:
-            return one;
-        case one:
-            return dont_care;
-        default: // dont_care
-            return zero;
-    }
-}
-
 
 // friend function to place term to ostream
 ostream & operator<<(ostream & os, const Term & term)
 {
-    os << term.toString();
-    return os;
+    return os << term.toString();
 }
 
-// returns the value of val raised to the power of exp
-int ipow(int val, int exp)
-{
-    int sum = 1;
-    for (int i = 0; i < exp; i++)
-        sum *= val;
-    return sum;
-}
