@@ -45,121 +45,69 @@ const char FIRST_VAR = 'a';
 
 // Constructors
 
-// gets terms from TermTree
-Formula(TermsTree & tt)
+// default setting
+void Formula::init()
 {
-
+    minimized = false;
+    maxIdx = 1 << varsSize;
+    setVars(varsSize);
 }
 
-
 // gets terms from vector t
-Formula::Formula(vector<Term> & tv) throw(InvalidTermExc, NoTermExc)
+Formula::Formula(vector<Term> & t) throw(InvalidTermExc, NoTermExc)
 {
     if (t.size() == 0) // t is empty
         throw NoTermExc();
 
-    int tsize = t[0].getSize(); // variables size
-    for (unsigned i = 1; i < t.size(); i++)
-        if (t[i].getSize() != tsize) // check correct size of term
-            throw InvalidTermExc(t[i].getSize(),tsize);
+    varsSize = t[0].getSize(); // variables size
+    for (unsigned i = 1; i < t.size(); i++) {
+        if (t[i].getSize() != varsSize) // check correct size of term
+            throw InvalidTermExc(t[i].getSize(), varsSize);
+    }
+    terms->setContainer(t);
 
-    // default setting
-    minimized = false;
-    debug = false;
-    setVars(tsize);
-    original_terms = terms = t;
+    init();
 }
 
 // gets terms from t array of terms
-Formula::Formula(Term * ta, int n) throw(InvalidTermExc, NoTermExc)
+Formula::Formula(Term *t, int n) throw(InvalidTermExc, NoTermExc)
 {
     if (n == 0) // array is emtpy
         throw NoTermExc();
 
-    int tsize = t[0].getSize(); // variables size
-    try
-    {
-        for (int i = 0; i < n; i++)
-        {
-            if (t[i].getSize() != tsize) // check correct size of term
-                throw InvalidTermExc(t[i].getSize(),tsize);
-            terms.push_back(t[i]);
+    varsSize = t[0].getSize(); // variables size
+    try {
+        for (int i = 0; i < n; i++) {
+            if (t[i].getSize() != varsSize) // check correct size of term
+                throw InvalidTermExc(t[i].getSize(), varsSize);
+            terms->pushTerm(t[i]);
         }
     }
-    catch (InvalidTermExc & e)
-    {
-        terms.clear(); // deletes all added terms
+    catch (InvalidTermExc & e) {
+        terms->clear(); // deletes all added terms
         throw;
     }
-    // default setting
-    minimized = false;
-    setVars(tsize);
-    debug = false;
 
-    original_terms = terms;
+    init();
 }
 
 
-
-void Formula::pushTerm(int idx, bool is_dc)
+void Formula::pushTerm(int idx, bool isDC) throw(BadIndexExc)
 {
-    int max_idx = ipow(2,vars.size());
-    if (idx >= max_idx)
-        return;
-    minimized = false;
-    for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).getIdx()) {
-            (*it).setDC(is_dc);
-            terms = original_terms;
-            return;
-        }
-    }
-    original_terms.push_back(Term(idx,vars.size(),is_dc));
-    terms = original_terms;
+    if (idx >= maxIdx)
+        throw BadIndexExc(idx);
+
+    if (terms->pushTerm(idx, isDC))
+        minimized = false;
 }
 
-void Formula::removeTerm(int idx)
+void Formula::removeTerm(int idx) throw(BadIndexExc)
 {
-    for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).getIdx()) {
-            original_terms.erase(it);
-            terms = original_terms;
-            minimized = false;
-            return;
-        }
-    }
-}
+    if (idx >= maxIdx)
+        throw BadIndexExc(idx);
 
-tval Formula::getTermValue(int idx)
-{
-    for (vector<Term>::iterator it = original_terms.begin(); it != original_terms.end(); it++) {
-        if (idx == (*it).getIdx()) {
-            if ((*it).isDC())
-                return Term::dont_care;
-            else
-                return Term::one;
-        }
-    }
-    return Term::zero;
-}
-
-
-vector<int> Formula::getTermsIdx(tval val)
-{
-    vector<int> values;
-    bool is_dc;
-    if (val == Term::one)
-        is_dc = false;
-    else if (val == Term::dont_care)
-        is_dc = true;
-    else // if (tval == Term::zero) // temporary - it should return intersect
-        return values;
-
-    for (unsigned i = 0; i < original_terms.size(); i++) {
-        if ((is_dc && original_terms[i].isDC()) || (!is_dc && !original_terms[i].isDC()))
-            values.push_back(original_terms[i].getIdx());
-    }
-    return values;
+    if (terms->removeTerm(idx))
+        minimized = false;
 }
 
 
@@ -203,20 +151,6 @@ void Formula::setVars(vector<char> & v) throw(InvalidVarsExc)
     Term::checkVars(v);
     vars = v;
 }
-
-
-// eqaulity operator
-bool Formula::operator==(const Formula & f)
-{
-    if (terms.size() != f.terms.size())
-        return false;
-    // checks all terms
-    for (vector<Term>::iterator it = terms.begin(); it != terms.end(); it++)
-        if (find(f.terms.begin(),f.terms.end(),*it) == f.terms.end())
-            return false;
-    return true;
-}
-
 
 // statement of formula
 string Formula::toString(bool idx_form) throw(InvalidVarsExc)
@@ -276,12 +210,10 @@ string Formula::toString(bool idx_form) throw(InvalidVarsExc)
 // friend function to place term to ostream
 ostream & operator<<(std::ostream & os, Formula & f)
 {
-    try
-    {
+    try {
         os << f.toString();
     }
-    catch (InvalidVarsExc & e)
-    {
+    catch (InvalidVarsExc & e) {
         os << e.what();
     }
     return os;

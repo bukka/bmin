@@ -9,7 +9,8 @@ SOURCES += formula.cpp \
     termstree.cpp \
     minimizingalgorithm.cpp \
     quinemccluskey.cpp \
-    kernel.cpp
+    kernel.cpp \
+    termscontainer.cpp
 HEADERS += formula.h \
     term.h \
     exceptions.h \
@@ -18,4 +19,6 @@ HEADERS += formula.h \
     termstree.h \
     minimizingalgorithm.h \
     quinemccluskey.h \
-    kernel.h
+    kernel.h \
+    constants.h \
+    termscontainer.h

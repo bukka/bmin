@@ -23,6 +23,7 @@
 #include "guimanager.h"
 #include "constants.h"
 #include "formula.h"
+#include "kernel.h"
 
 #include <QList>
 
@@ -34,6 +35,7 @@ GUIManager::GUIManager()
 {
     // set empty formula
     m_formula = 0;
+    m_kernel =
 }
 
 // destructor
@@ -76,6 +78,7 @@ void GUIManager::setFormula(const QString &fce)
     }
     try {
         // make formula
+        Kernel *ker =
         Formula *tmp = new Formula(fce.toStdString());
 
         if (m_formula)

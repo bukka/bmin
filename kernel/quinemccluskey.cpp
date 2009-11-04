@@ -1,5 +1,5 @@
 #include "quinemccluskey.h"
 
-QuineMcCluskey::QuineMcCluskey()
+QuineMcCluskey::QuineMcCluskey(Formula *f) : MinimizingAlgorithm(f)
 {
 }

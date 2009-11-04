@@ -36,8 +36,6 @@ typedef int term_t;
 // maximum number of literals ( -1 means sign in int
 #define TERM_MAX_SIZE (sizeof (term_t) * 8 - 1)
 
-enum TermValue { ZERO, ONE, DC };
-
 // Class represented product term
 class Term
 {
@@ -51,6 +49,9 @@ private:
     void init(term_t lit, term_t mis, int s, bool isDC);
 
 public:
+    // possible output value of term
+    enum OutputValue { ZERO, ONE, DC };
+
     // checks the variables validity
     static void checkVars(const std::vector<char> & var_names)
             throw(InvalidVarsExc);
@@ -63,9 +64,9 @@ public:
     Term(term_t lit, term_t miss, int size, bool isDC = false);
 
     // true if this is don't care term
-    bool isDC() const { return dc; }
+    inline bool isDC() const { return dc; }
     // sets whether this is dont care term
-    void setDC(bool is_dc) { dc = is_dc; }
+    inline void setDC(bool isDC) { dc = isDC; }
     // returns size of term, if all is false returns size reduced of dont cares
     int getSize(bool all = true) const;
     // returns terms index of boolean function
@@ -88,10 +89,11 @@ public:
     bool operator==(const Term & t) const;
     bool operator<(const Term & t) const;
     bool operator>(const Term & t) const;
+
     // index operator
     LiteralValue operator[](int position);
-    LiteralValue at(int position) throw(BadIndexExc);
-    int getValueAt(int position);
+    LiteralValue at(int position) const throw(BadIndexExc);
+    int getValueAt(int position) const;
 
 
     // term in string form: { 0 X 1 0 }

@@ -4,8 +4,6 @@
 class QuineMcCluskey : public MinimizingAlgorithm
 {
 private:
-    Formula formula;
-
     // finds essential prime implicants
     int extract_essential_implicant(bool ** table, int n_impls, int n_terms) const;
     // finds implicant by largest covering
@@ -15,7 +13,7 @@ private:
     void extract_implicant(bool ** table, int n_impls, int n_terms, int impl) const;
 
 public:
-    QuineMcCluskey();
+    QuineMcCluskey(Formula *f);
 
     void minimize();
 

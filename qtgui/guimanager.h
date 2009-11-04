@@ -42,9 +42,9 @@ public:
     // destroy instance
     static void destroy();
     // actualize function and return function string
-    QString getActualFce() { emit fceRead(); return m_actualFce; }
+    inline QString getActualFce() { emit fceRead(); return m_actualFce; }
     // whether formula is correct
-    bool isCorrectFormula() const { return m_isCorrect; }
+    inline bool isCorrectFormula() const { return m_isCorrect; }
 
 private:
     GUIManager();
@@ -53,6 +53,8 @@ private:
      // static instance
     static GUIManager *s_instance;
 
+    // kernel
+    Kernel *m_kernel;
     // boolean function
     Formula *m_formula;
     // string with actual formula

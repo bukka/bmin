@@ -27,7 +27,6 @@ HEADERS += mainwindow.h \
     cubeglconf.h \
     welcomewidget.h \
     modewidget.h \
-    constants.h \
     modulewidget.h \
     modemanager.h \
     aboutdialog.h

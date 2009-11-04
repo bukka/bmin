@@ -24,6 +24,7 @@
 #define FORMULA_H
 
 #include "term.h"
+#include "termscontainer.h"
 #include "exceptions.h"
 
 #include <iostream>
@@ -37,43 +38,45 @@
 class Formula
 {
 private:
-    TermsTree terms;
+    void init();
+    inline void minimized(bool m) { minimized = m; }
+
+    TermsContainer *terms;
 
     // names of variables
     std::vector<char> vars;
 
+    int varsSize;
     bool minimized;
+    int maxIdx;
 
 public:
     // Constructors
     // gets terms from TermTree
-    Formula(TermsTree & tt);
-    // gets terms from vector t
-    Formula(std::vector<Term> & tv) throw(InvalidTermExc, NoTermExc);
-    // gets terms from t array of terms
-    Formula(Term * ta, int n) throw(InvalidTermExc, NoTermExc);
+    Formula(TermsContainer & tc);
 
     // adds new term to formula
-    void pushTerm(int idx, bool is_dc = false);
+    void pushTerm(int idx, bool isDC = false) throw(BadIndexExc);
     // removes term with idx
-    void removeTerm(int idx);
-
+    void removeTerm(int idx) throw(BadIndexExc);
+    // finds out whether term t is in TermsContainer
+    inline bool hasTerm(const Term & t) { return terms->hasTerm(t); }
     // returns value of term with idx
-    TermValue getTermValue(int idx);
+    inline Term::OutputValue getTermValue(int idx) { terms->getTermValue(idx); }
+    // returns terms id with val from original terms
+    inline std::vector<int> getTermsIdx(Term::OutputValue val) { terms->getTermsIdx(val); }
+    // returns actual minterms
+    inline std::vector<Term> getMinterms() { terms->getMinterms(); }
+    // returns number of terms
+    inline int getSize() { return terms.getSize(); }
 
     // whether formula is minimized
-    bool isMinimized() { return minimized; }
+    inline bool isMinimized() { return minimized; }
 
-    // eqaulity operator
-    bool operator==(const Formula & f);
+    // equality
+    bool operator==(const Formula & f) { return terms == f.terms; }
+    bool equal(const Formula & f, inclVars = true);
 
-    /* returns terms id with val from original terms */
-    std::vector<int> getTermsIdx(TermValue val);
-    // returns number of terms
-    int getSize() { return terms.size(); }
-
-    // finds out whether term t is in terms vector
-    bool hasTerm(const Term & t);
     // set default names for n variables
     void setVars(int n);
     // sets variables name by array of characters v
@@ -81,9 +84,9 @@ public:
     // sets variables name by vector v
     void setVars(std::vector<char> & v) throw(InvalidVarsExc);
     // returns variables
-    std::vector<char> & getVars() { return vars; }
+    std::vector<char> getVars() { return vars; }
     // returns number of varibles
-    int getVarsCount() { return vars.size(); }
+    inline int getVarsCount() { return varsSize; }
 
     // statement of formula
     std::string toString(bool idx_form = false) throw(InvalidVarsExc);

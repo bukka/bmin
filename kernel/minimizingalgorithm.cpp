@@ -1,5 +1,5 @@
 #include "minimizingalgorithm.h"
 
-MinimizingAlgorithm::MinimizingAlgorithm()
+MinimizingAlgorithm::MinimizingAlgorithm(Formula *f) : formula(f)
 {
 }
