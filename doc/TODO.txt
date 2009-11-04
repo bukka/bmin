@@ -1,0 +1,16 @@
+# TODO file
+
+# CODE -------------------------------
+
+termtree.h, termtree.cpp
+	- comleting, test
+
+termscontainer.cpp
+	TermsContainer::getTermsIdx - Term ZERO
+
+formula.cpp
+	constructors
+	Formula::toString(bool idx_form) - rewrite - compatibility with parse
+	
+term.h
+	OutputValue -> standalone
