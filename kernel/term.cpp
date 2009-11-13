@@ -21,7 +21,6 @@
  */
 
 #include "term.h"
-#include "exceptions.h"
 
 #include <iostream>
 #include <algorithm>
@@ -32,18 +31,6 @@
 
 using namespace std;
 
-// check term vars correctness
-void Term::checkVars(const vector<char> & var_names) throw(InvalidVarsExc)
-{
-    if (var_names.size() == 0)
-        throw InvalidVarsExc();
-    vector<char> v; // vector with the invalid names of variables
-    for (unsigned i = 0; i < var_names.size(); i++)
-        if (!isalpha(var_names[i])) // only letter is correct
-            v.push_back(var_names[i]);
-    if (v.size() != 0)
-        throw InvalidVarsExc(v);
-}
 
 // term initialization
 void Term::init(term_t lit, term_t mis, int s, bool isDC)
@@ -192,10 +179,10 @@ LiteralValue Term::operator[](int position)
 }
 
 // get literal value at position
-LiteralValue Term::at(int position) throw(BadIndexExc)
+LiteralValue Term::at(int position) throw(InvalidTermPosExc)
 {
     if (position < 0 || position >= size)
-        throw BadIndexExc(idx);
+        throw InvalidTermPosExc(position);
 
     return operator[](position);
 }
@@ -227,8 +214,9 @@ bool charComparing(char c1, char c2)
 }
 
 // term in string form: ab'c
-string Term::toString(vector<char> names) const throw(InvalidVarsExc)
+string Term::toString(vector<char> names) const
 {
+
     // sorting characters
     sort(names.begin(), names.end(), charComparing);
 
@@ -239,7 +227,7 @@ string Term::toString(vector<char> names) const throw(InvalidVarsExc)
             continue;
         s += names[i];
         if (value.isZero())
-            t.push_back('\'');;
+            s += '\'';
     }
 
     return s;

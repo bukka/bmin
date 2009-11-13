@@ -23,8 +23,6 @@
 #ifndef TERM_H
 #define TERM_H
 
-#include "exceptions.h"
-
 #include <iostream>
 #include <vector>
 #include <string>
@@ -39,22 +37,9 @@ typedef int term_t;
 // Class represented product term
 class Term
 {
-private:
-    term_t liters;     // literals value
-    term_t missing;    // which literals are missing literals
-    int size;		   // number of literals
-    bool dc;		   // dont care term
-
-    // term initialization
-    void init(term_t lit, term_t mis, int s, bool isDC);
-
 public:
     // possible output value of term
     enum OutputValue { ZERO, ONE, DC };
-
-    // checks the variables validity
-    static void checkVars(const std::vector<char> & var_names)
-            throw(InvalidVarsExc);
 
     // constructor - the term of size s with all variables setted to missing value
     Term(int s = 0, bool isDC = false);
@@ -92,17 +77,29 @@ public:
 
     // index operator
     LiteralValue operator[](int position);
-    LiteralValue at(int position) const throw(BadIndexExc);
+    LiteralValue at(int position) const throw(InvalidTermPosExc);
     int getValueAt(int position) const;
-
-
-    // term in string form: { 0 X 1 0 }
-    std::string toString() const;
-    // term in string form: A'BC
-    std::string toString(std::vector<char> var_names) const throw(InvalidVarsExc);
 
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
+
+    friend class Formula;
+
+private:
+    term_t liters;     // literals value
+    term_t missing;    // which literals are missing literals
+    int size;		   // number of literals
+    bool dc;		   // dont care term
+
+    // term initialization
+    void init(term_t lit, term_t mis, int s, bool isDC);
+
+    // term in string form: 0X10
+    std::string toString() const;
+    // term in string form: A'BC
+    std::string toString(std::vector<char> varNames) const;
+
+
 };
 
 #endif /* TERM_H */

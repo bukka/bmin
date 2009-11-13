@@ -41,7 +41,6 @@ GUIManager::GUIManager()
 // destructor
 GUIManager::~GUIManager()
 {
-    delete m_formula;
 }
 
 // return instance of GUIManager
@@ -78,8 +77,8 @@ void GUIManager::setFormula(const QString &fce)
     }
     try {
         // make formula
-        Kernel *ker =
-        Formula *tmp = new Formula(fce.toStdString());
+        Kernel *ker = Kernel::instance();
+        Formula *tmp = ker->parseFce(fce.toStdString());
 
         if (m_formula)
             delete m_formula;

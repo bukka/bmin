@@ -3,7 +3,9 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 HEADERS += konsole.h \
     lexicalanalyzer.h \
-    parser.h
+    parser.h \
+    shellexc.h
 SOURCES += konsole.cpp \
     lexicalanalyzer.cpp \
-    parser.cpp
+    parser.cpp \
+    shellexc.cpp

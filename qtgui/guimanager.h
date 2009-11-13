@@ -23,10 +23,9 @@
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 
-#include "term.h"
-
 #include <QObject>
 
+class Kernel;
 class Formula;
 
 class QString;

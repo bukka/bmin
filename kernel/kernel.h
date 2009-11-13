@@ -7,6 +7,16 @@ class Formula;
 
 class Kernel
 {
+public:
+    static Kernel *instance();
+    static void destroy();
+
+    Formula *getFormula();
+    void setFormula(Formula *f);
+    void deleteFomula();
+    void minimizeFormula();
+
+    void exit();
 private:
     Kernel();
     ~Kernel();
@@ -14,11 +24,7 @@ private:
      // static instance
     static Kernel *s_instance;
 
-public:
-    static Kernel *instance();
-    static void destroy();
-
-    Formula *parseFce(std::string & str);
+    Formula *formula;
 };
 
 #endif // KERNEL_H

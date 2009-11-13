@@ -1,6 +1,6 @@
 # TODO file
 
-# CODE -------------------------------
+# CODE -------------------------------------------------
 
 termtree.h, termtree.cpp
 	- comleting, test
@@ -11,6 +11,16 @@ termscontainer.cpp
 formula.cpp
 	constructors
 	Formula::toString(bool idx_form) - rewrite - compatibility with parse
+	Formula::checkVars - variable unique
 	
 term.h
-	OutputValue -> standalone
+	OutputValue -> standalone class
+	
+parser.cpp
+	product of sums
+	
+	
+# FEATURES ---------------------------------------------
+
+more formulas
+parsing all file (no every row standalone)

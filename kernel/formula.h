@@ -25,42 +25,56 @@
 
 #include "term.h"
 #include "termscontainer.h"
-#include "exceptions.h"
+#include "kernelexc.h"
 
 #include <iostream>
 #include <string>
 #include <vector>
-#include <map>
+#include <list>
+#include <set>
 #include <exception>
 #include <stdexcept>
+
+
+struct FormulaDecl
+{
+    FormulaDecl(const std::vector<char> *v = 0, char n = 'f') : vars(v), name(n) {}
+    ~FormulaDecl() { delete vars; }
+    const std::list<char> *vars;
+    char name;
+};
+
+struct FormulaSpec
+{
+    FormulaSpec(std::set<int> *_f = 0, std::set<int> *_d = 0, std::set<int> *_r = 0)
+                : f(_f), d(_d), r(_r) {}
+    ~FormulaSpec();
+    std::set<int> *f; // one
+    std::set<int> *d; // dc
+    std::set<int> *r; // zero
+};
+
 
 // class represented logical formula
 class Formula
 {
-private:
-    void init();
-    inline void minimized(bool m) { minimized = m; }
-
-    TermsContainer *terms;
-
-    // names of variables
-    std::vector<char> vars;
-
-    int varsSize;
-    bool minimized;
-    int maxIdx;
-
 public:
+    static void checkVars(const vector<char> &v) throw(InvalidVarsExc);
+
     // Constructors
-    // gets terms from TermTree
-    Formula(TermsContainer & tc);
+    Formula::Formula(std::vector<Term> &t, char name = 'f', std::vector<char> *v = 0)
+            throw(InvalidTermExc, NoTermExc);
+    Formula::Formula(Term *t, int n, char name = 'f', std::vector<char> *v = 0)
+            throw(InvalidTermExc, NoTermExc);
+    Formula::Formula(FormulaSpec *spec, FormulaDecl *decl)
+            throw(InvalidTermExc, NoTermExc);
 
     // adds new term to formula
-    void pushTerm(int idx, bool isDC = false) throw(BadIndexExc);
+    void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
     // removes term with idx
-    void removeTerm(int idx) throw(BadIndexExc);
+    void removeTerm(int idx) throw(InvalidIndexExc);
     // finds out whether term t is in TermsContainer
-    inline bool hasTerm(const Term & t) { return terms->hasTerm(t); }
+    inline bool hasTerm(const Term &t) { return terms->hasTerm(t); }
     // returns value of term with idx
     inline Term::OutputValue getTermValue(int idx) { terms->getTermValue(idx); }
     // returns terms id with val from original terms
@@ -74,26 +88,47 @@ public:
     inline bool isMinimized() { return minimized; }
 
     // equality
-    bool operator==(const Formula & f) { return terms == f.terms; }
-    bool equal(const Formula & f, inclVars = true);
+    bool operator==(const Formula &f) { return terms == f.terms; }
+    bool equal(const Formula &f, inclVars = true);
+
+
+    // name setter
+    inline void setName(char n) { name = n; }
+    // name getter
+    inline char getName() { return name; }
 
     // set default names for n variables
     void setVars(int n);
     // sets variables name by array of characters v
     void setVars(char * v, int n) throw(InvalidVarsExc);
     // sets variables name by vector v
-    void setVars(std::vector<char> & v) throw(InvalidVarsExc);
+    void setVars(std::vector<char> &v) throw(InvalidVarsExc);
     // returns variables
     std::vector<char> getVars() { return vars; }
     // returns number of varibles
     inline int getVarsCount() { return varsSize; }
 
-    // statement of formula
-    std::string toString(bool idx_form = false) throw(InvalidVarsExc);
-    // friend function to place term to ostream
-    friend std::ostream & operator<<(std::ostream & os, Formula & t);
+    // friend function to place term to ostream (to debugging)
+    friend std::ostream &operator<<(std::ostream &os, Formula &t);
 
     friend class MinimizingAlgorithm;
+
+
+private:
+    void init();
+    inline void minimized(bool m) { minimized = m; }
+
+
+    TermsContainer *terms;
+
+    // formula name
+    char name;
+    // names of variables
+    std::vector<char> vars;
+
+    int varsSize;
+    bool minimized;
+    int maxIdx;
 };
 
 #endif /* FORMULA_H */

@@ -3,8 +3,11 @@
 
 class MinimizingAlgorithm
 {
+protected:
+    Formula *formula;
+
 public:
-    MinimizingAlgorithm();
+    MinimizingAlgorithm(Formula *f);
 
     void minimize() = 0;
 };

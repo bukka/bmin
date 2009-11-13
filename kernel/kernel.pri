@@ -3,7 +3,7 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 SOURCES += formula.cpp \
     term.cpp \
-    exceptions.cpp \
+    kernelexc.cpp \
     literalvalue.cpp \
     oldformula.cpp \
     termstree.cpp \
@@ -13,7 +13,7 @@ SOURCES += formula.cpp \
     termscontainer.cpp
 HEADERS += formula.h \
     term.h \
-    exceptions.h \
+    kernelexc.h \
     literalvalue.h \
     oldformula.h \
     termstree.h \

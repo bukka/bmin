@@ -3,3 +3,8 @@
 Konsole::Konsole()
 {
 }
+
+void Konsole::process()
+{
+}
+

@@ -15,8 +15,6 @@ private:
 public:
     QuineMcCluskey(Formula *f);
 
-    void minimize();
-
     // complete minimization
     void minimize();
     // creates prime implicant and saves it to terms vector
