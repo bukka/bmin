@@ -40,10 +40,6 @@
 
 using namespace std;
 
-// the first letter of the default variables vector
-const char FIRST_VAR = 'a';
-
-
 // FORMULA SPEC
 // Dectructor
 FormulaSpec::~FormulaSpec()
@@ -59,49 +55,77 @@ FormulaSpec::~FormulaSpec()
 // Constructors
 
 // default setting
-void Formula::init()
+void Formula::init(int vs, vector<char> *v, char fn, Form f)
 {
+    varibleSize = vs;
+    maxIdx = 1 << vs;
+    setVars(v, vs);
+
+    name = fn;
+    form = f;
     minimized = false;
-    maxIdx = 1 << varsSize;
-    setVars(varsSize);
-}
-
-// gets terms from vector t
-Formula::Formula(vector<Term> & t) throw(InvalidTermExc, NoTermExc)
-{
-    if (t.size() == 0) // t is empty
-        throw NoTermExc();
-
-    varsSize = t[0].getSize(); // variables size
-    for (unsigned i = 1; i < t.size(); i++) {
-        if (t[i].getSize() != varsSize) // check correct size of term
-            throw InvalidTermExc(t[i].getSize(), varsSize);
-    }
-    terms->setContainer(t);
-
-    init();
 }
 
 // gets terms from t array of terms
-Formula::Formula(Term *t, int n) throw(InvalidTermExc, NoTermExc)
+Formula::Formula(int vs, Term *t, int n, vector<char> *v, char fn, Form f)
+        throw(InvalidTermExc)
 {
-    if (n == 0) // array is emtpy
-        throw NoTermExc();
+    init(vs, v, fn, f);
 
-    varsSize = t[0].getSize(); // variables size
+    if (n == 0) // array is emtpy
+        return;
+
     try {
         for (int i = 0; i < n; i++) {
-            if (t[i].getSize() != varsSize) // check correct size of term
-                throw InvalidTermExc(t[i].getSize(), varsSize);
-            terms->pushTerm(t[i]);
+            if (t[i].getSize() != vs) // check correct size of term
+                throw InvalidTermExc(t[i].getSize(), varsCount);
+            terms.pushTerm(t[i]);
         }
     }
-    catch (InvalidTermExc & e) {
-        terms->clear(); // deletes all added terms
+    catch (InvalidTermExc &e) {
+        terms.clear(); // deletes all added terms
         throw;
     }
+}
 
-    init();
+// gets terms from vector t
+Formula::Formula(int vs, vector<Term> &t, vector<char> *v, char fn, Form f)
+        throw(InvalidTermExc)
+{
+    init(vs, v, fn, f);
+
+    if (t.size() == 0) // t is empty
+        return;
+
+    for (unsigned i = 1; i < t.size(); i++) {
+        if (t[i].getSize() != vs) // check correct size of term
+            throw InvalidTermExc(t[i].getSize(), varsCount);
+    }
+    terms.setContainer(t);
+}
+
+Formula::Formula(FormulaSpec *spec, FormulaDecl *decl) throw(InvalidTermExc)
+{
+    set<int>::iterator it;
+
+    if (spec->f) {
+        init(decl->vars->size(), decl->vars, decl->name, SOP);
+        for (it = spec->f->begin(); it != spec->f->end(); it++)
+            terms.pushTerm(*it, false);
+        for (it = spec->d->begin(); it != spec->d->end(); it++)
+            terms.pushTerm(*it, true);
+    }
+    //TODO else product
+}
+
+Formula::Formula(const Formula &f, bool toMinterms)
+{
+    init(f.varsCount, &f.vars, f.fn, f.form);
+    if (toMinterms)
+        terms.setContainer(f.getMinterms());
+    else
+        terms = f.terms;
+
 }
 
 
@@ -110,7 +134,7 @@ void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
     if (idx >= maxIdx)
         throw InvalidIndexExc(idx);
 
-    if (terms->pushTerm(idx, isDC))
+    if (terms.pushTerm(idx, isDC))
         minimized = false;
 }
 
@@ -119,70 +143,42 @@ void Formula::removeTerm(int idx) throw(InvalidIndexExc)
     if (idx >= maxIdx)
         throw InvalidIndexExc(idx);
 
-    if (terms->removeTerm(idx))
+    if (terms.removeTerm(idx))
         minimized = false;
-}
-
-
-// finds out whether term t is in terms vector
-bool Formula::hasTerm(const Term & t)
-{
-    if (terms.size() == 0 || terms[0].getSize() != t.getSize())
-        return false;
-    return find(terms.begin(),terms.end(),t) != terms.end();
-}
-
-
-// check term vars correctness
-void Formula::checkVars(const vector<char> & v) throw(InvalidVarsExc)
-{
-    if (v.size() == 0)
-        throw InvalidVarsExc();
-    vector<char> invalid; // vector with the invalid names of variables
-    for (unsigned i = 0; i < v.size(); i++) {
-        if (!isalpha(v[i])) // only letter is correct
-            invalid.push_back(v[i]);
-    }
-    if (invalid.size() != 0)
-        throw InvalidVarsExc(invalid);
 }
 
 // set default names for n variables
 void Formula::setVars(int n)
 {
-    for (char var = FIRST_VAR + n - 1; var >= FIRST_VAR; var--)
-        vars.push_back(var);
+    vars.reserve(n);
+    for (char var = DEFAULT_FIRST_VAR + n - 1; var >= DEFAULT_FIRST_VAR; var--)
+        vars[i] = var;
 }
 
 // sets variables name by array of characters v
-void Formula::setVars(char * v, int n) throw(InvalidVarsExc)
+void Formula::setVars(char *v, int n)
 {
-    // checks correct size of variables
-    if (n != static_cast<int>(vars.size()))
-        throw InvalidVarsExc();
-
+    //TODO - varibles count over and under; try fce copy
     vector<char> tmp(n);
     for (int i = 0; i < n; i++)
         tmp[i] = v[i];
-    // checks correct names of variables
-    checkVars(tmp);
+
     vars = tmp;
 }
 
 // sets variables name by vector v
-void Formula::setVars(vector<char> & v) throw(InvalidVarsExc)
+void Formula::setVars(vector<char> *v, int vs)
 {
-    // checks correct size of variables
-    if (v.size() != vars.size())
-        throw InvalidVarsExc();
-    // checks correct names of variables
-    checkVars(v);
-    vars = v;
+    //TODO - varibles count over and under
+    if (!v)
+        setVars(vs);
+    else
+        vars = *v;
 }
 
 
 // friend function to place term to ostream
-ostream & operator<<(std::ostream & os, Formula & f)
+ostream & operator<<(std::ostream &os, Formula &f)
 {
     return os << "Formula " << name;
 }

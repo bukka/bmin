@@ -21,27 +21,18 @@
  */
 
 #include "guimanager.h"
-#include "constants.h"
-#include "formula.h"
-#include "kernel.h"
+
+#include "shell/parser.h"
+
+#include "kernel/kernel.h"
+#include "kernel/formula.h"
+#include "kernel/outputvalue.h"
+#include "kernel/constants.h"
 
 #include <QList>
 
 // preinicialize static instance
 GUIManager *GUIManager::s_instance = 0;
-
-// constructor
-GUIManager::GUIManager()
-{
-    // set empty formula
-    m_formula = 0;
-    m_kernel =
-}
-
-// destructor
-GUIManager::~GUIManager()
-{
-}
 
 // return instance of GUIManager
 GUIManager *GUIManager::instance()
@@ -57,6 +48,20 @@ void GUIManager::destroy()
 {
     delete s_instance;
     s_instance = 0;
+}
+
+// constructor
+GUIManager::GUIManager()
+{
+    // set empty formula
+    m_formula = 0;
+    m_kernel = Kernel::instance();
+}
+
+// destructor
+GUIManager::~GUIManager()
+{
+    Kernel::destroy();
 }
 
 // by changing formula
@@ -77,14 +82,11 @@ void GUIManager::setFormula(const QString &fce)
     }
     try {
         // make formula
-        Kernel *ker = Kernel::instance();
-        Formula *tmp = ker->parseFce(fce.toStdString());
-
-        if (m_formula)
-            delete m_formula;
-        m_formula = tmp;
-        emit formulaChanged(m_formula);
-        m_isCorrect = true;
+        m_parser.parse(fce.toStdString());
+        if (m_kernel->isFormulaChanged()) { // HACK -> events
+            m_isCorrect = true;
+            emit formulaChanged(m_kernel->getFormula());
+        }
     }
     catch (std::exception &exc) {
         emit errorInvoked(exc.what());
@@ -104,31 +106,33 @@ void GUIManager::updateFormula(const QString &fce)
 // minimization of the variables
 void GUIManager::minimizeFormula()
 {
-    if (!m_formula || !m_isCorrect) {
+    if (!m_kernel->hasFormula() || !m_isCorrect) {
         emit errorInvoked(tr("Incorrect boolean function!"));
         return;
     }
-    if (m_formula->isMinimized()) {
+    if (m_kernel->getFormula()->isMinimized()) {
         return;
     }
 
-    m_formula->minimize();
-    emit minFceChanged(QString::fromStdString(m_formula->toString()));
+    m_kernel->minimizeFormula();
+    emit minFceChanged(QString::fromStdString(m_parser.formulaToString(Parser::VARS)));
     emit formulaMinimized();
 }
 
 // changes term in formula
-void GUIManager::setTerm(int idx, tval value)
+void GUIManager::setTerm(int idx, OutputValue &value)
 {
-    if (!m_formula)
+    if (!m_kernel->hasFormula())
         return;
 
-    if (value == Term::zero)
-        m_formula->removeTerm(idx);
-    else
-        m_formula->pushTerm(idx,value == Term::dont_care);
+    Formula *formula = m_kernel->getFormula();
 
-    m_actualFce = QString::fromStdString(m_formula->toString(true));
+    if (value.isZero())
+        formula->removeTerm(idx);
+    else
+        formula->pushTerm(idx, value.isDC());
+
+    m_actualFce = QString::fromStdString(m_parser.formulaToString(Parser::SUM));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
     emit formulaChanged(m_formula);

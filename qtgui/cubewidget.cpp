@@ -26,9 +26,9 @@
 
 #include "cubewidget.h"
 #include "cubegldrawer.h"
-#include "term.h"
 #include "guimanager.h"
 
+#include "outputvalue.h"
 
 // BooleanCube constructor - makes CubeGLDrawer, which draws - too much
 // Boolean n-Cube. It connects all required signals and slots
@@ -43,8 +43,8 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 
     GUIManager *gm = GUIManager::instance();
     // changing one term in drawer
-    connect(drawer, SIGNAL(cubeChanged(int, tval)),
-            gm, SLOT(setTerm(int, tval)));
+    connect(drawer, SIGNAL(cubeChanged(int, OutputValue &)),
+            gm, SLOT(setTerm(int, OutputValue &)));
     // formula is minimized
     connect(drawer, SIGNAL(minRequested()),
             gm, SLOT(minimizeFormula()));

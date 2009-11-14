@@ -5,9 +5,6 @@
 
 class LiteralValue
 {
-protected:
-    int value;
-
 public:
     static const int ZERO = 0;
     static const int ONE = 1;
@@ -27,7 +24,11 @@ public:
 
     bool operator==(const LiteralValue & val) const { return val.getValue() == value; }
 
-     std::string toString() const;
+    std::string toString() const;
+
+ private:
+    int value;
+
 };
 
 #endif // LITERALVALUE_H

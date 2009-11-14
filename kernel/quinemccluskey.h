@@ -1,26 +1,37 @@
 #ifndef QUINEMCCLUSKEY_H
 #define QUINEMCCLUSKEY_H
 
+#include "minimizingalgorithm.h"
+
+#include <vector>
+
+class Term;
+
 class QuineMcCluskey : public MinimizingAlgorithm
 {
-private:
-    // finds essential prime implicants
-    int extract_essential_implicant(bool ** table, int n_impls, int n_terms) const;
-    // finds implicant by largest covering
-    int extract_largest_implicant(bool ** table, int n_impls, int n_terms) const;
-    // sets false value for all terms (remove term cell from table)
-    // which are implicated by implicant impl
-    void extract_implicant(bool ** table, int n_impls, int n_terms, int impl) const;
-
 public:
-    QuineMcCluskey(Formula *f);
+    QuineMcCluskey();
+    ~QuineMcCluskey();
 
     // complete minimization
-    void minimize();
-    // creates prime implicant and saves it to terms vector
+    Formula *minimize(Formula *);
+
+    // creates prime implicant
     void findPrimeImplicants();
-    // makes consequential functions
+    // makes covering
     void findFinalImplicants();
+
+private:
+    // finds essential prime implicants
+    int extractEssentialImplicants(bool **table, int nImpls, int nTerms) const;
+    // finds implicant by largest covering
+    int extractLargestImplicants(bool **table, int nImpls, int nTerms) const;
+    // sets false value for all terms (remove term cell from table)
+    // which are implicated by implicant impl
+    void extractImplicant(bool **table, int nImpls, int nTerms, int impl) const;
+
+    // duplicates vector with terms, but dont care terms are ignored
+    std::vector<Term> *copyMainTerms(std::vector<Term> &v) const;
 };
 
 #endif // QUINEMCCLUSKEY_H

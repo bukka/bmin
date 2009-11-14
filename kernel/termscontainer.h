@@ -5,13 +5,10 @@
 
 #include "term.h"
 
+class OutputValue;
+
 class TermsContainer
 {
-    bool expandTerm(vector<Term> & v, Term & t);
-
-    std::vector<Term> termsVector;
-
-    ContainerType type;
 public:
     enum ContainerType { STL_SET, STL_VECTOR, TERMS_TREE };
 
@@ -23,20 +20,34 @@ public:
 
     bool pushTerm(int idx, bool isDC = false);
     bool removeTerm(int idx);
-    bool hasTerm(const Term & t);
+    bool hasTerm(const Term &t);
 
     /* returns terms id with val from original terms */
-    std::vector<int> getTermsIdx(Term::OutputValue val);
+    std::vector<int> getTermsIdx(OutputValue &val);
     /* returns actual minterms */
     std::vector<Term> getMinterms();
 
     // returns value of term with idx
-    Term::OutputValue getTermValue(int idx);
+    OutputValue getTermValue(int idx);
 
     void clear();
 
     // equality
-    bool operator==(const TermsContainer & f);
+    bool operator==(const TermsContainer &f);
+
+    // iterating
+    void itInit();
+    bool itNext();
+    Term &itGet();
+
+private:
+    bool expandTerm(vector<Term> &v, Term & t);
+
+    std::vector<Term> termsVector;
+
+    ContainerType type;
+
+    int itPos;
 };
 
 #endif // TERMSCONTAINER_H

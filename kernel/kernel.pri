@@ -7,10 +7,10 @@ SOURCES += formula.cpp \
     literalvalue.cpp \
     oldformula.cpp \
     termstree.cpp \
-    minimizingalgorithm.cpp \
     quinemccluskey.cpp \
     kernel.cpp \
-    termscontainer.cpp
+    termscontainer.cpp \
+    outputvalue.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -21,4 +21,6 @@ HEADERS += formula.h \
     quinemccluskey.h \
     kernel.h \
     constants.h \
-    termscontainer.h
+    termscontainer.h \
+    outputvalue.h
+

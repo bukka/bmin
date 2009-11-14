@@ -43,12 +43,5 @@ private:
     int index;
 };
 
-// no terms was added
-class NoTermExc : public std::exception
-{
-public:
-    NoTermExc() {}
-    const char *what() const throw();
-};
 
 #endif // KERNELEXC_H

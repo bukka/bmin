@@ -2,29 +2,36 @@
 #define PARSER_H
 
 #include "lexicalanalyzer.h"
-#include "shellexc.h"
 
-#include <iostream>
+#include <istream>
+#include <string>
 #include <list>
 #include <set>
 
 class Kernel;
+class Formula;
 class FormulaDecl;
 class FormulaSpec;
 class Term;
+class ShellExc;
 
 class Parser
 {
 public:
-    enum PrintForm { SUM, PROD, VARS }
+    enum PrintForm {
+        SUM,  // sum of minterms' indexes
+        PROD, // product of minterms's indexes
+        SOP,  // sum of products
+        POS   // product of sums
+    };
 
     Parser();
 
     void parse(std::string &str);
     void parse(std::istream &is);
 
-    std::ostream &printFce(std::ostream &os, PrintForm form, Formula *f = 0);
-    std::ostream &printTerm(std::ostream &os, Term &term);
+    std::string termToString(Term &term, PrintForm form = PROD);
+    std::string formulaToString(PrintForm form = SUM, Formula *formula = 0);
 
 private:
     Kernel *kernel;

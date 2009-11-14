@@ -1,26 +1,28 @@
 # TODO file
 
-# CODE -------------------------------------------------
-
-termtree.h, termtree.cpp
-	- comleting, test
-
-termscontainer.cpp
-	TermsContainer::getTermsIdx - Term ZERO
-
-formula.cpp
-	constructors
-	Formula::toString(bool idx_form) - rewrite - compatibility with parse
-	Formula::checkVars - variable unique
-	
-term.h
-	OutputValue -> standalone class
-	
-parser.cpp
-	product of sums
-	
 	
 # FEATURES ---------------------------------------------
 
+processing products of sums
+kernel events
 more formulas
 parsing all file (no every row standalone)
+
+
+# CODE -------------------------------------------------
+
+parser.cpp
+	exception handling in parse function
+
+formula.cpp	
+	Formula(FormulaSpec *spec, FormulaDecl *decl) - products
+	setVars - varibles count over and under
+
+termscontainer.cpp
+	TermsContainer::getTermsIdx - Term ZERO
+	more containers - list, ternary tree, terms tree
+
+	
+termtree.h, termtree.cpp
+	- comleting, test
+

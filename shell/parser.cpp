@@ -2,9 +2,9 @@
 #include "lexicalanalyzer.h"
 #include "shellexc.h"
 
-#include "kernel.h"
-#include "formula.h"
-#include "term.h"
+#include "kernel/kernel.h"
+#include "kernel/formula.h"
+#include "kernel/term.h"
 
 #include <string>
 #include <istream>
@@ -18,6 +18,28 @@ Parser::Parser()
 {
     kernel = Kernel::instance();
 }
+
+string termToString(Term &term, PrintForm form)
+{
+
+}
+
+string Parser::formulaToString(PrintForm form, Formula *f)
+{
+    if (!f)
+        f = kernel->getFormula();
+
+    switch (form) {
+    case SUM:
+
+    case PROD:
+
+    case SOP:
+
+    case POS:
+    }
+}
+
 
 void parse(std::string & str)
 {
@@ -49,7 +71,7 @@ void Parser::program() throw(ShellExc)
 
 }
 
-void Parser::command() throw(CommandExc)
+void Parser::command() throw(ShellExc)
 {
     switch (lex.getCommand()) {
     case LexicalAnalyzer::MINIMIZE:
@@ -76,11 +98,22 @@ void Parser::fceDef() throw(ShellExc)
 
 FormulaDecl *Parser::fceDecl() throw(ShellExc)
 {
-    FormulaDecl *decl = new FormulaDecl;
-    decl->name = fceName();
+    char name = fceName();
     cmpre(LexicalAnalyzer::LPAR);
-    decl->vars = fceVars();
-    cmpre(LexicalAnalyzer::RPAR);
+    list<char> *l = fceVars();
+    try {
+        cmpre(LexicalAnalyzer::RPAR);
+    }
+    catch (ShellExc &exc) {
+        delete l;
+        throw exc;
+    }
+
+    vector<char> *v = new vector<char>(l->size());
+    copy(l->begin(), l->end(), v->begin());
+    delete l;
+
+    return new FormulaDecl(v, name);
 }
 
 char Parser::fceName() throw(ShellExc)
@@ -132,8 +165,15 @@ FormulaSpec *Parser::sum() throw(ShellExc)
     readToken(); // sum
 
     FormulaSpec *spec = new FormulaSpec;
-    spec->f = mTerms();
-    spec->d = sumRem();
+    try {
+        spec->f = mTerms();
+        spec->d = sumRem();
+    }
+    catch (ShellExc &exc) {
+        delete spec->f;
+        delete spec;
+        throw exc;
+    }
 }
 
 set<int> *Parser::sumRem() throw(ShellExc)
@@ -151,8 +191,15 @@ FormulaSpec *Parser::prod() throw(ShellExc)
     readToken(); // prod
 
     FormulaSpec *spec = new FormulaSpec;
-    spec->r = mTerms();
-    spec->d = prodRem();
+    try {
+        spec->r = mTerms();
+        spec->d = prodRem();
+    }
+    catch (ShellExc &exc) {
+        delete spec->r;
+        delete spec;
+        throw exc;
+    }
 }
 
 set<int> *Parser::prodRem() throw(ShellExc)
@@ -189,7 +236,13 @@ set<int> *Parser::fceIndexes() throw(ShellExc)
     cmpe(LexicalAnalyzer::NUMBER);
     set<int> *s = fceIndexesRem();
     s->insert(lex.getNumber());
-    cmpre(LexicalAnalyzer::RPAR);
+    try {
+        cmpre(LexicalAnalyzer::RPAR);
+    }
+    catch (ShellExc &exc) {
+        delete s;
+        throw exc;
+    }
     return s;
 }
 

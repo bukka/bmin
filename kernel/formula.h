@@ -35,12 +35,19 @@
 #include <exception>
 #include <stdexcept>
 
+class OutputValue;
+
+struct FormulaDef
+{
+    FormulaDecl decl;
+    FormulaSpec spec;
+};
 
 struct FormulaDecl
 {
     FormulaDecl(const std::vector<char> *v = 0, char n = 'f') : vars(v), name(n) {}
     ~FormulaDecl() { delete vars; }
-    const std::list<char> *vars;
+    std::vector<char> *vars;
     char name;
 };
 
@@ -54,33 +61,42 @@ struct FormulaSpec
     std::set<int> *r; // zero
 };
 
-
 // class represented logical formula
 class Formula
 {
 public:
-    static void checkVars(const vector<char> &v) throw(InvalidVarsExc);
+    enum Form { SOP, POS };
+
+    static const char DEFAULT_NAME = 'f';
+    static const Form DEFAULT_FORM = SOP;
+    static const char DEFAULT_FIRST_VAR = 'a';
 
     // Constructors
-    Formula::Formula(std::vector<Term> &t, char name = 'f', std::vector<char> *v = 0)
-            throw(InvalidTermExc, NoTermExc);
-    Formula::Formula(Term *t, int n, char name = 'f', std::vector<char> *v = 0)
-            throw(InvalidTermExc, NoTermExc);
-    Formula::Formula(FormulaSpec *spec, FormulaDecl *decl)
-            throw(InvalidTermExc, NoTermExc);
+    Formula(int vc, Term *t = 0, int n = 0,
+            std::vector<char> *v = 0, char fn = DEFAULT_NAME, Form f = DEFAULT_FORM)
+            throw(InvalidTermExc);
+    Formula(int vc, std::vector<Term> &t,
+            std::vector<char> *v = 0, char fn = DEFAULT_NAME, Form f = DEFAULT_FORM)
+            throw(InvalidTermExc);
+    Formula(FormulaSpec *spec, FormulaDecl *decl) throw(InvalidTermExc);
+    // Copy Construtor
+    Formula(const Formula &f, bool toMinterms = false);
+
+    // set definitions
+    void setDef(FormulaDef &def, bool sum = true);
 
     // adds new term to formula
     void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
     // removes term with idx
     void removeTerm(int idx) throw(InvalidIndexExc);
     // finds out whether term t is in TermsContainer
-    inline bool hasTerm(const Term &t) { return terms->hasTerm(t); }
+    inline bool hasTerm(const Term &t) { return terms.hasTerm(t); }
     // returns value of term with idx
-    inline Term::OutputValue getTermValue(int idx) { terms->getTermValue(idx); }
+    inline OutputValue getTermValue(int idx) { terms.getTermValue(idx); }
     // returns terms id with val from original terms
-    inline std::vector<int> getTermsIdx(Term::OutputValue val) { terms->getTermsIdx(val); }
+    inline std::vector<int> getTermsIdx(OutputValue &val) { terms.getTermsIdx(val); }
     // returns actual minterms
-    inline std::vector<Term> getMinterms() { terms->getMinterms(); }
+    inline std::vector<Term> getMinterms() { terms.getMinterms(); }
     // returns number of terms
     inline int getSize() { return terms.getSize(); }
 
@@ -89,44 +105,48 @@ public:
 
     // equality
     bool operator==(const Formula &f) { return terms == f.terms; }
-    bool equal(const Formula &f, inclVars = true);
+    bool equal(const Formula &f, bool inclVars = true);
 
 
     // name setter
-    inline void setName(char n) { name = n; }
+    inline void setName(char fn) { name = fn; }
     // name getter
     inline char getName() { return name; }
+    // form setter
+    inline void setForm(Form f) { form = f; }
+    // form getter
+    inline void getForm() { return form; }
 
     // set default names for n variables
     void setVars(int n);
     // sets variables name by array of characters v
-    void setVars(char * v, int n) throw(InvalidVarsExc);
+    void setVars(char * v, int n);
     // sets variables name by vector v
-    void setVars(std::vector<char> &v) throw(InvalidVarsExc);
+    void setVars(std::vector<char> &v, int vs = 0);
     // returns variables
     std::vector<char> getVars() { return vars; }
     // returns number of varibles
-    inline int getVarsCount() { return varsSize; }
+    inline int getVarsCount() { return varsCount; }
 
     // friend function to place term to ostream (to debugging)
     friend std::ostream &operator<<(std::ostream &os, Formula &t);
 
     friend class MinimizingAlgorithm;
 
-
 private:
-    void init();
+    void init(int vs, vector<char> *v, char fn, Form f);
     inline void minimized(bool m) { minimized = m; }
 
-
-    TermsContainer *terms;
-
+    // container for terms
+    TermsContainer terms;
     // formula name
     char name;
+    // formula visible form
+    Form form;
     // names of variables
     std::vector<char> vars;
 
-    int varsSize;
+    int varsCount;
     bool minimized;
     int maxIdx;
 };

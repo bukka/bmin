@@ -26,10 +26,10 @@
 #include <vector>
 
 #include "modulewidget.h"
-#include "term.h"
 
 class MapCell;
 class Formula;
+class OutputValue;
 
 class MapWidget : public ModuleWidget
 {
@@ -48,7 +48,7 @@ public:
     qreal getCellBorder() { return cellBorder; }
 
 signals:
-    void mapChanged(int idx, tval value);
+    void mapChanged(int idx, OutputValue &value);
 
 public slots:
     void invalidateMap();

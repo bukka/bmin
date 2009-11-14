@@ -20,6 +20,15 @@
  * 02111-1307 USA.
  */
 
+#include "cubegldrawer.h"
+#include "cubeglconf.h"
+
+#include "kernel/formula.h"
+#include "kernel/term.h"
+#include "kernel/outputvalue.h"
+
+#include <math.h>
+
 #include <QWidget>
 #include <QColor>
 #include <QImage>
@@ -34,14 +43,6 @@
 #include <QGLWidget>
 #include <QGLFormat>
 #include <QDebug>
-
-#include <math.h>
-
-#include "cubegldrawer.h"
-#include "cubeglconf.h"
-#include "formula.h"
-#include "term.h"
-#include "cubewidget.h"
 
 static inline void setArray(GLfloat *a,
     GLfloat r, GLfloat g, GLfloat b, GLfloat w = 1.0f)
@@ -707,15 +708,15 @@ void CubeGLDrawer::drawSphere(int idx, GLenum mode,
     if (actualCube < 0)
         diffuse = zeroDiffuse;
     else {
-        tval value = formula->getTermValue(idx);
-        switch (value) {
-            case Term::zero:
+        OutputValue value = formula->getTermValue(idx);
+        switch (value.getValue()) {
+            case OutputValue::ZERO:
                 diffuse = zeroDiffuse;
                 break;
-            case Term::one:
+            case OutputValue::ONE:
                 diffuse = oneDiffuse;
                 break;
-            case Term::dont_care:
+            case OutputValue::DC:
                 diffuse = dcDiffuse;
                 break;
             default:
@@ -1605,8 +1606,7 @@ void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
 
     hits = glRenderMode(GL_RENDER);
     if (hits)
-        emit cubeChanged(sBuff[3],
-            Term::getNextValue(formula->getTermValue(sBuff[3])));
+        emit cubeChanged(sBuff[3], OutputValue::getNextValue(formula->getTermValue(sBuff[3])));
 
 }
 

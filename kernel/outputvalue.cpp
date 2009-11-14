@@ -1,8 +1,8 @@
-#include "literalvalue.h"
+#include "outputvalue.h"
 
 #include <string>
 
-LiteralValue LiteralValue::getNextValue() const
+OutputValue OutputValue::getNextValue() const
 {
     switch (value) {
     case ZERO:
@@ -14,14 +14,14 @@ LiteralValue LiteralValue::getNextValue() const
     }
 }
 
-std::string LiteralValue::toString() const
+std::string OutputValue::toString() const
 {
     switch (value) {
     case ZERO:
         return "0";
     case ONE:
         return "1";
-    default: // missing value
-        return "-";
+    default: // dont care value
+        return "X";
     }
 }

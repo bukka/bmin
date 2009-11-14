@@ -1,15 +1,21 @@
 #ifndef MINIMIZINGALGORITHM_H
 #define MINIMIZINGALGORITHM_H
 
+class Formula;
+
 class MinimizingAlgorithm
 {
 protected:
-    Formula *formula;
+    Formula *of; // original formula
+    Formula *mf; // minimized formula
 
 public:
-    MinimizingAlgorithm(Formula *f);
+    MinimizingAlgorithm() : of(0), mf(0) {}
 
-    void minimize() = 0;
+    Formula *minimize(Formula *) = 0;
+
+    inline Formula *getMinimizedFormula() { return mf; }
+    inline Formula *getOriginalFormula() { return of; }
 };
 
 #endif // MINIMIZINGALGORITHM_H

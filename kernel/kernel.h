@@ -15,6 +15,11 @@ public:
     void setFormula(Formula *f);
     void deleteFomula();
     void minimizeFormula();
+    inline bool hasFormula() { return formula == 0; }
+
+    // hack - will be changed for events
+    bool isFormulaChanged();
+    bool formulaChanged;
 
     void exit();
 private:

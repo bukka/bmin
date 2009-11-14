@@ -20,12 +20,13 @@
  * 02111-1307 USA.
  */
 
-
-#include "formula.h"
-#include "term.h"
 #include "mapwidget.h"
 #include "mapcell.h"
 #include "guimanager.h"
+
+#include "kernel/formula.h"
+#include "kernel/term.h"
+#include "kernel/outputvalue.h"
 
 #include <QPalette>
 #include <QColor>
@@ -110,8 +111,8 @@ MapWidget::MapWidget(const QString &name, int pos)
 
     GUIManager *gm = GUIManager::instance();
     // changing term's value in map
-    connect(this, SIGNAL(mapChanged(int, tval)),
-        gm, SLOT(setTerm(int, tval)));
+    connect(this, SIGNAL(mapChanged(int, OutputValue &)),
+        gm, SLOT(setTerm(int, OutputValue &)));
     // changing formula in parent
     connect(gm, SIGNAL(formulaChanged(Formula *)),
         this, SLOT(setMapData(Formula *)));
@@ -334,21 +335,21 @@ void MapWidget::mousePressEvent(QMouseEvent *event)
     cells[cellIdx]->setValue(newValue);
     updateMap();
 
-    tval termValue;
+    OutputValue outVal;
     switch (newValue) {
         case MapCell::ZERO:
-            termValue = Term::zero;
+            outVal = OutputValue::ZERO;
             break;
         case MapCell::ONE:
-            termValue = Term::one;
+            outVal = OutputValue::ONE;
             break;
         case MapCell::DONT_CARE:
-            termValue = Term::dont_care;
+            outVal = OutputValue::DC;
             break;
         default:
             return;
     }
-    emit mapChanged(idx,termValue);
+    emit mapChanged(idx, outVal);
 
 }
 
@@ -409,8 +410,8 @@ void MapWidget::setMapData(Formula *formula)
     else
         setAllValues(zero);
 
-    setValues(formula->getTermsIdx(Term::one),MapCell::ONE,size);
-    setValues(formula->getTermsIdx(Term::dont_care), MapCell::DONT_CARE, size);
+    setValues(formula->getTermsIdx(OutputValue::ONE),MapCell::ONE,size);
+    setValues(formula->getTermsIdx(OutputValue::DC), MapCell::DONT_CARE, size);
 
 
     updateMap();

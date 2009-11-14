@@ -24,6 +24,7 @@ void Kernel::destroy()
 Kernel::Kernel()
 {
     formula = 0;
+    formulaChanged = false; // hack
 }
 
 Kernel::~Kernel()
@@ -39,6 +40,15 @@ Formula *Kernel::getFormula()
 void Kernel::setFormula(Formula *f)
 {
     formula = f;
+    formulaChanged = true; // hack
+}
+
+// hack
+bool Kernel::isFormulaChanged()
+{
+    changed = formulaChanged;
+    formulaChanged = false;
+    return changed;
 }
 
 void Kernel::deleteFomula()
@@ -47,3 +57,8 @@ void Kernel::deleteFomula()
     formula = 0;
 }
 
+// for events
+void Kernel::exit()
+{
+
+}

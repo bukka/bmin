@@ -48,9 +48,3 @@ const char *InvalidIndexExc::what() const throw()
         oss << " (it's too big)";
     return oss.str().c_str();
 }
-
-// statement of NoTermExc
-const char *NoTermExc::what() const throw()
-{
-    return "No terms were added.";
-}

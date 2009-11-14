@@ -89,7 +89,7 @@ int Term::valuesCount(int value) const
 // returns the new term combined (only by difference of one varible)
 // with *this and t, for example 0010 & 0000 => 00X0
 // note that it's expected that term size are the same
-Term * Term::combine(const Term & t) const
+Term *Term::combine(const Term & t) const
 {
     term_t diff_mask, pos;
     int i;
@@ -110,7 +110,7 @@ Term * Term::combine(const Term & t) const
     }
 
     // if it's possible to combine the terms, return new Term
-    return new Term(liters, diff_mask | missing, size);
+    return new Term(liters, diff_mask | missing, size, dc);
 }
 
 // replace first missing value by zero and one

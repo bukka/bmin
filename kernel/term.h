@@ -34,13 +34,12 @@ typedef int term_t;
 // maximum number of literals ( -1 means sign in int
 #define TERM_MAX_SIZE (sizeof (term_t) * 8 - 1)
 
+class LiteralValue;
+
 // Class represented product term
 class Term
 {
 public:
-    // possible output value of term
-    enum OutputValue { ZERO, ONE, DC };
-
     // constructor - the term of size s with all variables setted to missing value
     Term(int s = 0, bool isDC = false);
     // constructor - makes the variables array with size s by index idx
@@ -82,8 +81,6 @@ public:
 
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
-
-    friend class Formula;
 
 private:
     term_t liters;     // literals value

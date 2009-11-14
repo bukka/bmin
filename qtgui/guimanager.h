@@ -27,6 +27,8 @@
 
 class Kernel;
 class Formula;
+class OutputValue;
+class Parser;
 
 class QString;
 
@@ -54,8 +56,8 @@ private:
 
     // kernel
     Kernel *m_kernel;
-    // boolean function
-    Formula *m_formula;
+    // parser
+    Parser m_parser;
     // string with actual formula
     QString m_actualFce;
     // whether formula is correct
@@ -69,7 +71,7 @@ public slots:
     // updating formula - the same like setFormule and fceChanged is emitted
     void updateFormula(const QString &);
     // changes term in formula
-    void setTerm(int idx, tval value);
+    void setTerm(int idx, OutputValue &);
 
 signals:
     // emitted when it is essential to change formula in the text field

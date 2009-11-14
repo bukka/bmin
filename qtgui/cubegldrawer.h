@@ -31,7 +31,6 @@
 
 #include <vector>
 
-#include "term.h"
 #include "cubeglconf.h"
 
 class QImage;
@@ -45,6 +44,7 @@ class QAction;
 class QActionGroup;
 class QString;
 class Formula;
+class OutputValue;
 
 // widget class for opengl cube
 class CubeGLDrawer : public QGLWidget, public CubeGLConf
@@ -64,7 +64,7 @@ signals:
     // emmited when key M is pushed - minimizing
     void minRequested();
     // emited when it is clicked on sphere
-    void cubeChanged(int idx, tval value);
+    void cubeChanged(int idx, OutputValue &value);
     // emmited when cube is focused
     void cubeFocused(bool cubeFocus);
 

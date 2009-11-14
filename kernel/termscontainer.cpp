@@ -1,6 +1,7 @@
 #include "termscontainer.h"
 #include "term.h"
 #include "literalvalue.h"
+#include "outputvalue.h"
 
 #include <vector>
 
@@ -30,7 +31,7 @@ std::vector<Term> TermsContainer::getMinterms()
 {
     vector<Term> minterms;
     for (vector<Term>::iterator iter = termsVector.begin(); iter != termsVector.end(); iter++)
-        expandTerm(minterms,*iter);
+        expandTerm(minterms, *iter);
 
     return minterms;
 }
@@ -77,18 +78,17 @@ bool TermsContainer::hasTerm(const Term & t)
 }
 
 
-std::vector<int> TermsContainer::getTermsIdx(Term::OutputValue val)
+std::vector<int> TermsContainer::getTermsIdx(OutputValue &val)
 {
     vector<int> values;
 
     // TODO - all terms with ZERO
-    if (val == Term::ZERO) {
+    if (val.isZero()) {
         return values; // termporary
     }
     else {
-        bool isDC = (val == Term::DC);
         for (unsigned i = 0; i < termsVector.size(); i++) {
-            if (!(is_dc ^ termsVector[i].isDC()))
+            if (!(val.isDC() ^ termsVector[i].isDC()))
                 values.push_back(termsVector[i].getIdx());
         }
     }
@@ -97,17 +97,17 @@ std::vector<int> TermsContainer::getTermsIdx(Term::OutputValue val)
 
 
 
-Term::OutputValue TermsContainer::getTermValue(int idx)
+OutputValue TermsContainer::getTermValue(int idx)
 {
     for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
         if (idx == (*it).getIdx()) {
             if ((*it).isDC())
-                return Term::DC;
+                return OutputValue::DC;
             else
-                return Term::ONE;
+                return OutputValue::ONE;
         }
     }
-    return Term::ZERO;
+    return OutputValue::ZERO;
 }
 
 void TermsContainer::clear()
@@ -125,4 +125,21 @@ bool TermsContainer::operator==(const TermsContainer & f)
         if (find(f.termsVector.begin(),f.termsVector.end(),*it) == f.termsVector.end())
             return false;
     return true;
+}
+
+void TermsContainer::itInit()
+{
+    itPos = 0;
+}
+
+
+bool TermsContainer::itNext()
+{
+    itPos++;
+    return termsVector != itPos;
+}
+
+Term &TermsContainer::itGet()
+{
+    return termsVector[itPos];
 }

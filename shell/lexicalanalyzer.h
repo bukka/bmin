@@ -1,10 +1,10 @@
 #ifndef LEXICALANALYZER_H
 #define LEXICALANALYZER_H
 
-#include "shellexc.h"
-
 #include <istream>
 #include <string>
+
+class ShellExc;
 
 class LexicalAnalyzer
 {
@@ -54,8 +54,8 @@ public:
 
     LexicalAnalyzer();
 
-    void analyze(std::string & str);
-    void analyze(std::istream & s);
+    void analyze(std::string &str);
+    void analyze(std::istream &s);
 
     Token readToken() throw(ShellExc);
     inline Token getToken() const { return token; }
@@ -80,8 +80,8 @@ private:
 
     InputType readInput();
     // case insensitive comparing
-    bool strcmpi(const std::string & str, const char *cmd);
-    bool isCommand(const std::string & str);
+    bool strcmpi(const std::string &str, const char *cmd);
+    bool isCommand(const std::string &str);
 
     bool readNext;
 
