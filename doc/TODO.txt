@@ -4,6 +4,7 @@
 # FEATURES ---------------------------------------------
 
 processing products of sums
+create iterator for formula terms
 kernel events
 more formulas
 parsing all file (no every row standalone)
@@ -13,13 +14,15 @@ parsing all file (no every row standalone)
 
 parser.cpp
 	exception handling in parse function
-
+			
 formula.cpp	
 	Formula(FormulaSpec *spec, FormulaDecl *decl) - products
 	setVars - varibles count over and under
+	iterator
 
 termscontainer.cpp
 	TermsContainer::getTermsIdx - Term ZERO
+	iterator
 	more containers - list, ternary tree, terms tree
 
 	

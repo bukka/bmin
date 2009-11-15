@@ -1,5 +1,5 @@
 #include "kernel.h"
-#include "parser.h"
+#include "quinemccluskey.h"
 
 #include <string>
 
@@ -23,24 +23,56 @@ void Kernel::destroy()
 
 Kernel::Kernel()
 {
-    formula = 0;
+    formula = minimizedFormula = 0;
     formulaChanged = false; // hack
 }
 
 Kernel::~Kernel()
 {
     delete formula;
+    delete minimizedFormula;
 }
 
-Formula *Kernel::getFormula()
+inline Formula *Kernel::getFormula()
 {
     return formula;
 }
 
+inline Formula *Kernel::getMinimizedFormula()
+{
+    return minimizedFormula;
+}
+
+inline bool Kernel::hasFormula()
+{
+    return formula == 0;
+}
+
+inline bool Kernel::hasMinimizedFormula()
+{
+    return minimizedFormula == 0;
+}
+
+
 void Kernel::setFormula(Formula *f)
 {
     formula = f;
+    if (minimizedFormula) {
+        delete minimizedFormula;
+        minimizedFormula = 0;
+    }
     formulaChanged = true; // hack
+}
+
+void Kernel::minimizeFormula()
+{
+    minimizedFormula = qm.minimize(formula);
+}
+
+void Kernel::deleteFomula()
+{
+    delete formula;
+    formula = 0;
 }
 
 // hack
@@ -49,12 +81,6 @@ bool Kernel::isFormulaChanged()
     changed = formulaChanged;
     formulaChanged = false;
     return changed;
-}
-
-void Kernel::deleteFomula()
-{
-    delete formula;
-    formula = 0;
 }
 
 // for events

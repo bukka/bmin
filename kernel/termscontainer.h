@@ -19,7 +19,9 @@ public:
     int getSize();
 
     bool pushTerm(int idx, bool isDC = false);
+    bool pushTerm(const Term &t);
     bool removeTerm(int idx);
+    bool removeTerm(const Term &t);
     bool hasTerm(const Term &t);
 
     /* returns terms id with val from original terms */

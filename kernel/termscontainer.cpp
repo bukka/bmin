@@ -58,6 +58,12 @@ bool TermsContainer::pushTerm(int idx, bool isDC)
     return true;
 }
 
+bool TermsContainer::pushTerm(const Term &t)
+{
+    if (find(termsVector.begin(), termsVector.end(), t) == termsVector.end())
+        termsVector.push_back(t);
+}
+
 bool TermsContainer::removeTerm(int idx)
 {
     for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
@@ -70,12 +76,21 @@ bool TermsContainer::removeTerm(int idx)
     return false;
 }
 
+bool TermsContainer::removeTerm(const Term &t)
+{
+    vector<Term>::iterator it;
+    if ((it = find(termsVector.begin(), termsVector.end(), t)) != termsVector.end())
+        termsVector.erase(it);
+}
+
 bool TermsContainer::hasTerm(const Term & t)
 {
     if (termsVector.size() == 0 || termsVector[0].getSize() != t.getSize())
         return false;
     return find(termsVector.begin(), termsVector.end(),t) != termsVector.end();
 }
+
+
 
 
 std::vector<int> TermsContainer::getTermsIdx(OutputValue &val)

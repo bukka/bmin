@@ -115,7 +115,7 @@ void GUIManager::minimizeFormula()
     }
 
     m_kernel->minimizeFormula();
-    emit minFceChanged(QString::fromStdString(m_parser.formulaToString(Parser::VARS)));
+    emit minFceChanged(QString::fromStdString(m_parser.formulaToString(Parser::SOP)));
     emit formulaMinimized();
 }
 

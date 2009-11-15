@@ -6,7 +6,7 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp
-OTHER_FILES += license-header.txt
+OTHER_FILES += license-header.txt license.txt
 
 include(kernel/kernel.pri)
 include(shell/shell.pri)

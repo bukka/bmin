@@ -5,9 +5,11 @@
 #include "kernel/kernel.h"
 #include "kernel/formula.h"
 #include "kernel/term.h"
+#include "kernel/outputvalue.h"
+#include "kernel/literalvalue.h"
 
 #include <string>
-#include <istream>
+#include <iostream>
 #include <sstream>
 #include <list>
 #include <set>
@@ -19,25 +21,77 @@ Parser::Parser()
     kernel = Kernel::instance();
 }
 
-string termToString(Term &term, PrintForm form)
+string termToString(Term &term, vector<char> &vars, PrintForm form)
 {
+    ostringstream oss;
+    if (form == PROD || form == SOP) {
+        for (int i = 0; i < term.getSize(); i++) {
+            if (!term[i].isMissing()) {
+                oss << vars[i];
+                if (term[i].isZero())
+                    oss << '\''; // negation
+            }
+        }
+    }
+    // TODO prod
 
+    return oss.str();
 }
 
 string Parser::formulaToString(PrintForm form, Formula *f)
 {
-    if (!f)
-        f = kernel->getFormula();
+    if (!f) {
+        f = (form == SUM || form == PROD)?
+            kernel->getFormula(): kernel->getMinimizedFormula();
+    }
+
+    ostringstream oss;
+    // variables
+    oss << f->getName() << LexicalAnalyzer::SYM_LPAR;
+    vector<char> vars = f->getVars();
+    for (unsigned i = 0; i < vars.size(); i++) {
+        if (i != 0)
+            oss << LexicalAnalyzer::SYM_COMMA;
+        oss << vars[i];
+    }
+    oss << LexicalAnalyzer::SYM_RPAR << ' ' << LexicalAnalyzer::SYM_ASSIGN;
 
     switch (form) {
     case SUM:
-
+        oss << ' ' << LexicalAnalyzer::CMD_SUM << ' ';
+        oss << LexicalAnalyzer::FCE_MINTERM << LexicalAnalyzer::SYM_LPAR;
+        vector<int> idx = f->getTermsIdx(OutputValue::ONE);
+        for (unsigned i = 0; i < idx.size(); i++) {
+            if (i != 0)
+                oss << LexicalAnalyzer::SYM_COMMA;
+            oss << idx[i];
+        }
+        oss << LexicalAnalyzer::SYM_RPAR;
+        idx =  f->getTermsIdx(OutputValue::DC);
+        if (!idx.empty()) {
+            oss << ' ' << LexicalAnalyzer::PLUS << ' ';
+            oss << LexicalAnalyzer::CMD_SUM << ' ';
+            oss << LexicalAnalyzer::FCE_DC << LexicalAnalyzer::SYM_LPAR;
+            for (unsigned i = 0; i < idx.size(); i++) {
+                if (i != 0)
+                    oss << LexicalAnalyzer::SYM_COMMA;
+                oss << idx[i];
+            }
+            oss << LexicalAnalyzer::SYM_RPAR;
+        }
+        break;
     case PROD:
-
+        // TODO
     case SOP:
-
+        f->termsItInit();
+        while (f->termsItNext())
+            oss << ' ' << termToString(f->termsItGet(), vars, PROD);
+        break;
     case POS:
+        // TODO
     }
+
+    return oss.str();
 }
 
 
@@ -54,7 +108,7 @@ void parse(std::istream & is)
         program();
     }
     catch (ShellExc & exc) {
-
+        cout << exc.what() << endl;
     }
 }
 
@@ -215,7 +269,7 @@ set<int> *Parser::prodRem() throw(ShellExc)
 set<int> *Parser::mTerms() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
-    if (lex.getLetter() != 'm')
+    if (lex.getLetter() != LexicalAnalyzer::FCE_MINTERM)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken();
     return fceIndexes();
@@ -224,7 +278,7 @@ set<int> *Parser::mTerms() throw(ShellExc)
 set<int> *Parser::dTerms() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
-    if (lex.getLetter() != 'd')
+    if (lex.getLetter() != LexicalAnalyzer::FCE_DC)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken();
     return fceIndexes();

@@ -25,7 +25,7 @@
 
 
 #include "term.h"
-#include "exceptions.h"
+#include "kernelexc.h"
 
 #include <iostream>
 #include <string>

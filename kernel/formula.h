@@ -37,12 +37,6 @@
 
 class OutputValue;
 
-struct FormulaDef
-{
-    FormulaDecl decl;
-    FormulaSpec spec;
-};
-
 struct FormulaDecl
 {
     FormulaDecl(const std::vector<char> *v = 0, char n = 'f') : vars(v), name(n) {}
@@ -82,9 +76,6 @@ public:
     // Copy Construtor
     Formula(const Formula &f, bool toMinterms = false);
 
-    // set definitions
-    void setDef(FormulaDef &def, bool sum = true);
-
     // adds new term to formula
     void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
     // removes term with idx
@@ -99,6 +90,10 @@ public:
     inline std::vector<Term> getMinterms() { terms.getMinterms(); }
     // returns number of terms
     inline int getSize() { return terms.getSize(); }
+
+    inline void termsItInit() { terms.itInit(); }
+    inline bool termsItNext() { return terms.itNext; }
+    inline Term &termsItGet() { return terms.itGet; }
 
     // whether formula is minimized
     inline bool isMinimized() { return minimized; }

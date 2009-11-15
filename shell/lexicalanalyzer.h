@@ -47,6 +47,9 @@ public:
     static const char SYM_ASSIGN       = '=';
     static const char SYM_COMMA        = ',';
 
+    static const char FCE_MINTERM      = 'm';
+    static const char FCE_DC           = 'd';
+
     static const char * const CMD_SUM      = "sum";
     static const char * const CMD_PROD     = "prod";
     static const char * const CMD_MINIMIZE = "minimize";

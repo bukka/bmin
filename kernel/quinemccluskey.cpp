@@ -22,6 +22,8 @@ Formula *QuineMcCluskey::minimize(Formula *f)
     
     findPrimeImplicants();
     findFinalImplicants();
+
+    return mf;
 }
 
 
@@ -34,8 +36,7 @@ void QuineMcCluskey::findPrimeImplicants()
     int dontCares, ones, varsCount;
     Term *pterm, *combined;
     vector<Term *> *left, *right, *out;
-    vector<Term *>::iterator lit, rit;
-    vector<Term>::iterator it;
+    vector<Term *>::iterator lit, rit, it;
 
     varsCount = of->varsCount;
 
@@ -76,17 +77,9 @@ void QuineMcCluskey::findPrimeImplicants()
                             //if (debug) {}
                         }
 
-
-                        // HERE
-                        // if term certained by left iterator (lit) is in terms
-                        if ((it = find(terms.begin(),terms.end(),**lit)) != terms.end())
-                            terms.erase(it);
-                        // if term certained by right iterator (rit) is in terms
-                        if ((it = find(terms.begin(),terms.end(),**rit)) != terms.end())
-                            terms.erase(it);
-                        // if combined isn't in terms
-                        if ((it = find(terms.begin(),terms.end(),*combined)) == terms.end())
-                            terms.push_back(*combined);
+                        mf->terms.removeTerm(**lit);
+                        mf->terms.removeTerm(**rit);
+                        mf->terms.pushTerm(*combined);
                     }
                 }
             }
@@ -97,14 +90,11 @@ void QuineMcCluskey::findPrimeImplicants()
     //if (debug) {}
 
     // deletes all rows from table
-    for (int i = 0; i <= varsCount; i++)
-    {
+    for (int i = 0; i <= varsCount; i++) {
         // deletes all combined terms (dynamicly allocated)
-        if (i > 0)
-        {
-            for (int j = 0; j <= varsCount; j++)
-            {
-                for (vector<Term *>::iterator it = table[i][j].begin(); it != table[i][j].end(); it++)
+        if (i > 0) {
+            for (int j = 0; j <= varsCount; j++) {
+                for (it = table[i][j].begin(); it != table[i][j].end(); it++)
                     delete *it;
             }
         }
@@ -121,20 +111,19 @@ void QuineMcCluskey::findFinalImplicants()
     if (!(of && mf))
         return;
 
-    int impl, term, num_impls, num_terms;
+    int impl, term, implsCount, origTermsSize;
 
-    vector<Term> * orig_main_terms = copyMainTerms(original_terms);
+    vector<Term> * origOnesTerms = copyMainTerms(of->terms);
 
-    num_impls = terms.size();
-    num_terms = orig_main_terms->size();
+    implsCount = mf->terms.getSize();
+    origTermsSize = origOnesTerms->size();
 
     // table of covering
-    bool **table = new bool * [num_impls];
-    for (impl = 0; impl < num_impls; impl++)
-    {
-        table[impl] = new bool[num_terms];
-        for (term = 0; term < num_terms; term++)
-            table[impl][term] = terms[impl].implies(orig_main_terms->at(term));
+    bool **table = new bool *[implsCount];
+    for (impl = 0; impl < implsCount; impl++) {
+        table[impl] = new bool[origTermsSize];
+        for (term = 0; term < origTermsSize; term++)
+            table[impl][term] = terms[impl].implies(origOnesTerms->at(term));
     }
 
     /*if (debug)
@@ -147,24 +136,22 @@ void QuineMcCluskey::findFinalImplicants()
     // vector with final terms
     vector<Term> v;
     bool done = false;
-    while (!done)
-    {
+    while (!done) {
         // finds essential prime impicants
-        impl = extractEssentialImplicants(table,num_impls,num_terms);
+        impl = extractEssentialImplicants(table, implsCount, origTermsSize);
         if (impl != -1)
             v.push_back(terms[impl]);
-        else
-        {
-            impl = extractLargestImplicants(table,num_impls,num_terms);
+        else {
+            impl = extractLargestImplicants(table, implsCount, origTermsSize);
             if (impl != -1)
                 v.push_back(terms[impl]);
             else
                 done = true;
         }
     }
-    terms = v;
+    mf->terms.setContainer(v);
 
-    delete orig_main_terms;
+    delete origOnesTerms;
 
     minimized = true;
 }
@@ -172,34 +159,34 @@ void QuineMcCluskey::findFinalImplicants()
 vector<Term> *QuineMcCluskey::copyMainTerms(vector<Term> &v) const
 {
     vector<Term> * pv = new vector<Term>;
-    for (unsigned i = 0; i < v.size(); i++)
+    for (unsigned i = 0; i < v.size(); i++) {
         if (!v[i].isDC())
             pv->push_back(v[i]);
+    }
     return pv;
 }
 
 int QuineMcCluskey::extractEssentialImplicants(bool **table, int nImpls, int nTerms) const
 {
-    int last_impl = -1, term, impl;
-    for (term = 0; term < n_terms; term++) // for each original minterm
-    {
-        for (impl = 0; impl < n_impls; impl++) // for each prime implicant
-        {
-            if (table[impl][term])
-            {
-                if (last_impl == -1)
-                    last_impl = impl;
-                else // more implicants
-                {
-                    last_impl = -1;
+    int lastImpl, term, impl;
+    lastImpl = -1;
+
+    // for each original minterm
+    for (term = 0; term < nTerms; term++) {
+        // for each prime implicant
+        for (impl = 0; impl < nImpls; impl++) {
+            if (table[impl][term]) {
+                if (lastImpl == -1)
+                    lastImpl = impl;
+                else { // more implicants
+                    lastImpl = -1;
                     break;
                 }
             }
         }
-        if (last_impl != -1)
-        {
-            extractImplicant(table,n_impls,n_terms,last_impl);
-            return last_impl;
+        if (lastImpl != -1) {
+            extractImplicant(table, nImpls, nTerms, lastImpl);
+            return lastImpl;
         }
     }
     return -1;
@@ -207,31 +194,35 @@ int QuineMcCluskey::extractEssentialImplicants(bool **table, int nImpls, int nTe
 
 int QuineMcCluskey::extractLargestImplicants(bool **table, int nImpls, int nTerms) const
 {
-    int max_terms, max_terms_impl, term_count, impl, term;
-    max_terms = 0;
-    max_terms_impl = -1;
-    for (impl = 0; impl < n_impls; impl++) // for each prime implicant
-    {
-        term_count = 0;
+    int maxTerms, maxTermsImpl, termsCount, impl, term;
+    maxTerms = 0;
+    maxTermsImpl = -1;
+    for (impl = 0; impl < nImpls; impl++) {
+        // for each prime implicant
+        termsCount = 0;
         // counts number of covered terms
-        for (term = 0; term < n_terms; term++)
+        for (term = 0; term < nTerms; term++) {
             if (table[impl][term])
-                term_count++;
-        if (max_terms < term_count)
-        {
-            max_terms = term_count;
-            max_terms_impl = impl;
+                termsCount++;
+        }
+        if (maxTerms < termsCount) {
+            maxTerms = termsCount;
+            maxTermsImpl = impl;
         }
     }
-    if (max_terms_impl != -1)
-        extractImplicant(table,n_impls,n_terms,max_terms_impl);
-    return max_terms_impl;
+
+    if (maxTermsImpl != -1)
+        extractImplicant(table, nImpls, nTerms, maxTermsImpl);
+
+    return maxTermsImpl;
 }
 
 void QuineMcCluskey::extractImplicant(bool **table, int nImpls, int nTerms, int impl) const
 {
-    for (int term = 0; term < n_terms; term++)
-        if (table[impl][term])
-            for (int impl2 = 0; impl2 < n_impls; impl2++)
+    for (int term = 0; term < nTerms; term++) {
+        if (table[impl][term]) {
+            for (int impl2 = 0; impl2 < nImpls; impl2++)
                 table[impl2][term] = false;
+        }
+    }
 }

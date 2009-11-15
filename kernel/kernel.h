@@ -4,6 +4,7 @@
 #include <string>
 
 class Formula;
+class QuineMcCluskey;
 
 class Kernel
 {
@@ -11,11 +12,13 @@ public:
     static Kernel *instance();
     static void destroy();
 
-    Formula *getFormula();
+    inline Formula *getFormula();
+    inline Formula *getMinimizedFormula();
+    inline bool hasFormula();
+    inline bool hasMinimizedFormula();
     void setFormula(Formula *f);
-    void deleteFomula();
     void minimizeFormula();
-    inline bool hasFormula() { return formula == 0; }
+    void deleteFomula();
 
     // hack - will be changed for events
     bool isFormulaChanged();
@@ -29,7 +32,10 @@ private:
      // static instance
     static Kernel *s_instance;
 
-    Formula *formula;
+    Formula *formula; // original formula
+    Formula *minFormula; // minimized formula
+
+    QuineMcCluskey qm;
 };
 
 #endif // KERNEL_H

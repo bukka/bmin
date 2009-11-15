@@ -6,6 +6,7 @@
 #include <istream>
 #include <string>
 #include <list>
+#include <vector>
 #include <set>
 
 class Kernel;
@@ -14,6 +15,8 @@ class FormulaDecl;
 class FormulaSpec;
 class Term;
 class ShellExc;
+class SyntaxExc;
+class CommandExc;
 
 class Parser
 {
@@ -30,7 +33,7 @@ public:
     void parse(std::string &str);
     void parse(std::istream &is);
 
-    std::string termToString(Term &term, PrintForm form = PROD);
+    std::string termToString(Term &term, vector<char> &vars, PrintForm form = PROD);
     std::string formulaToString(PrintForm form = SUM, Formula *formula = 0);
 
 private:
