@@ -53,15 +53,15 @@ void GUIManager::destroy()
 // constructor
 GUIManager::GUIManager()
 {
-    // set empty formula
-    m_formula = 0;
     m_kernel = Kernel::instance();
+    m_parser = new Parser;
 }
 
 // destructor
 GUIManager::~GUIManager()
 {
     Kernel::destroy();
+    delete m_parser;
 }
 
 // by changing formula
@@ -82,7 +82,7 @@ void GUIManager::setFormula(const QString &fce)
     }
     try {
         // make formula
-        m_parser.parse(fce.toStdString());
+        m_parser->parse(fce.toStdString());
         if (m_kernel->isFormulaChanged()) { // HACK -> events
             m_isCorrect = true;
             emit formulaChanged(m_kernel->getFormula());
@@ -115,7 +115,7 @@ void GUIManager::minimizeFormula()
     }
 
     m_kernel->minimizeFormula();
-    emit minFceChanged(QString::fromStdString(m_parser.formulaToString(Parser::SOP)));
+    emit minFceChanged(QString::fromStdString(m_parser->formulaToString(Parser::SOP)));
     emit formulaMinimized();
 }
 
@@ -132,8 +132,8 @@ void GUIManager::setTerm(int idx, OutputValue &value)
     else
         formula->pushTerm(idx, value.isDC());
 
-    m_actualFce = QString::fromStdString(m_parser.formulaToString(Parser::SUM));
+    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::SUM));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
-    emit formulaChanged(m_formula);
+    emit formulaChanged(m_kernel->getFormula());
 }

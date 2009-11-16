@@ -26,6 +26,9 @@
 #include "kernel/formula.h"
 #include "kernel/term.h"
 #include "kernel/outputvalue.h"
+#include "kernel/literalvalue.h"
+
+#include "shell/parser.h"
 
 #include <math.h>
 
@@ -193,14 +196,14 @@ CubeGLDrawer::~CubeGLDrawer()
 void CubeGLDrawer::setFormula(Formula *f)
 {
     stopMin();
-    if (f->getVarCount() > MAX_N) {
+    if (f->getVarsCount() > MAX_N) {
         actualCube = -1;
         paintedMsg = MSG_OVER;
     }
     else {
         makeCurrent();
         formula = f;
-        actualCube = f->getVarCount();
+        actualCube = f->getVarsCount();
         drawCube(actualCube);
         paintedMsg = MSG_NONE;
     }
@@ -212,7 +215,7 @@ void CubeGLDrawer::minimizeCube()
     if (!formula->isMinimized())
         return;
     makeCurrent();
-    terms = formula->getMinterms();
+    formula->getMinterms(terms);
     bindTermsTextures();
 
     if (isMin) {
@@ -273,10 +276,11 @@ void CubeGLDrawer::bindTermsTextures()
     GLuint texId;
     termsTextures.clear();
 
+    Parser parser;
     for (unsigned i = 0; i < terms.size(); i++) {
-        texId = bindTextTextures(QString::fromStdString(
-            terms[i].toString(formula->getVars())), getI(TERM_IMG_W),
-            getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
+        texId = bindTextTextures(
+                QString::fromStdString(parser.termToString(terms[i], formula->getVars())),
+                getI(TERM_IMG_W), getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
         termsTextures.push_back(texId);
     }
 }
@@ -641,11 +645,11 @@ void CubeGLDrawer::drawMin()
     GLdouble shift[3];
     GLdouble a = getD(CUBE_A) / 2.0;
     for (int i = 0; i < actualCube; i++) {
-        switch (terms[minPos][i]) {
-            case Term::one:
+        switch (terms[minPos][i].getValue()) {
+            case LiteralValue::ONE:
                 shift[i] = a;
                 break;
-            case Term::zero:
+            case LiteralValue::ZERO:
                 shift[i] = -a;
                 break;
             default:
@@ -655,8 +659,8 @@ void CubeGLDrawer::drawMin()
 
     glPushMatrix();
     if (actualCube == 3) {
-        if (ozSize == 2 && terms[minPos][2] != Term::dont_care) {
-            if (terms[minPos][0] != Term::dont_care) {
+        if (ozSize == 2 && !terms[minPos][2].isMissing()) {
+            if (!terms[minPos][0].isMissing()) {
                 glRotated(90.0, 0.0, 0.0, 1.0);
                 if (terms[minPos][2] == terms[minPos][0])
                     glTranslated(x, y - shift[0], -shift[2]);
@@ -672,11 +676,11 @@ void CubeGLDrawer::drawMin()
                     glTranslated(x, y - shift[2], -shift[1]);
             }
         }
-        else if (ozSize == 1 && terms[minPos][1] != Term::dont_care) {
+        else if (ozSize == 1 && !terms[minPos][1].isMissing()) {
             glRotated(90.0, 1.0, 0.0, 0.0);
             glTranslated(x, y, -shift[1]);
         }
-        else if (ozSize == 1 && terms[minPos][2] != Term::dont_care) {
+        else if (ozSize == 1 && !terms[minPos][2].isMissing()) {
             glRotated(90.0, 0.0, 1.0, 0.0);
             glTranslated(x, y, shift[2]);
         }
@@ -684,7 +688,7 @@ void CubeGLDrawer::drawMin()
             glTranslated(x + shift[2], y + shift[1], -shift[0]);
     }
     else if (actualCube == 2) {
-        if (ozSize == 1 && terms[minPos][1] != Term::dont_care) {
+        if (ozSize == 1 && !terms[minPos][1].isMissing()) {
             glRotated(90, 0.0, 0.0, 1.0);
             glTranslated(x + shift[0], y - shift[1], 0.0);
         }
@@ -1605,8 +1609,10 @@ void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
     glMatrixMode(GL_MODELVIEW);
 
     hits = glRenderMode(GL_RENDER);
-    if (hits)
-        emit cubeChanged(sBuff[3], OutputValue::getNextValue(formula->getTermValue(sBuff[3])));
+    if (hits) {
+        OutputValue value = OutputValue::getNextValue(formula->getTermValue(sBuff[3]));
+        emit cubeChanged(sBuff[3], value);
+    }
 
 }
 

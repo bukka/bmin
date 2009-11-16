@@ -1,6 +1,8 @@
 #ifndef SHELLEXC_H
 #define SHELLEXC_H
 
+#include <exception>
+
 class ShellExc : public std::exception
 {
 public:
@@ -53,18 +55,20 @@ protected:
 class CommandExc : public ShellExc
 {
 public:
-    enum Type { CONTEXT, UNKNOWN };
+    enum Reason { CONTEXT, UNKNOWN };
 
-    CommandExc(const char *cmd, Type t, int c, int l = 1)
-            : ShellExc(c, l), command(cmd), type(t) {}
+    CommandExc(const char *cmd, Reason r, int c, int l = 1)
+            : ShellExc(c, l), command(cmd), reason(r) {}
 
     virtual Type getType() { return COMMAND; }
 
     const char *what() const throw();
 
+    inline Reason getReason() { return reason; }
+
 protected:
     const char *command;
-    Type type;
+    Reason reason;
 };
 
 #endif // SHELLEXC_H

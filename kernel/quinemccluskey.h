@@ -6,6 +6,7 @@
 #include <vector>
 
 class Term;
+class TermsContainer;
 
 class QuineMcCluskey : public MinimizingAlgorithm
 {
@@ -31,7 +32,7 @@ private:
     void extractImplicant(bool **table, int nImpls, int nTerms, int impl) const;
 
     // duplicates vector with terms, but dont care terms are ignored
-    std::vector<Term> *copyMainTerms(std::vector<Term> &v) const;
+    std::vector<Term> *getTermsVector(TermsContainer *tc, bool onlyOnes = false) const;
 };
 
 #endif // QUINEMCCLUSKEY_H

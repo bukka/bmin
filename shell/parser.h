@@ -30,10 +30,9 @@ public:
 
     Parser();
 
-    void parse(std::string &str);
-    void parse(std::istream &is);
+    void parse(std::string str);
 
-    std::string termToString(Term &term, vector<char> &vars, PrintForm form = PROD);
+    std::string termToString(Term &term, std::vector<char> vars, PrintForm form = PROD);
     std::string formulaToString(PrintForm form = SUM, Formula *formula = 0);
 
 private:
@@ -43,13 +42,13 @@ private:
     void program() throw(ShellExc);
     void command() throw(ShellExc);
     void fceDef() throw(ShellExc);
-    const FormulaDecl *fceDecl() throw(ShellExc);
+    FormulaDecl *fceDecl() throw(ShellExc);
     char fceName() throw(ShellExc);
     std::list<char> *fceVars() throw(ShellExc);
     std::list<char> *fceVarsRem() throw(ShellExc);
     FormulaSpec *fceBody() throw(ShellExc);
     FormulaSpec *sum() throw(ShellExc);
-    std::set<int> *sumRem();
+    std::set<int> *sumRem() throw(ShellExc);
     FormulaSpec *prod() throw(ShellExc);
     std::set<int> *prodRem() throw(ShellExc);
     std::set<int> *mTerms() throw(ShellExc);
@@ -65,6 +64,8 @@ private:
     inline bool cmpe(LexicalAnalyzer::Token tok) throw(ShellExc);
     // compare and if true read token otherwise throw exception
     inline bool cmpre(LexicalAnalyzer::Token tok) throw(ShellExc);
+
+    inline void readToken() { lex.readToken(); }
 
     inline SyntaxExc syntaxExc();
     inline CommandExc commandExc();

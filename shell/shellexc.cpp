@@ -4,6 +4,8 @@
 #include <sstream>
 #include <exception>
 
+using namespace std;
+
 const char *ShellExc::what() const throw()
 {
     return "Shell exception";
@@ -13,9 +15,9 @@ const char *LexicalExc::what() const throw()
 {
     ostringstream oss;
     oss << "Invalid Character ";
-    if (character >= 32) // show characters from space position
-        oss << "'" << character << "' ";
-    oss << "chr(" << int(character) << ")";
+    if (badChar >= 32) // show characters from space position
+        oss << "'" << badChar << "' ";
+    oss << "chr(" << int(badChar) << ")";
     return oss.str().c_str();
 
 }
@@ -30,7 +32,7 @@ const char *SyntaxExc::what() const throw()
 const char *CommandExc::what() const throw()
 {
     ostringstream oss;
-    if (type == CONTEXT)
+    if (reason == CONTEXT)
         oss << "Command '" << command << "' cannot be used in this context." << col;
     else // UNKNOWN
         oss << "Unknown command '" << command << "'.";

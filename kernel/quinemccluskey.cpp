@@ -2,10 +2,14 @@
 #include "minimizingalgorithm.h"
 #include "formula.h"
 #include "term.h"
+#include "termscontainer.h"
 #include "literalvalue.h"
 
 #include <vector>
 #include <map>
+#include <algorithm>
+
+using namespace std;
 
 QuineMcCluskey::QuineMcCluskey() : MinimizingAlgorithm() {}
 
@@ -17,11 +21,14 @@ QuineMcCluskey::~QuineMcCluskey()
 Formula *QuineMcCluskey::minimize(Formula *f)
 {
     delete of;
-    of = new Formula(f, true);
-    mf = new Formula(of);
+    of = new Formula(*f, true);
+    mf = new Formula(*of);
     
     findPrimeImplicants();
     findFinalImplicants();
+
+    mf->setMinimized(true);
+    of->setMinimized(true);
 
     return mf;
 }
@@ -46,9 +53,9 @@ void QuineMcCluskey::findPrimeImplicants()
         table[i] = new vector<Term *>[varsCount+1];
 
     // sorting terms by numbers of dont cares and ones
-    of->terms.itInit();
-    while (of->terms.itNext()) {
-        pterm = &of->terms.itGet();
+    of->terms->itInit();
+    while (of->terms->itNext()) {
+        pterm = &of->terms->itGet();
         ones = pterm->valuesCount(LiteralValue::ONE);
         table[0][ones].push_back(pterm);
         /*if (debug)
@@ -72,14 +79,14 @@ void QuineMcCluskey::findPrimeImplicants()
                     combined = (*lit)->combine(**rit);
                     if (combined) {
                         // if combined isn't in out
-                        if (find(out->begin(),out->end(),combined)	== out->end()) {
+                        if (find(out->begin(), out->end(), combined) == out->end()) {
                             out->push_back(combined);
                             //if (debug) {}
                         }
 
-                        mf->terms.removeTerm(**lit);
-                        mf->terms.removeTerm(**rit);
-                        mf->terms.pushTerm(*combined);
+                        mf->terms->removeTerm(**lit);
+                        mf->terms->removeTerm(**rit);
+                        mf->terms->pushTerm(*combined);
                     }
                 }
             }
@@ -113,17 +120,18 @@ void QuineMcCluskey::findFinalImplicants()
 
     int impl, term, implsCount, origTermsSize;
 
-    vector<Term> * origOnesTerms = copyMainTerms(of->terms);
+    vector<Term> *onesTerms = getTermsVector(of->terms, true);
+    vector<Term> *terms = getTermsVector(of->terms);
 
-    implsCount = mf->terms.getSize();
-    origTermsSize = origOnesTerms->size();
+    implsCount = mf->terms->getSize();
+    origTermsSize = onesTerms->size();
 
     // table of covering
     bool **table = new bool *[implsCount];
     for (impl = 0; impl < implsCount; impl++) {
         table[impl] = new bool[origTermsSize];
         for (term = 0; term < origTermsSize; term++)
-            table[impl][term] = terms[impl].implies(origOnesTerms->at(term));
+            table[impl][term] = (*terms)[impl].implies(onesTerms->at(term));
     }
 
     /*if (debug)
@@ -140,28 +148,28 @@ void QuineMcCluskey::findFinalImplicants()
         // finds essential prime impicants
         impl = extractEssentialImplicants(table, implsCount, origTermsSize);
         if (impl != -1)
-            v.push_back(terms[impl]);
+            v.push_back((*terms)[impl]);
         else {
             impl = extractLargestImplicants(table, implsCount, origTermsSize);
             if (impl != -1)
-                v.push_back(terms[impl]);
+                v.push_back((*terms)[impl]);
             else
                 done = true;
         }
     }
-    mf->terms.setContainer(v);
+    mf->terms->setContainer(v);
 
-    delete origOnesTerms;
-
-    minimized = true;
+    delete onesTerms;
 }
 
-vector<Term> *QuineMcCluskey::copyMainTerms(vector<Term> &v) const
+vector<Term> *QuineMcCluskey::getTermsVector(TermsContainer *tc, bool onlyOnes) const
 {
-    vector<Term> * pv = new vector<Term>;
-    for (unsigned i = 0; i < v.size(); i++) {
-        if (!v[i].isDC())
-            pv->push_back(v[i]);
+    vector<Term> *pv = new vector<Term>;
+    tc->itInit();
+    while (tc->itNext()) {
+        Term t = tc->itGet();
+        if (!onlyOnes || !t.isDC())
+            pv->push_back(t);
     }
     return pv;
 }

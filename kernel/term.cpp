@@ -21,6 +21,7 @@
  */
 
 #include "term.h"
+#include "literalvalue.h"
 
 #include <iostream>
 #include <algorithm>
@@ -67,7 +68,7 @@ int Term::valuesCount(int value) const
     int i, count;
     count = 0;
 
-    switch (value.getValue()) {
+    switch (value) {
     case LiteralValue::ONE:
         mask = liters;
         break;
@@ -84,6 +85,11 @@ int Term::valuesCount(int value) const
      }
 
     return count;
+}
+
+inline int valuesCount(const LiteralValue & value)
+{
+    return valuesCount(value.getValue());
 }
 
 // returns the new term combined (only by difference of one varible)
@@ -167,7 +173,7 @@ bool Term::operator>(const Term & t) const
 }
 
 // index operator
-LiteralValue Term::operator[](int position)
+LiteralValue Term::operator[](int position) const
 {
     term_t pos = 1 << position;
     if (missing & pos)
@@ -179,16 +185,16 @@ LiteralValue Term::operator[](int position)
 }
 
 // get literal value at position
-LiteralValue Term::at(int position) throw(InvalidTermPosExc)
+LiteralValue Term::at(int position) const throw(InvalidPositionExc)
 {
     if (position < 0 || position >= size)
-        throw InvalidTermPosExc(position);
+        throw InvalidPositionExc(position);
 
     return operator[](position);
 }
 
 // get int value at position
-int Term::getValueAt(int position)
+int Term::getValueAt(int position) const
 {
     term_t pos = 1 << position;
     if (missing & pos)
@@ -205,31 +211,6 @@ string Term::toString() const
     string s;
     for (int i = 0; i < size; i++)
         s += operator[](i).toString();
-    return s;
-}
-
-bool charComparing(char c1, char c2)
-{
-    return c1 > c2;
-}
-
-// term in string form: ab'c
-string Term::toString(vector<char> names) const
-{
-
-    // sorting characters
-    sort(names.begin(), names.end(), charComparing);
-
-    string s;
-    for (int i = size-1; i >= 0; i--) {
-        LiteralValue value = operator[](i);
-        if (value.isMissing())
-            continue;
-        s += names[i];
-        if (value.isZero())
-            s += '\'';
-    }
-
     return s;
 }
 

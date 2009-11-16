@@ -31,6 +31,15 @@ private:
     int position;
 };
 
+// invalid format of inserted term (bad count of variables)
+class InvalidTermExc : public std::exception
+{
+    int nSet;
+    int nReq;
+public:
+    InvalidTermExc(int ns, int nr) : nSet(ns), nReq(nr) {}
+    const char * what() const throw();
+};
 
 // invalid index in formula
 class InvalidIndexExc : public std::exception

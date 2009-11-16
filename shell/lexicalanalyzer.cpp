@@ -2,6 +2,7 @@
 #include "shellexc.h"
 
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <cstring>
 #include <cctype>
@@ -11,50 +12,47 @@ using namespace std;
 LexicalAnalyzer::LexicalAnalyzer()
 {
     token = END;
+    iss = 0;
 }
 
-const char *LexicalAnalyzer::getTokenName(Token tok)
+const char *LexicalAnalyzer::getTokenName(Token tok) const
 {
     switch (tok) {
     case NUMBER: return TN_NUMBER;
     case LETTER: return TN_LETTER;
-    case WORD: return TN_WORD;
     case LPAR: return TN_LPAR;
     case RPAR: return TN_RPAR;
     case PLUS: return TN_PLUS;
     case MULT: return TN_MULT;
     case ASSIGN: return TN_ASSIGN;
     case COMMA: return TN_COMMA;
-    case COMMAND: return TN_COMMAND;
-    case END: return TN_END;
+    case CMD: return TN_CMD;
+    default: return TN_END;
     }
 }
 
-const char *LexicalAnalyzer::getCommandName(Command cmd)
+const char *LexicalAnalyzer::getCommandName(Command cmd) const
 {
     switch (cmd) {
     case SUM: return CMD_SUM;
     case PROD: return CMD_PROD;
     case MINIMIZE: return CMD_MINIMIZE;
-    case EXIT: return CMD_EXIT;
+    default: return CMD_EXIT;
     }
 }
 
-void LexicalAnalyzer::analyze(string & str)
-{
-    analyze(istringstream(str));
-}
-
-void LexicalAnalyzer::analyze(istream & s)
+void LexicalAnalyzer::analyze(string &str)
 {
     col = 0;
     readNext = true;
-    is = s;
+    delete iss;
+    iss = new istringstream(str);
 }
 
-InputType LexicalAnalyzer::readInput()
+
+LexicalAnalyzer::InputType LexicalAnalyzer::readInput()
 {
-    if (!is.get(inputChar))
+    if (!iss->get(inputChar))
         return EOI;
 
     col++;
@@ -73,19 +71,19 @@ InputType LexicalAnalyzer::readInput()
     return inputType;
 }
 
-bool LexicalAnalyzer::strcmpi(const string & str, const char *cmd)
+bool LexicalAnalyzer::strcmpi(const string &str, const char *cmd)
 {
     if (str.size() != strlen(cmd))
         return false;
 
-    for (int i = 0; i < str.size(); i++) {
+    for (unsigned i = 0; i < str.size(); i++) {
         if (tolower(str[i]) != cmd[i])
             return false;
     }
     return true;
 }
 
-bool LexicalAnalyzer::isCommand(const string & str)
+bool LexicalAnalyzer::isCommand(const string &str)
 {
     if (strcmpi(str, CMD_MINIMIZE))
         command = MINIMIZE;
@@ -94,14 +92,14 @@ bool LexicalAnalyzer::isCommand(const string & str)
     else if (strcmpi(word, CMD_SUM))
         command = SUM;
     else if (strcmpi(word, CMD_PROD))
-        command = ROD;
+        command = PROD;
     else
         return false;
 
     return true;
 }
 
-Token LexicalAnalyzer::readToken() throw(ShellExc)
+LexicalAnalyzer::Token LexicalAnalyzer::readToken() throw(ShellExc)
 {
     if (readNext)
         readInput();
@@ -129,12 +127,10 @@ Token LexicalAnalyzer::readToken() throw(ShellExc)
         if (readInput() != ALPHA) // LETTER
             return LETTER;
 
-        ostringstream oss;
-        oss << letter;
+        word = letter;
         do {
-            oss << inputChar;
+            word += inputChar;
         } while (readInput() == ALPHA);
-        word = oss.str();
 
         // command
         if (isCommand(word))
@@ -157,8 +153,8 @@ Token LexicalAnalyzer::readToken() throw(ShellExc)
         case SYM_COMMA:
             return COMMA;
         default:
-            throw LexicalExc(inputChar, linePosition);
-
+            throw LexicalExc(inputChar, col);
+        }
     }
 }
 

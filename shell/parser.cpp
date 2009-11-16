@@ -21,7 +21,7 @@ Parser::Parser()
     kernel = Kernel::instance();
 }
 
-string termToString(Term &term, vector<char> &vars, PrintForm form)
+string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
 {
     ostringstream oss;
     if (form == PROD || form == SOP) {
@@ -47,76 +47,66 @@ string Parser::formulaToString(PrintForm form, Formula *f)
 
     ostringstream oss;
     // variables
-    oss << f->getName() << LexicalAnalyzer::SYM_LPAR;
+    oss << f->getName() << SYM_LPAR;
     vector<char> vars = f->getVars();
     for (unsigned i = 0; i < vars.size(); i++) {
         if (i != 0)
-            oss << LexicalAnalyzer::SYM_COMMA;
+            oss << SYM_COMMA;
         oss << vars[i];
     }
-    oss << LexicalAnalyzer::SYM_RPAR << ' ' << LexicalAnalyzer::SYM_ASSIGN;
+    oss << SYM_RPAR << ' ' << SYM_ASSIGN;
 
-    switch (form) {
-    case SUM:
-        oss << ' ' << LexicalAnalyzer::CMD_SUM << ' ';
-        oss << LexicalAnalyzer::FCE_MINTERM << LexicalAnalyzer::SYM_LPAR;
-        vector<int> idx = f->getTermsIdx(OutputValue::ONE);
+    if (form == SUM) {
+        vector<int> idx;
+        oss << ' ' << CMD_SUM << ' ';
+        oss << FCE_MINTERM << SYM_LPAR;
+        f->getTermsIdx(idx, OutputValue::ONE);
         for (unsigned i = 0; i < idx.size(); i++) {
             if (i != 0)
-                oss << LexicalAnalyzer::SYM_COMMA;
+                oss << SYM_COMMA;
             oss << idx[i];
         }
-        oss << LexicalAnalyzer::SYM_RPAR;
-        idx =  f->getTermsIdx(OutputValue::DC);
+        oss << SYM_RPAR;
+        idx = f->getTermsIdx(idx, OutputValue::DC);
         if (!idx.empty()) {
-            oss << ' ' << LexicalAnalyzer::PLUS << ' ';
-            oss << LexicalAnalyzer::CMD_SUM << ' ';
-            oss << LexicalAnalyzer::FCE_DC << LexicalAnalyzer::SYM_LPAR;
+            oss << ' ' << SYM_PLUS << ' ';
+            oss << CMD_SUM << ' ';
+            oss << FCE_DC << SYM_LPAR;
             for (unsigned i = 0; i < idx.size(); i++) {
                 if (i != 0)
-                    oss << LexicalAnalyzer::SYM_COMMA;
+                    oss << SYM_COMMA;
                 oss << idx[i];
             }
-            oss << LexicalAnalyzer::SYM_RPAR;
+            oss << SYM_RPAR;
         }
-        break;
-    case PROD:
-        // TODO
-    case SOP:
+    }
+    else {
         f->termsItInit();
         while (f->termsItNext())
             oss << ' ' << termToString(f->termsItGet(), vars, PROD);
-        break;
-    case POS:
-        // TODO
     }
 
     return oss.str();
 }
 
 
-void parse(std::string & str)
+void Parser::parse(std::string str)
 {
-    parse(stringstream(str));
-}
-
-void parse(std::istream & is)
-{
-    lex.analyze(is);
+    lex.analyze(str);
 
     try {
         program();
     }
-    catch (ShellExc & exc) {
+    catch (ShellExc &exc) {
         cout << exc.what() << endl;
     }
 }
 
 void Parser::program() throw(ShellExc)
 {
-    lex.readToken();
+    readToken();
 
-    if (cmpr(LexicalAnalyzer::COMMAND))
+    if (cmpr(LexicalAnalyzer::CMD))
         command();
     else if (cmpr(LexicalAnalyzer::LETTER))
         fceDef();
@@ -160,7 +150,7 @@ FormulaDecl *Parser::fceDecl() throw(ShellExc)
     }
     catch (ShellExc &exc) {
         delete l;
-        throw exc;
+        throw;
     }
 
     vector<char> *v = new vector<char>(l->size());
@@ -173,7 +163,7 @@ FormulaDecl *Parser::fceDecl() throw(ShellExc)
 char Parser::fceName() throw(ShellExc)
 {
     char name = lex.getLetter();
-    lex.readToken();
+    readToken();
     return name;
 }
 
@@ -226,8 +216,9 @@ FormulaSpec *Parser::sum() throw(ShellExc)
     catch (ShellExc &exc) {
         delete spec->f;
         delete spec;
-        throw exc;
+        throw;
     }
+    return spec;
 }
 
 set<int> *Parser::sumRem() throw(ShellExc)
@@ -252,8 +243,9 @@ FormulaSpec *Parser::prod() throw(ShellExc)
     catch (ShellExc &exc) {
         delete spec->r;
         delete spec;
-        throw exc;
+        throw;
     }
+    return spec;
 }
 
 set<int> *Parser::prodRem() throw(ShellExc)
@@ -269,7 +261,7 @@ set<int> *Parser::prodRem() throw(ShellExc)
 set<int> *Parser::mTerms() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
-    if (lex.getLetter() != LexicalAnalyzer::FCE_MINTERM)
+    if (lex.getLetter() != FCE_MINTERM)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken();
     return fceIndexes();
@@ -278,7 +270,7 @@ set<int> *Parser::mTerms() throw(ShellExc)
 set<int> *Parser::dTerms() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
-    if (lex.getLetter() != LexicalAnalyzer::FCE_DC)
+    if (lex.getLetter() != FCE_DC)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken();
     return fceIndexes();
@@ -295,7 +287,7 @@ set<int> *Parser::fceIndexes() throw(ShellExc)
     }
     catch (ShellExc &exc) {
         delete s;
-        throw exc;
+        throw;
     }
     return s;
 }
@@ -321,7 +313,7 @@ inline bool Parser::cmp(LexicalAnalyzer::Token tok)
 bool Parser::cmpr(LexicalAnalyzer::Token tok)
 {
     if (cmp(tok)) {
-        lex.readToken();
+        readToken();
         return true;
     }
     else
@@ -330,14 +322,16 @@ bool Parser::cmpr(LexicalAnalyzer::Token tok)
 
 inline bool Parser::cmpe(LexicalAnalyzer::Token tok) throw(ShellExc)
 {
-    if (!cmp(rok))
+    if (!cmp(tok))
         throw syntaxExc();
+    return true;
 }
 
 inline bool Parser::cmpre(LexicalAnalyzer::Token tok) throw(ShellExc)
 {
-    if (!cmpr(rok))
+    if (!cmpr(tok))
         throw syntaxExc();
+    return true;
 }
 
 inline SyntaxExc Parser::syntaxExc()

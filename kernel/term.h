@@ -23,6 +23,8 @@
 #ifndef TERM_H
 #define TERM_H
 
+#include "kernelexc.h"
+
 #include <iostream>
 #include <vector>
 #include <string>
@@ -35,6 +37,7 @@ typedef int term_t;
 #define TERM_MAX_SIZE (sizeof (term_t) * 8 - 1)
 
 class LiteralValue;
+class InvalidPositionExc;
 
 // Class represented product term
 class Term
@@ -57,10 +60,7 @@ public:
     int getIdx() const;
     // returns the count of values in term
     int valuesCount(int value) const;
-    inline int valuesCount(const LiteralValue & value) const
-    {
-        return valuesCount(value.getValue());
-    }
+    inline int valuesCount(const LiteralValue & value) const;
     // returns the new term combined (only by difference of one varible)
     // with *this and t, for example 0010 & 0000 => 00X0
     Term *combine(const Term & t) const;
@@ -75,28 +75,23 @@ public:
     bool operator>(const Term & t) const;
 
     // index operator
-    LiteralValue operator[](int position);
-    LiteralValue at(int position) const throw(InvalidTermPosExc);
+    LiteralValue operator[](int position) const;
+    LiteralValue at(int position) const throw(InvalidPositionExc);
     int getValueAt(int position) const;
-
+    
+    // term in string form: 0X10
+    std::string toString() const;
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 
 private:
+    // term initialization
+    void init(term_t lit, term_t mis, int s, bool isDC);
+
     term_t liters;     // literals value
     term_t missing;    // which literals are missing literals
     int size;		   // number of literals
     bool dc;		   // dont care term
-
-    // term initialization
-    void init(term_t lit, term_t mis, int s, bool isDC);
-
-    // term in string form: 0X10
-    std::string toString() const;
-    // term in string form: A'BC
-    std::string toString(std::vector<char> varNames) const;
-
-
 };
 
 #endif /* TERM_H */

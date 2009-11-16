@@ -2,9 +2,9 @@
 
 #include <string>
 
-LiteralValue LiteralValue::getNextValue() const
+LiteralValue LiteralValue::getNextValue(LiteralValue lv)
 {
-    switch (value) {
+    switch (lv.getValue()) {
     case ZERO:
         return LiteralValue(ONE);
     case ONE:

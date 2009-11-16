@@ -1,10 +1,37 @@
 #ifndef LEXICALANALYZER_H
 #define LEXICALANALYZER_H
 
-#include <istream>
+#include "shellexc.h"
+
+#include <sstream>
 #include <string>
 
-class ShellExc;
+
+static const char * const TN_NUMBER  = "NUMBER";
+static const char * const TN_LETTER  = "LETTER";
+static const char * const TN_LPAR    = "LPAR";
+static const char * const TN_RPAR    = "RPAR";
+static const char * const TN_PLUS    = "PLUS";
+static const char * const TN_MULT    = "MULT";
+static const char * const TN_ASSIGN  = "ASSIGN";
+static const char * const TN_COMMA   = "COMMA";
+static const char * const TN_CMD     = "CMD";
+static const char * const TN_END     = "END";
+
+static const char SYM_LPAR         = '(';
+static const char SYM_RPAR         = ')';
+static const char SYM_PLUS         = '+';
+static const char SYM_MULT         = '*';
+static const char SYM_ASSIGN       = '=';
+static const char SYM_COMMA        = ',';
+
+static const char FCE_MINTERM      = 'm';
+static const char FCE_DC           = 'd';
+
+static const char * const CMD_SUM      = "sum";
+static const char * const CMD_PROD     = "prod";
+static const char * const CMD_MINIMIZE = "minimize";
+static const char * const CMD_EXIT     = "exit";
 
 class LexicalAnalyzer
 {
@@ -29,36 +56,9 @@ public:
         EXIT
     };
 
-    static const char * const TN_NUMBER  = "NUMBER";
-    static const char * const TN_LETTER  = "LETTER";
-    static const char * const TN_LPAR    = "LPAR";
-    static const char * const TN_RPAR    = "RPAR";
-    static const char * const TN_PLUS    = "PLUS";
-    static const char * const TN_MULT    = "MULT";
-    static const char * const TN_ASSIGN  = "ASSIGN";
-    static const char * const TN_COMMA   = "COMMA";
-    static const char * const TN_CMD     = "CMD";
-    static const char * const TN_END     = "END";
-
-    static const char SYM_LPAR         = '(';
-    static const char SYM_RPAR         = ')';
-    static const char SYM_PLUS         = '+';
-    static const char SYM_MULT         = '*';
-    static const char SYM_ASSIGN       = '=';
-    static const char SYM_COMMA        = ',';
-
-    static const char FCE_MINTERM      = 'm';
-    static const char FCE_DC           = 'd';
-
-    static const char * const CMD_SUM      = "sum";
-    static const char * const CMD_PROD     = "prod";
-    static const char * const CMD_MINIMIZE = "minimize";
-    static const char * const CMD_EXIT     = "exit";
-
     LexicalAnalyzer();
 
     void analyze(std::string &str);
-    void analyze(std::istream &s);
 
     Token readToken() throw(ShellExc);
     inline Token getToken() const { return token; }
@@ -66,8 +66,7 @@ public:
     const char *getTokenName(Token tok) const;
     inline Command getCommand() const { return command; }
     inline const char *getCommandName() const { return getCommandName(command); }
-    const char *getCommandName(Command cmd);
-
+    const char *getCommandName(Command cmd) const;
 
 
     inline int getNumber() const { return number; }
@@ -90,14 +89,14 @@ private:
 
     InputType inputType;
     char inputChar;
-    int inputDigit;
+    int inputInt;
 
     Token token;
     Command command;
 
     int col;
 
-    std::istream is;
+    std::istringstream *iss;
 
     char letter;
     int number;

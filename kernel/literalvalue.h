@@ -10,11 +10,12 @@ public:
     static const int ONE = 1;
     static const int MISSING = 2;
 
-    static LiteralValue getNextValue();
+    static LiteralValue getNextValue(LiteralValue lv);
 
     LiteralValue(int v) : value(v) {}
 
     inline int getValue() const { return value; }
+    LiteralValue getNextValue() const;
 
     inline bool equal(const LiteralValue & val) const { return val.getValue() == value; }
     inline bool equal(int val) const { return val == value; }

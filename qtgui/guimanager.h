@@ -57,7 +57,7 @@ private:
     // kernel
     Kernel *m_kernel;
     // parser
-    Parser m_parser;
+    Parser *m_parser;
     // string with actual formula
     QString m_actualFce;
     // whether formula is correct

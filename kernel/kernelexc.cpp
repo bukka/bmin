@@ -37,6 +37,17 @@ const char *InvalidPositionExc::what() const throw()
     return oss.str().c_str();
 }
 
+// statement of InvalidTermExc
+const char *InvalidTermExc::what() const throw()
+{
+    ostringstream outstr;
+    outstr << "Invalid Term: number of variables in term: "
+            << nSet << " (required: " << nReq << ")";
+
+    return outstr.str().c_str();
+}
+
+
 // statement of InvalidIndexExc
 const char *InvalidIndexExc::what() const throw()
 {

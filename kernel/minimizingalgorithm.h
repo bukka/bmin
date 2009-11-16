@@ -12,10 +12,10 @@ protected:
 public:
     MinimizingAlgorithm() : of(0), mf(0) {}
 
-    Formula *minimize(Formula *) = 0;
+    virtual Formula *minimize(Formula *) = 0;
 
-    inline Formula *getMinimizedFormula() { return mf; }
-    inline Formula *getOriginalFormula() { return of; }
+    virtual inline Formula *getMinimizedFormula() { return mf; }
+    virtual inline Formula *getOriginalFormula() { return of; }
 };
 
 #endif // MINIMIZINGALGORITHM_H

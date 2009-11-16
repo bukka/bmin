@@ -1,4 +1,5 @@
 #include "kernel.h"
+#include "formula.h"
 #include "quinemccluskey.h"
 
 #include <string>
@@ -23,50 +24,55 @@ void Kernel::destroy()
 
 Kernel::Kernel()
 {
-    formula = minimizedFormula = 0;
+    formula = minFormula = 0;
     formulaChanged = false; // hack
+    qm = new QuineMcCluskey;
 }
 
 Kernel::~Kernel()
 {
     delete formula;
-    delete minimizedFormula;
+    delete minFormula;
+    delete qm;
 }
 
-inline Formula *Kernel::getFormula()
+Formula *Kernel::getFormula()
 {
     return formula;
 }
 
-inline Formula *Kernel::getMinimizedFormula()
+Formula *Kernel::getMinimizedFormula()
 {
-    return minimizedFormula;
+    return formula->isMinimized()? minFormula: 0;
 }
 
-inline bool Kernel::hasFormula()
+bool Kernel::hasFormula()
 {
-    return formula == 0;
+    return formula != 0;
 }
 
-inline bool Kernel::hasMinimizedFormula()
+bool Kernel::hasMinimizedFormula()
 {
-    return minimizedFormula == 0;
+    if (minFormula == 0)
+        return false;
+
+    return formula->isMinimized();
 }
 
 
 void Kernel::setFormula(Formula *f)
 {
     formula = f;
-    if (minimizedFormula) {
-        delete minimizedFormula;
-        minimizedFormula = 0;
+    if (minFormula) {
+        delete minFormula;
+        minFormula = 0;
     }
     formulaChanged = true; // hack
 }
 
 void Kernel::minimizeFormula()
 {
-    minimizedFormula = qm.minimize(formula);
+    minFormula = qm->minimize(formula);
 }
 
 void Kernel::deleteFomula()
@@ -78,7 +84,7 @@ void Kernel::deleteFomula()
 // hack
 bool Kernel::isFormulaChanged()
 {
-    changed = formulaChanged;
+    bool changed = formulaChanged;
     formulaChanged = false;
     return changed;
 }

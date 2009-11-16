@@ -12,10 +12,10 @@ public:
     static Kernel *instance();
     static void destroy();
 
-    inline Formula *getFormula();
-    inline Formula *getMinimizedFormula();
-    inline bool hasFormula();
-    inline bool hasMinimizedFormula();
+    Formula *getFormula();
+    Formula *getMinimizedFormula();
+    bool hasFormula();
+    bool hasMinimizedFormula();
     void setFormula(Formula *f);
     void minimizeFormula();
     void deleteFomula();
@@ -35,7 +35,7 @@ private:
     Formula *formula; // original formula
     Formula *minFormula; // minimized formula
 
-    QuineMcCluskey qm;
+    QuineMcCluskey *qm;
 };
 
 #endif // KERNEL_H

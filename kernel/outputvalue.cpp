@@ -2,15 +2,15 @@
 
 #include <string>
 
-OutputValue OutputValue::getNextValue() const
+OutputValue OutputValue::getNextValue(OutputValue ov)
 {
-    switch (value) {
+    switch (ov.getValue()) {
     case ZERO:
-        return LiteralValue(ONE);
+        return OutputValue(ONE);
     case ONE:
-        return LiteralValue(MISSING);
+        return OutputValue(DC);
     default: // missing value
-        return LiteralValue(ZERO);
+        return OutputValue(ZERO);
     }
 }
 

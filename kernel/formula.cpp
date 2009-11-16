@@ -35,7 +35,9 @@
 
 #include "formula.h"
 #include "term.h"
+#include "termscontainer.h"
 #include "literalvalue.h"
+#include "outputvalue.h"
 #include "kernelexc.h"
 
 using namespace std;
@@ -55,11 +57,12 @@ FormulaSpec::~FormulaSpec()
 // Constructors
 
 // default setting
-void Formula::init(int vs, vector<char> *v, char fn, Form f)
+void Formula::init(int vs, const vector<char> *v, char fn, Form f)
 {
-    varibleSize = vs;
+    varsCount = vs;
     maxIdx = 1 << vs;
     setVars(v, vs);
+    terms = new TermsContainer(vs);
 
     name = fn;
     form = f;
@@ -67,7 +70,7 @@ void Formula::init(int vs, vector<char> *v, char fn, Form f)
 }
 
 // gets terms from t array of terms
-Formula::Formula(int vs, Term *t, int n, vector<char> *v, char fn, Form f)
+Formula::Formula(int vs, Term *t, int n, const vector<char> *v, char fn, Form f)
         throw(InvalidTermExc)
 {
     init(vs, v, fn, f);
@@ -79,17 +82,17 @@ Formula::Formula(int vs, Term *t, int n, vector<char> *v, char fn, Form f)
         for (int i = 0; i < n; i++) {
             if (t[i].getSize() != vs) // check correct size of term
                 throw InvalidTermExc(t[i].getSize(), varsCount);
-            terms.pushTerm(t[i]);
+            terms->pushTerm(t[i]);
         }
     }
     catch (InvalidTermExc &e) {
-        terms.clear(); // deletes all added terms
+        terms->clear(); // deletes all added terms
         throw;
     }
 }
 
 // gets terms from vector t
-Formula::Formula(int vs, vector<Term> &t, vector<char> *v, char fn, Form f)
+Formula::Formula(int vs, vector<Term> &t, const vector<char> *v, char fn, Form f)
         throw(InvalidTermExc)
 {
     init(vs, v, fn, f);
@@ -101,28 +104,30 @@ Formula::Formula(int vs, vector<Term> &t, vector<char> *v, char fn, Form f)
         if (t[i].getSize() != vs) // check correct size of term
             throw InvalidTermExc(t[i].getSize(), varsCount);
     }
-    terms.setContainer(t);
+    terms->setContainer(t);
 }
 
-Formula::Formula(FormulaSpec *spec, FormulaDecl *decl) throw(InvalidTermExc)
+Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidTermExc)
 {
     set<int>::iterator it;
 
     if (spec->f) {
         init(decl->vars->size(), decl->vars, decl->name, SOP);
         for (it = spec->f->begin(); it != spec->f->end(); it++)
-            terms.pushTerm(*it, false);
+            terms->pushTerm(*it, false);
         for (it = spec->d->begin(); it != spec->d->end(); it++)
-            terms.pushTerm(*it, true);
+            terms->pushTerm(*it, true);
     }
     //TODO else product
 }
 
 Formula::Formula(const Formula &f, bool toMinterms)
 {
-    init(f.varsCount, &f.vars, f.fn, f.form);
-    if (toMinterms)
-        terms.setContainer(f.getMinterms());
+    init(f.varsCount, &f.vars, f.name, f.form);
+    if (toMinterms) {
+        vector<Term> v;
+        terms->setContainer(f.getMinterms(v));
+    }
     else
         terms = f.terms;
 
@@ -134,7 +139,7 @@ void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
     if (idx >= maxIdx)
         throw InvalidIndexExc(idx);
 
-    if (terms.pushTerm(idx, isDC))
+    if (terms->pushTerm(idx, isDC))
         minimized = false;
 }
 
@@ -143,15 +148,73 @@ void Formula::removeTerm(int idx) throw(InvalidIndexExc)
     if (idx >= maxIdx)
         throw InvalidIndexExc(idx);
 
-    if (terms.removeTerm(idx))
+    if (terms->removeTerm(idx))
         minimized = false;
+}
+
+bool Formula::hasTerm(const Term &t) const
+{
+    return terms->hasTerm(t);
+}
+
+OutputValue Formula::getTermValue(int idx) const
+{
+    return terms->getTermValue(idx);
+}
+
+vector<int> &Formula::getTermsIdx(vector<int> &v, int val) const
+{
+    return terms->getTermsIdx(v, val);
+}
+
+vector<Term> &Formula::getMinterms(vector<Term> &v) const
+{
+    return terms->getMinterms(v);
+}
+
+int Formula::getSize() const
+{
+    return terms->getSize();
+}
+
+void Formula::termsItInit()
+{
+    terms->itInit();
+}
+
+bool Formula::termsItNext()
+{
+    return terms->itNext();
+}
+
+Term &Formula::termsItGet()
+{
+    return terms->itGet();
+}
+
+
+// equality
+bool Formula::operator==(const Formula &f) const
+{
+    return terms == f.terms;
+}
+
+// equality
+bool Formula::equal(const Formula &f, bool inclVars) const
+{
+    if (terms != f.terms)
+        return false;
+    if (inclVars)
+        return (f.vars == vars);
+    return true;
 }
 
 // set default names for n variables
 void Formula::setVars(int n)
 {
     vars.reserve(n);
-    for (char var = DEFAULT_FIRST_VAR + n - 1; var >= DEFAULT_FIRST_VAR; var--)
+    char var = DEFAULT_FIRST_VAR + n - 1;
+    for (int i = 0; i < n; i++, var--)
         vars[i] = var;
 }
 
@@ -167,7 +230,7 @@ void Formula::setVars(char *v, int n)
 }
 
 // sets variables name by vector v
-void Formula::setVars(vector<char> *v, int vs)
+void Formula::setVars(const vector<char> *v, int vs)
 {
     //TODO - varibles count over and under
     if (!v)
@@ -176,10 +239,15 @@ void Formula::setVars(vector<char> *v, int vs)
         vars = *v;
 }
 
+vector<char> Formula::getVars() const
+{
+    return vars;
+}
+
 
 // friend function to place term to ostream
 ostream & operator<<(std::ostream &os, Formula &f)
 {
-    return os << "Formula " << name;
+    return os << "Formula " << f.name;
 }
 

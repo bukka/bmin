@@ -44,6 +44,7 @@ class QAction;
 class QActionGroup;
 class QString;
 class Formula;
+class Term;
 class OutputValue;
 
 // widget class for opengl cube

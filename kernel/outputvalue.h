@@ -9,10 +9,11 @@ public:
     static const int ZERO = 0;
     static const int ONE = 1;
     static const int DC = 2;
+    static const int UNDEFINED = 3;
 
-    static OutputValue getNextValue();
+    static OutputValue getNextValue(OutputValue ov);
 
-    OutputValue(int v) : value(v) {}
+    OutputValue(int v = UNDEFINED) : value(v) {}
 
     inline int getValue() const { return value; }
 

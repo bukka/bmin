@@ -1,16 +1,18 @@
 # TODO file
 
 	
-# FEATURES ---------------------------------------------
+# FEATURES ----------------------------------------------------------
 
-processing products of sums
-create iterator for formula terms
-kernel events
+kernel events - excptions, commands
+correct work with variables
+treating products of sums
+create iterator for formula terms; iterating in const methods 
+inlining short functions
 more formulas
 parsing all file (no every row standalone)
 
 
-# CODE -------------------------------------------------
+# CODE --------------------------------------------------------------
 
 parser.cpp
 	exception handling in parse function
