@@ -1,7 +1,7 @@
 # TODO file
 
 	
-# FEATURES ----------------------------------------------------------
+# FEATURES ----------------------------------------------------------makaca23
 
 kernel events - excptions, commands
 correct work with variables
@@ -15,6 +15,7 @@ parsing all file (no every row standalone)
 # CODE --------------------------------------------------------------
 
 parser.cpp
+	f(d,c,b,a) = sum m() - empty fce
 	exception handling in parse function
 			
 formula.cpp	
@@ -31,3 +32,7 @@ termscontainer.cpp
 termtree.h, termtree.cpp
 	- comleting, test
 
+
+
+# TESTING FCE
+f(c,b,a) = sum m(1, 2)

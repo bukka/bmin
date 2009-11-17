@@ -1,10 +1,10 @@
 # Bmin project
 
-QT += opengl
-TARGET = bmin
 TEMPLATE = app
+CONFIG += qt warn_on
+QT += opengl
 
-
+TARGET = bmin
 SOURCES += main.cpp
 OTHER_FILES += license-header.txt license.txt
 

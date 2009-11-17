@@ -53,7 +53,7 @@ void LexicalAnalyzer::analyze(string &str)
 LexicalAnalyzer::InputType LexicalAnalyzer::readInput()
 {
     if (!iss->get(inputChar))
-        return EOI;
+        return inputType = EOI;
 
     col++;
 
@@ -111,21 +111,21 @@ LexicalAnalyzer::Token LexicalAnalyzer::readToken() throw(ShellExc)
 
     switch (inputType) {
     case EOI:
-        return END;
+        return setToken(END);
 
     case DIGIT:
         readNext = false;
         number = inputInt;
         while (readInput() == DIGIT)
             number = number * 10 + inputInt;
-        return NUMBER;
+        return setToken(NUMBER);
 
     case ALPHA:
         readNext = false;
         letter = inputChar;
 
         if (readInput() != ALPHA) // LETTER
-            return LETTER;
+            return setToken(LETTER);
 
         word = letter;
         do {
@@ -134,24 +134,24 @@ LexicalAnalyzer::Token LexicalAnalyzer::readToken() throw(ShellExc)
 
         // command
         if (isCommand(word))
-            return CMD;
+            return setToken(CMD);
         else
             throw CommandExc(word.c_str(), CommandExc::UNKNOWN, col);
 
     default: // OTHER
         switch (inputChar) {
         case SYM_LPAR:
-            return LPAR;
+            return setToken(LPAR);
         case SYM_RPAR:
-            return RPAR;
+            return setToken(RPAR);
         case SYM_PLUS:
-            return PLUS;
+            return setToken(PLUS);
         case SYM_MULT:
-            return MULT;
+            return setToken(MULT);
         case SYM_ASSIGN:
-            return ASSIGN;
+            return setToken(ASSIGN);
         case SYM_COMMA:
-            return COMMA;
+            return setToken(COMMA);
         default:
             throw LexicalExc(inputChar, col);
         }

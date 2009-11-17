@@ -115,8 +115,10 @@ Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(Invalid
         init(decl->vars->size(), decl->vars, decl->name, SOP);
         for (it = spec->f->begin(); it != spec->f->end(); it++)
             terms->pushTerm(*it, false);
-        for (it = spec->d->begin(); it != spec->d->end(); it++)
-            terms->pushTerm(*it, true);
+        if (spec->d) {
+            for (it = spec->d->begin(); it != spec->d->end(); it++)
+                terms->pushTerm(*it, true);
+        }
     }
     //TODO else product
 }

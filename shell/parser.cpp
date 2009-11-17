@@ -96,6 +96,7 @@ void Parser::parse(std::string str)
 
     try {
         program();
+        cmpre(LexicalAnalyzer::END);
     }
     catch (ShellExc &exc) {
         cout << exc.what() << endl;
@@ -106,9 +107,9 @@ void Parser::program() throw(ShellExc)
 {
     readToken();
 
-    if (cmpr(LexicalAnalyzer::CMD))
+    if (cmp(LexicalAnalyzer::CMD))
         command();
-    else if (cmpr(LexicalAnalyzer::LETTER))
+    else if (cmp(LexicalAnalyzer::LETTER))
         fceDef();
     else
         throw syntaxExc();
@@ -127,6 +128,7 @@ void Parser::command() throw(ShellExc)
     default:
         throw commandExc();
     }
+    readToken();
 }
 
 void Parser::fceDef() throw(ShellExc)
@@ -170,8 +172,10 @@ char Parser::fceName() throw(ShellExc)
 list<char> *Parser::fceVars() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
+    char var = lex.getLetter();
+    readToken();
     list<char> *l = fceVarsRem();
-    l->push_front(lex.getLetter());
+    l->push_front(var);
     return l;
 }
 
@@ -179,9 +183,11 @@ list<char> *Parser::fceVarsRem() throw(ShellExc)
 {
     if (cmp(LexicalAnalyzer::RPAR))
         return new list<char>;
-    else if (cmpr(LexicalAnalyzer::COMMA) && cmpr(LexicalAnalyzer::LETTER)) {
+    else if (cmpr(LexicalAnalyzer::COMMA) && cmp(LexicalAnalyzer::LETTER)) {
+        char var = lex.getLetter();
+        readToken();
         list<char> *l = fceVarsRem();
-        l->push_front(lex.getLetter());
+        l->push_front(var);
         return l;
     }
     else
@@ -192,9 +198,9 @@ FormulaSpec *Parser::fceBody() throw(ShellExc)
 {
     if (cmp(LexicalAnalyzer::CMD)) {
         switch (lex.getCommand()) {
-        case SUM:
+        case LexicalAnalyzer::SUM:
             return sum();
-        case PROD:
+        case LexicalAnalyzer::PROD:
             return prod();
         default:
             throw commandExc();
@@ -211,10 +217,10 @@ FormulaSpec *Parser::sum() throw(ShellExc)
     FormulaSpec *spec = new FormulaSpec;
     try {
         spec->f = mTerms();
-        spec->d = sumRem();
+        if (cmpr(LexicalAnalyzer::PLUS))
+            spec->d = sumRem();
     }
     catch (ShellExc &exc) {
-        delete spec->f;
         delete spec;
         throw;
     }
@@ -223,7 +229,6 @@ FormulaSpec *Parser::sum() throw(ShellExc)
 
 set<int> *Parser::sumRem() throw(ShellExc)
 {
-    cmpre(LexicalAnalyzer::PLUS);
     cmpe(LexicalAnalyzer::CMD);
     if (lex.getCommand() != LexicalAnalyzer::SUM)
         throw commandExc();
@@ -238,10 +243,10 @@ FormulaSpec *Parser::prod() throw(ShellExc)
     FormulaSpec *spec = new FormulaSpec;
     try {
         spec->r = mTerms();
-        spec->d = prodRem();
+        if (cmpr(LexicalAnalyzer::PLUS))
+            spec->d = prodRem();
     }
     catch (ShellExc &exc) {
-        delete spec->r;
         delete spec;
         throw;
     }
@@ -263,7 +268,7 @@ set<int> *Parser::mTerms() throw(ShellExc)
     cmpe(LexicalAnalyzer::LETTER);
     if (lex.getLetter() != FCE_MINTERM)
         throw LexicalExc(lex.getLetter(), lex.getCol());
-    readToken();
+    readToken(); // letter
     return fceIndexes();
 }
 
@@ -272,7 +277,7 @@ set<int> *Parser::dTerms() throw(ShellExc)
     cmpe(LexicalAnalyzer::LETTER);
     if (lex.getLetter() != FCE_DC)
         throw LexicalExc(lex.getLetter(), lex.getCol());
-    readToken();
+    readToken(); // letter
     return fceIndexes();
 }
 
@@ -280,8 +285,10 @@ set<int> *Parser::fceIndexes() throw(ShellExc)
 {
     cmpre(LexicalAnalyzer::LPAR);
     cmpe(LexicalAnalyzer::NUMBER);
+    int num = lex.getNumber();
+    readToken();
     set<int> *s = fceIndexesRem();
-    s->insert(lex.getNumber());
+    s->insert(num);
     try {
         cmpre(LexicalAnalyzer::RPAR);
     }
@@ -296,9 +303,11 @@ set<int> *Parser::fceIndexesRem() throw(ShellExc)
 {
     if (cmp(LexicalAnalyzer::RPAR))
         return new set<int>;
-    else if (cmpr(LexicalAnalyzer::COMMA) && cmpr(LexicalAnalyzer::NUMBER)) {
+    else if (cmpr(LexicalAnalyzer::COMMA) && cmp(LexicalAnalyzer::NUMBER)) {
+        int num = lex.getNumber();
+        readToken();
         set<int> *s = fceIndexesRem();
-        s->insert(lex.getNumber());
+        s->insert(num);
         return s;
     }
     else

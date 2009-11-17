@@ -81,6 +81,7 @@ private:
 
 
     InputType readInput();
+    inline Token setToken(Token tok) { return token = tok; }
     // case insensitive comparing
     bool strcmpi(const std::string &str, const char *cmd);
     bool isCommand(const std::string &str);
