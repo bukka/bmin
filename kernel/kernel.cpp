@@ -72,7 +72,8 @@ void Kernel::setFormula(Formula *f)
 
 void Kernel::minimizeFormula()
 {
-    minFormula = qm->minimize(formula);
+    if (formula)
+        minFormula = qm->minimize(formula);
 }
 
 void Kernel::deleteFomula()

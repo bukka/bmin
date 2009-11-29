@@ -28,7 +28,7 @@ Formula *QuineMcCluskey::minimize(Formula *f)
     findFinalImplicants();
 
     mf->setMinimized(true);
-    of->setMinimized(true);
+    f->setMinimized(true);
 
     return mf;
 }
@@ -53,9 +53,9 @@ void QuineMcCluskey::findPrimeImplicants()
         table[i] = new vector<Term *>[varsCount+1];
 
     // sorting terms by numbers of dont cares and ones
-    of->terms->itInit();
-    while (of->terms->itNext()) {
-        pterm = &of->terms->itGet();
+    of->itInit();
+    while (of->itHasNext()) {
+        pterm = &of->itNext();
         ones = pterm->valuesCount(LiteralValue::ONE);
         table[0][ones].push_back(pterm);
         /*if (debug)
@@ -94,6 +94,7 @@ void QuineMcCluskey::findPrimeImplicants()
     }
 
 
+
     //if (debug) {}
 
     // deletes all rows from table
@@ -121,7 +122,7 @@ void QuineMcCluskey::findFinalImplicants()
     int impl, term, implsCount, origTermsSize;
 
     vector<Term> *onesTerms = getTermsVector(of->terms, true);
-    vector<Term> *terms = getTermsVector(of->terms);
+    vector<Term> *terms = getTermsVector(mf->terms);
 
     implsCount = mf->terms->getSize();
     origTermsSize = onesTerms->size();
@@ -166,8 +167,8 @@ vector<Term> *QuineMcCluskey::getTermsVector(TermsContainer *tc, bool onlyOnes) 
 {
     vector<Term> *pv = new vector<Term>;
     tc->itInit();
-    while (tc->itNext()) {
-        Term t = tc->itGet();
+    while (tc->itHasNext()) {
+        Term t = tc->itNext();
         if (!onlyOnes || !t.isDC())
             pv->push_back(t);
     }

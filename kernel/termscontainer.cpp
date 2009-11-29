@@ -28,7 +28,7 @@ bool TermsContainer::pushTerm(int idx, bool isDC)
 {
     for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
         if (idx == (*it).getIdx()) {
-            if ((*it).isDC() == isDC)
+            if ((*it).isDC())
                 return false;
             else {
                 (*it).setDC(isDC);
@@ -81,6 +81,7 @@ bool TermsContainer::hasTerm(const Term & t) const
 
 vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms) const
 {
+    minterms.clear();
     //for (vector<Term>::iterator iter = termsVector.begin(); iter != termsVector.end(); iter++)
     //expandTerm(minterms, *iter);
     for (unsigned i = 0; i < termsVector.size(); i++)
@@ -90,6 +91,7 @@ vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms) const
 
 vector<int> &TermsContainer::getTermsIdx(vector<int> &idxs, int val) const
 {
+    idxs.clear();
     // TODO - all terms with ZERO
     OutputValue value(val);
     if (value.isZero()) {
@@ -152,15 +154,14 @@ void TermsContainer::itInit()
 }
 
 
-bool TermsContainer::itNext()
+bool TermsContainer::itHasNext()
 {
-    itPos++;
     return termsVector.size() != itPos;
 }
 
-Term &TermsContainer::itGet()
+Term &TermsContainer::itNext()
 {
-    return termsVector[itPos];
+    return termsVector[itPos++];
 }
 
 // expands term t to all minterms

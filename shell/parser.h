@@ -2,10 +2,11 @@
 #define PARSER_H
 
 #include "lexicalanalyzer.h"
+#include "shellexc.h"
+#include "kernel/kernelexc.h"
 
 #include <istream>
 #include <string>
-#include <list>
 #include <vector>
 #include <set>
 
@@ -22,30 +23,30 @@ class Parser
 {
 public:
     enum PrintForm {
-        SUM,  // sum of minterms' indexes
-        PROD, // product of minterms's indexes
-        SOP,  // sum of products
-        POS   // product of sums
+        PF_SUM,  // sum of minterms' indexes
+        PF_PROD, // product of minterms's indexes
+        PF_SOP,  // sum of products
+        PF_POS   // product of sums
     };
 
     Parser();
 
     void parse(std::string str);
 
-    std::string termToString(Term &term, std::vector<char> vars, PrintForm form = PROD);
-    std::string formulaToString(PrintForm form = SUM, Formula *formula = 0);
+    std::string termToString(Term &term, std::vector<char> vars, PrintForm form = PF_PROD);
+    std::string formulaToString(PrintForm form = PF_SUM, Formula *formula = 0);
 
 private:
     Kernel *kernel;
     LexicalAnalyzer lex;
 
-    void program() throw(ShellExc);
+    void program() throw(ShellExc, KernelExc);
     void command() throw(ShellExc);
-    void fceDef() throw(ShellExc);
+    void fceDef() throw(ShellExc, KernelExc);
     FormulaDecl *fceDecl() throw(ShellExc);
     char fceName() throw(ShellExc);
-    std::list<char> *fceVars() throw(ShellExc);
-    std::list<char> *fceVarsRem() throw(ShellExc);
+    std::vector<char> *fceVars() throw(ShellExc);
+    std::vector<char> *fceVarsRem() throw(ShellExc);
     FormulaSpec *fceBody() throw(ShellExc);
     FormulaSpec *sum() throw(ShellExc);
     std::set<int> *sumRem() throw(ShellExc);
@@ -53,6 +54,7 @@ private:
     std::set<int> *prodRem() throw(ShellExc);
     std::set<int> *mTerms() throw(ShellExc);
     std::set<int> *dTerms() throw(ShellExc);
+    std::set<int> *fceArgs() throw(ShellExc);
     std::set<int> *fceIndexes() throw(ShellExc);
     std::set<int> *fceIndexesRem() throw(ShellExc);
 

@@ -39,6 +39,8 @@
 
 #include <vector>
 
+using namespace std;
+
 // maping cell index in karnaugh map
 // for number of variables greater 2
 static int karnaughG2[] = {
@@ -371,7 +373,11 @@ void MapWidget::setMapData(Formula *formula)
     }
 
     msg = MSG_NONE;
-    vars = formula->getVars();
+    vector<char> revVars = formula->getVars();
+    vars.clear();
+    for (int i = int(revVars.size()) - 1; i >= 0; i--)
+        vars.push_back(revVars[i]);
+
     int zero = MapCell::ZERO;
 
     if (size != mapSize) {
@@ -383,19 +389,16 @@ void MapWidget::setMapData(Formula *formula)
 
         if (size == 1) {
             cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
-            cells.push_back(
-                new MapCell(x+cellSize,y,cellSize,cellBorder,zero));
+            cells.push_back(new MapCell(x+cellSize,y,cellSize,cellBorder,zero));
         }
         else if (size > 1) {
             n = power(2,size);
             for (i = 0; i < min(n,64); i += 32) {
                 for (j = 0; j < min(n,32); j += 8) {
                     for (k = 0; k < min(n,8); k += 2) {
-                        cells.push_back(
-                            new MapCell(x,y,cellSize,cellBorder,zero));
+                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
                         y += cellSize;
-                        cells.push_back(
-                            new MapCell(x,y,cellSize,cellBorder,zero));
+                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
                         x += cellSize;
                         y -= cellSize;
                     }

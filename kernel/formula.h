@@ -59,10 +59,10 @@ struct FormulaSpec
 class Formula
 {
 public:
-    enum Form { SOP, POS };
+    enum Form { FORM_SOP, FORM_POS };
 
     static const char DEFAULT_NAME = 'f';
-    static const Form DEFAULT_FORM = SOP;
+    static const Form DEFAULT_FORM = FORM_SOP;
     static const char DEFAULT_FIRST_VAR = 'a';
 
     // Constructors
@@ -72,9 +72,12 @@ public:
     Formula(int vc, std::vector<Term> &t, const std::vector<char> *v = 0,
             char fn = DEFAULT_NAME, Form f = DEFAULT_FORM)
             throw(InvalidTermExc);
-    Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidTermExc);
+    Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidIndexExc);
     // Copy Construtor
     Formula(const Formula &f, bool toMinterms = false);
+
+    // Destructor
+    ~Formula();
 
     // adds new term to formula
     void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
@@ -91,9 +94,9 @@ public:
     // returns number of terms
     int getSize() const;
 
-    void termsItInit();
-    bool termsItNext();
-    Term &termsItGet();
+    void itInit();
+    bool itHasNext();
+    Term &itNext();
 
     // whether formula is minimized
     bool isMinimized() const { return minimized; }
@@ -129,7 +132,7 @@ public:
     friend class QuineMcCluskey;
 
 private:
-    void init(int vs, const std::vector<char> *v, char fn, Form f);
+    void init(int vs, const std::vector<char> *v, char fn, Form f = FORM_SOP);
     inline void setMinimized(bool m) { minimized = m; }
 
     // container for terms

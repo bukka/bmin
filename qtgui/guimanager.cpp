@@ -115,7 +115,7 @@ void GUIManager::minimizeFormula()
     }
 
     m_kernel->minimizeFormula();
-    emit minFceChanged(QString::fromStdString(m_parser->formulaToString(Parser::SOP)));
+    emit minFceChanged(QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP)));
     emit formulaMinimized();
 }
 
@@ -132,7 +132,7 @@ void GUIManager::setTerm(int idx, OutputValue &value)
     else
         formula->pushTerm(idx, value.isDC());
 
-    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::SUM));
+    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SUM));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
     emit formulaChanged(m_kernel->getFormula());

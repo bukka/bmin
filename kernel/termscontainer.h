@@ -41,8 +41,8 @@ public:
 
     // iterating
     void itInit();
-    bool itNext();
-    Term &itGet();
+    bool itHasNext();
+    Term &itNext();
 
 private:
     void expandTerm(std::vector<Term> &v, const Term &t) const;

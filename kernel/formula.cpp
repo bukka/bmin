@@ -60,7 +60,7 @@ FormulaSpec::~FormulaSpec()
 void Formula::init(int vs, const vector<char> *v, char fn, Form f)
 {
     varsCount = vs;
-    maxIdx = 1 << vs;
+    maxIdx = (1 << vs) - 1;
     setVars(v, vs);
     terms = new TermsContainer(vs);
 
@@ -107,18 +107,19 @@ Formula::Formula(int vs, vector<Term> &t, const vector<char> *v, char fn, Form f
     terms->setContainer(t);
 }
 
-Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidTermExc)
+Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidIndexExc)
 {
     set<int>::iterator it;
 
+    init(decl->vars->size(), decl->vars, decl->name);
+
+    if (spec->d) {
+        for (it = spec->d->begin(); it != spec->d->end(); it++)
+            pushTerm(*it, true);
+    }
     if (spec->f) {
-        init(decl->vars->size(), decl->vars, decl->name, SOP);
         for (it = spec->f->begin(); it != spec->f->end(); it++)
-            terms->pushTerm(*it, false);
-        if (spec->d) {
-            for (it = spec->d->begin(); it != spec->d->end(); it++)
-                terms->pushTerm(*it, true);
-        }
+            pushTerm(*it, false);
     }
     //TODO else product
 }
@@ -131,14 +132,19 @@ Formula::Formula(const Formula &f, bool toMinterms)
         terms->setContainer(f.getMinterms(v));
     }
     else
-        terms = f.terms;
+        *terms = *f.terms;
 
+}
+
+Formula::~Formula()
+{
+    delete terms;
 }
 
 
 void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
 {
-    if (idx >= maxIdx)
+    if (idx > maxIdx)
         throw InvalidIndexExc(idx);
 
     if (terms->pushTerm(idx, isDC))
@@ -147,7 +153,7 @@ void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
 
 void Formula::removeTerm(int idx) throw(InvalidIndexExc)
 {
-    if (idx >= maxIdx)
+    if (idx > maxIdx)
         throw InvalidIndexExc(idx);
 
     if (terms->removeTerm(idx))
@@ -179,19 +185,19 @@ int Formula::getSize() const
     return terms->getSize();
 }
 
-void Formula::termsItInit()
+void Formula::itInit()
 {
     terms->itInit();
 }
 
-bool Formula::termsItNext()
+bool Formula::itHasNext()
 {
-    return terms->itNext();
+    return terms->itHasNext();
 }
 
-Term &Formula::termsItGet()
+Term &Formula::itNext()
 {
-    return terms->itGet();
+    return terms->itNext();
 }
 
 

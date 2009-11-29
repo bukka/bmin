@@ -6,6 +6,11 @@
 
 using namespace std;
 
+const char *KernelExc::what() const throw()
+{
+    return "Kernel exception";
+}
+
 // statement of InvalidVarsExc
 const char *InvalidVarsExc::what() const throw()
 {

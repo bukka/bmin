@@ -1,13 +1,23 @@
-# TODO file
-
+## ------------------------------------------------------------------
+# TODO file ---------------------------------------------------------
 	
-# FEATURES ----------------------------------------------------------makaca23
+# FEATURES ----------------------------------------------------------
 
 kernel events - excptions, commands
-correct work with variables
 treating products of sums
-create iterator for formula terms; iterating in const methods 
+correct work with variables
+Quine-McCluskey debugging info
+ASCII arts
+Quine-McCluskey widget
+rewrite K-map
+creating formula wizard
+better error (exception) information
 inlining short functions
+create iterator for formula terms; iterating in const methods 
+more containers - comparing, testing
+optimize Quine-McCluskey algorithm
+espresso
+improve 3D cube
 more formulas
 parsing all file (no every row standalone)
 
@@ -34,5 +44,7 @@ termtree.h, termtree.cpp
 
 
 
-# TESTING FCE
+## ------------------------------------------------------------------
+# TESTING FCE -------------------------------------------------------
 f(c,b,a) = sum m(1, 2)
+f(d,c,b,a) = sum m(1, 2) + sum d(4, 6)

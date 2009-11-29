@@ -3,6 +3,7 @@
 #include "shellexc.h"
 
 #include "kernel/kernel.h"
+#include "kernel/kernelexc.h"
 #include "kernel/formula.h"
 #include "kernel/term.h"
 #include "kernel/outputvalue.h"
@@ -24,7 +25,7 @@ Parser::Parser()
 string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
 {
     ostringstream oss;
-    if (form == PROD || form == SOP) {
+    if (form == PF_PROD || form == PF_SOP) {
         for (int i = 0; i < term.getSize(); i++) {
             if (!term[i].isMissing()) {
                 oss << vars[i];
@@ -41,24 +42,26 @@ string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
 string Parser::formulaToString(PrintForm form, Formula *f)
 {
     if (!f) {
-        f = (form == SUM || form == PROD)?
+        f = (form == PF_SUM || form == PF_PROD)?
             kernel->getFormula(): kernel->getMinimizedFormula();
+        if (!f)
+            return "unknown";
     }
 
     ostringstream oss;
     // variables
     oss << f->getName() << SYM_LPAR;
     vector<char> vars = f->getVars();
-    for (unsigned i = 0; i < vars.size(); i++) {
-        if (i != 0)
+    for (unsigned i = vars.size(); i > 0; i--) {
+        if (i != vars.size())
             oss << SYM_COMMA;
-        oss << vars[i];
+        oss << vars[i - 1];
     }
-    oss << SYM_RPAR << ' ' << SYM_ASSIGN;
+    oss << SYM_RPAR << ' ' << SYM_ASSIGN << ' ';
 
-    if (form == SUM) {
+    if (form == PF_SUM) {
         vector<int> idx;
-        oss << ' ' << CMD_SUM << ' ';
+        oss << CMD_SUM << ' ';
         oss << FCE_MINTERM << SYM_LPAR;
         f->getTermsIdx(idx, OutputValue::ONE);
         for (unsigned i = 0; i < idx.size(); i++) {
@@ -80,12 +83,20 @@ string Parser::formulaToString(PrintForm form, Formula *f)
             oss << SYM_RPAR;
         }
     }
+    else if (f->getSize() == 0)
+            oss << " 0";
     else {
-        f->termsItInit();
-        while (f->termsItNext())
-            oss << ' ' << termToString(f->termsItGet(), vars, PROD);
+        f->itInit();
+        bool first = true;
+        while (f->itHasNext()) {
+            if (first)
+                first = false;
+            else
+                oss << ' ' << SYM_PLUS << ' ';
+            oss << termToString(f->itNext(), vars, PF_PROD);
+        }
     }
-
+    
     return oss.str();
 }
 
@@ -98,12 +109,12 @@ void Parser::parse(std::string str)
         program();
         cmpre(LexicalAnalyzer::END);
     }
-    catch (ShellExc &exc) {
+    catch (exception &exc) {
         cout << exc.what() << endl;
     }
 }
 
-void Parser::program() throw(ShellExc)
+void Parser::program() throw(ShellExc, KernelExc)
 {
     readToken();
 
@@ -131,7 +142,7 @@ void Parser::command() throw(ShellExc)
     readToken();
 }
 
-void Parser::fceDef() throw(ShellExc)
+void Parser::fceDef() throw(ShellExc, KernelExc)
 {
     FormulaDecl *decl = fceDecl();
     cmpre(LexicalAnalyzer::ASSIGN);
@@ -146,18 +157,8 @@ FormulaDecl *Parser::fceDecl() throw(ShellExc)
 {
     char name = fceName();
     cmpre(LexicalAnalyzer::LPAR);
-    list<char> *l = fceVars();
-    try {
-        cmpre(LexicalAnalyzer::RPAR);
-    }
-    catch (ShellExc &exc) {
-        delete l;
-        throw;
-    }
-
-    vector<char> *v = new vector<char>(l->size());
-    copy(l->begin(), l->end(), v->begin());
-    delete l;
+    vector<char> *v = fceVars();
+    readToken(); // RPAR - assured by fceVarsRem
 
     return new FormulaDecl(v, name);
 }
@@ -169,26 +170,26 @@ char Parser::fceName() throw(ShellExc)
     return name;
 }
 
-list<char> *Parser::fceVars() throw(ShellExc)
+vector<char> *Parser::fceVars() throw(ShellExc)
 {
     cmpe(LexicalAnalyzer::LETTER);
     char var = lex.getLetter();
     readToken();
-    list<char> *l = fceVarsRem();
-    l->push_front(var);
-    return l;
+    vector<char> *v = fceVarsRem();
+    v->push_back(var);
+    return v;
 }
 
-list<char> *Parser::fceVarsRem() throw(ShellExc)
+vector<char> *Parser::fceVarsRem() throw(ShellExc)
 {
     if (cmp(LexicalAnalyzer::RPAR))
-        return new list<char>;
+        return new vector<char>;
     else if (cmpr(LexicalAnalyzer::COMMA) && cmp(LexicalAnalyzer::LETTER)) {
         char var = lex.getLetter();
         readToken();
-        list<char> *l = fceVarsRem();
-        l->push_front(var);
-        return l;
+        vector<char> *v = fceVarsRem();
+        v->push_back(var);
+        return v;
     }
     else
         throw syntaxExc();
@@ -269,7 +270,7 @@ set<int> *Parser::mTerms() throw(ShellExc)
     if (lex.getLetter() != FCE_MINTERM)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken(); // letter
-    return fceIndexes();
+    return fceArgs();
 }
 
 set<int> *Parser::dTerms() throw(ShellExc)
@@ -278,24 +279,26 @@ set<int> *Parser::dTerms() throw(ShellExc)
     if (lex.getLetter() != FCE_DC)
         throw LexicalExc(lex.getLetter(), lex.getCol());
     readToken(); // letter
-    return fceIndexes();
+    return fceArgs();
+}
+
+set<int> *Parser::fceArgs() throw(ShellExc)
+{
+    cmpre(LexicalAnalyzer::LPAR);
+    set<int> *s = fceIndexes();
+    readToken(); // RPAR - assured by fceIndexes and fceIndexesRem
+    return s;
 }
 
 set<int> *Parser::fceIndexes() throw(ShellExc)
 {
-    cmpre(LexicalAnalyzer::LPAR);
+    if (cmp(LexicalAnalyzer::RPAR))
+        return 0;
     cmpe(LexicalAnalyzer::NUMBER);
     int num = lex.getNumber();
     readToken();
     set<int> *s = fceIndexesRem();
     s->insert(num);
-    try {
-        cmpre(LexicalAnalyzer::RPAR);
-    }
-    catch (ShellExc &exc) {
-        delete s;
-        throw;
-    }
     return s;
 }
 
