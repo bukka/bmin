@@ -26,8 +26,10 @@ public:
     bool hasTerm(const Term &t) const;
 
     /* returns terms id with val from original terms */
-    std::vector<int> &getTermsIdx(std::vector<int> &idxs, int val) const;
+    std::vector<int> getTermsIdx(int val) const;
+    std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs) const;
     /* returns actual minterms */
+    std::vector<Term> getMinterms() const;
     std::vector<Term> &getMinterms(std::vector<Term> &minterms) const;
 
     // returns value of term with idx
@@ -45,8 +47,6 @@ public:
     Term &itNext();
 
 private:
-    void expandTerm(std::vector<Term> &v, const Term &t) const;
-
     std::vector<Term> termsVector;
 
     ContainerType type;

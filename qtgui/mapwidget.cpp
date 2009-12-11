@@ -414,8 +414,8 @@ void MapWidget::setMapData(Formula *formula)
         setAllValues(zero);
 
     std::vector<int> idx;
-    setValues(formula->getTermsIdx(idx, OutputValue::ONE), MapCell::ONE,size);
-    setValues(formula->getTermsIdx(idx, OutputValue::DC), MapCell::DONT_CARE, size);
+    setValues(formula->getTermsIdx(OutputValue::ONE, idx), MapCell::ONE,size);
+    setValues(formula->getTermsIdx(OutputValue::DC, idx), MapCell::DONT_CARE, size);
 
 
     updateMap();

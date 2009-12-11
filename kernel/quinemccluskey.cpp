@@ -6,10 +6,72 @@
 #include "literalvalue.h"
 
 #include <vector>
-#include <map>
+#include <list>
+#include <set>
 #include <algorithm>
 
+
 using namespace std;
+
+// DEBUG DATA
+
+QuineMcCluskeyData::QuineMcCluskeyData() : varsCount(0)
+{
+    primes.clear();
+}
+
+void QuineMcCluskeyData::initPrimes(int vars)
+{
+    varsCount = vars;
+    maxMissings = 0;
+    primes = vector<list<Term> >((vars + 1) * vars);
+}
+
+void QuineMcCluskeyData::initCover(vector<Term> *row, vector<Term> *col)
+{
+    coverRowsCount = static_cast<int>(row->size());
+    coverColsCount = static_cast<int>(col->size());
+    coverHeadRow = *row;
+    coverHeadCol = *col;
+    coverTable.clear();
+}
+
+void QuineMcCluskeyData::addPrime(int missings, int ones, Term *t)
+{
+    if (missings > maxMissings)
+        maxMissings = missings;
+    int idx = getPrimesIdx(missings, ones);
+    primes[idx].push_back(*t);
+}
+
+std::list<Term> *QuineMcCluskeyData::getPrimes(int missings, int ones)
+{
+    int idx = getPrimesIdx(missings, ones);
+    return &primes[idx];
+}
+
+void QuineMcCluskeyData::setCover(int row, int col)
+{
+    coverTable.insert(getCoverIdx(row, col));
+}
+
+bool QuineMcCluskeyData::isCovered(int row, int col)
+{
+    return coverTable.find(getCoverIdx(row, col)) != coverTable.end();
+}
+
+int QuineMcCluskeyData::getPrimesIdx(int missings, int ones)
+{
+    return missings * varsCount + ones;
+}
+
+int QuineMcCluskeyData::getCoverIdx(int row, int col)
+{
+    return row + col * coverRowsCount;
+}
+
+
+// ALGORITHM
 
 QuineMcCluskey::QuineMcCluskey() : MinimizingAlgorithm() {}
 
@@ -18,8 +80,10 @@ QuineMcCluskey::~QuineMcCluskey()
     delete of;
 }
 
-Formula *QuineMcCluskey::minimize(Formula *f)
+Formula *QuineMcCluskey::minimize(Formula *f, bool dbg)
 {
+    setDebug(dbg);
+
     delete of;
     of = new Formula(*f, true);
     mf = new Formula(*of);
@@ -40,12 +104,15 @@ void QuineMcCluskey::findPrimeImplicants()
         return;
 
     // inicialization
-    int dontCares, ones, varsCount;
+    int missings, ones, varsCount;
     Term *pterm, *combined;
     vector<Term *> *left, *right, *out;
     vector<Term *>::iterator lit, rit, it;
 
     varsCount = of->varsCount;
+
+    if (debug)
+        data.initPrimes(varsCount);
 
     // inicializing matrix with vectors contained pointers to terms
     vector<Term *> **table = new vector<Term *> *[varsCount+1];
@@ -58,20 +125,17 @@ void QuineMcCluskey::findPrimeImplicants()
         pterm = &of->itNext();
         ones = pterm->valuesCount(LiteralValue::ONE);
         table[0][ones].push_back(pterm);
-        /*if (debug)
-        {
-            vector<int> v;
-            v.push_back(pterm->getIdx());
-            dbg_map.insert(pair<Term *,vector<int> >(pterm,v));
-        }*/
+
+        if (debug)
+            data.addPrime(0, ones, pterm);
     }
 
     // generating new terms - minimazation
-    for (dontCares = 0; dontCares < varsCount; dontCares++) {
+    for (missings = 0; missings < varsCount; missings++) {
         for (ones = 0; ones < varsCount; ones++) {
-            left = &table[dontCares][ones];
-            right = &table[dontCares][ones+1];
-            out = &table[dontCares+1][ones];
+            left = &table[missings][ones];
+            right = &table[missings][ones + 1];
+            out = &table[missings + 1][ones];
 
             for (lit = left->begin(); lit != left->end(); lit++) {
                 for (rit = right->begin(); rit != right->end(); rit++) {
@@ -81,7 +145,8 @@ void QuineMcCluskey::findPrimeImplicants()
                         // if combined isn't in out
                         if (find(out->begin(), out->end(), combined) == out->end()) {
                             out->push_back(combined);
-                            //if (debug) {}
+                            if (debug)
+                                data.addPrime(missings + 1, ones, combined);
                         }
 
                         mf->terms->removeTerm(**lit);
@@ -92,10 +157,6 @@ void QuineMcCluskey::findPrimeImplicants()
             }
         }
     }
-
-
-
-    //if (debug) {}
 
     // deletes all rows from table
     for (int i = 0; i <= varsCount; i++) {
@@ -127,20 +188,19 @@ void QuineMcCluskey::findFinalImplicants()
     implsCount = mf->terms->getSize();
     origTermsSize = onesTerms->size();
 
+    if (debug)
+        data.initCover(terms, onesTerms);
+
     // table of covering
     bool **table = new bool *[implsCount];
     for (impl = 0; impl < implsCount; impl++) {
         table[impl] = new bool[origTermsSize];
-        for (term = 0; term < origTermsSize; term++)
+        for (term = 0; term < origTermsSize; term++) {
             table[impl][term] = (*terms)[impl].implies(onesTerms->at(term));
+            if (debug && table[impl][term])
+                data.setCover(impl, term);
+        }
     }
-
-    /*if (debug)
-    {
-        *dbg_os << "Covering table:\n";
-        show_covering_table(*dbg_os,table,*orig_main_terms);
-        *dbg_os << endl;
-    }*/
 
     // vector with final terms
     vector<Term> v;

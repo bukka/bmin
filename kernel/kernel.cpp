@@ -70,16 +70,28 @@ void Kernel::setFormula(Formula *f)
     formulaChanged = true; // hack
 }
 
-void Kernel::minimizeFormula()
+bool Kernel::minimizeFormula(bool debug)
 {
-    if (formula)
-        minFormula = qm->minimize(formula);
+    if (formula && (!formula->isMinimized() || (debug && !qm->isDebug()))) {
+        minFormula = qm->minimize(formula, debug);
+        return true;
+    }
+    else
+        return false;
 }
 
 void Kernel::deleteFomula()
 {
     delete formula;
     formula = 0;
+}
+
+QuineMcCluskeyData *Kernel::getQmData()
+{
+    if (formula && (minimizeFormula(true) || (formula->isMinimized() && qm->isDebug())))
+        return qm->getData();
+    else
+        return 0;
 }
 
 // hack

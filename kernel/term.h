@@ -84,6 +84,9 @@ public:
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 
+    // expands term t to all minterms
+    static void expandTerm(std::vector<Term> &v, const Term &t);
+
 private:
     // term initialization
     void init(term_t lit, term_t mis, int s, bool isDC);

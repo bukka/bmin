@@ -30,6 +30,7 @@ class ModuleWidget;
 class WelcomeWidget;
 class MapWidget;
 class CubeWidget;
+class QmWidget;
 
 // mode manager class
 class ModeManager : public QObject
@@ -43,10 +44,11 @@ public:
     static void destroy();
 
     // modes' identifiers
-    static const int WELCOME_ID = 0;
-    static const int MAP_ID     = 1;
+    static const int ID_WELCOME = 0;
+    static const int ID_MAP     = 1;
+    static const int ID_QM      = 2;
 #ifdef Q_WS_WIN
-    static const int CUBE_ID    = 2;
+    static const int ID_CUBE    = 3;
 #endif
 
     // return modules
@@ -61,6 +63,7 @@ private:
 
     WelcomeWidget *m_welcome;
     MapWidget *m_map;
+    QmWidget *m_qm;
 #ifdef Q_WS_WIN
     CubeWidget *m_cube;
 #endif
@@ -73,6 +76,7 @@ signals:
     // emitted when mode is changed
     void modeChanged(int);
     void mapActivated(bool);
+    void qmActivated(bool);
 #ifdef Q_WS_WIN
     void cubeActivated(bool);
 #endif

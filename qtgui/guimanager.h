@@ -25,10 +25,14 @@
 
 #include <QObject>
 
+// #include "kernel/quinemccluskey.h"
+
 class Kernel;
 class Formula;
 class OutputValue;
 class Parser;
+class QuineMcCluskey;
+class QuineMcCluskeyData;
 
 class QString;
 
@@ -43,9 +47,12 @@ public:
     // destroy instance
     static void destroy();
     // actualize function and return function string
-    inline QString getActualFce() { emit fceRead(); return m_actualFce; }
+    QString getActualFce();
     // whether formula is correct
     inline bool isCorrectFormula() const { return m_isCorrect; }
+    // return data for Quine-McCluskey algorithm
+    QuineMcCluskeyData *getQmData();
+
 
 private:
     GUIManager();

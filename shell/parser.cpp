@@ -60,17 +60,16 @@ string Parser::formulaToString(PrintForm form, Formula *f)
     oss << SYM_RPAR << ' ' << SYM_ASSIGN << ' ';
 
     if (form == PF_SUM) {
-        vector<int> idx;
         oss << CMD_SUM << ' ';
         oss << FCE_MINTERM << SYM_LPAR;
-        f->getTermsIdx(idx, OutputValue::ONE);
+        vector<int> idx = f->getTermsIdx(OutputValue::ONE);
         for (unsigned i = 0; i < idx.size(); i++) {
             if (i != 0)
                 oss << SYM_COMMA;
             oss << idx[i];
         }
         oss << SYM_RPAR;
-        idx = f->getTermsIdx(idx, OutputValue::DC);
+        idx = f->getTermsIdx(OutputValue::DC, idx);
         if (!idx.empty()) {
             oss << ' ' << SYM_PLUS << ' ';
             oss << CMD_SUM << ' ';

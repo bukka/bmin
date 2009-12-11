@@ -26,6 +26,7 @@
 
 #include "kernel/kernel.h"
 #include "kernel/formula.h"
+#include "kernel/quinemccluskey.h"
 #include "kernel/outputvalue.h"
 #include "kernel/constants.h"
 
@@ -62,6 +63,17 @@ GUIManager::~GUIManager()
 {
     Kernel::destroy();
     delete m_parser;
+}
+
+QString GUIManager::getActualFce()
+{
+    emit fceRead();
+    return m_actualFce;
+}
+
+QuineMcCluskeyData *GUIManager::getQmData()
+{
+    return m_kernel->getQmData();
 }
 
 // by changing formula

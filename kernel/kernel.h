@@ -5,6 +5,7 @@
 
 class Formula;
 class QuineMcCluskey;
+class QuineMcCluskeyData;
 
 class Kernel
 {
@@ -17,8 +18,10 @@ public:
     bool hasFormula();
     bool hasMinimizedFormula();
     void setFormula(Formula *f);
-    void minimizeFormula();
     void deleteFomula();
+    bool minimizeFormula(bool debug = false);
+
+    QuineMcCluskeyData *getQmData();
 
     // hack - will be changed for events
     bool isFormulaChanged();

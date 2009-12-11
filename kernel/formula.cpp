@@ -170,14 +170,24 @@ OutputValue Formula::getTermValue(int idx) const
     return terms->getTermValue(idx);
 }
 
-vector<int> &Formula::getTermsIdx(vector<int> &v, int val) const
+vector<int> Formula::getTermsIdx(int val) const
 {
-    return terms->getTermsIdx(v, val);
+    return terms->getTermsIdx(val);
 }
 
-vector<Term> &Formula::getMinterms(vector<Term> &v) const
+vector<int> &Formula::getTermsIdx(int val, vector<int> &idxs) const
 {
-    return terms->getMinterms(v);
+    return terms->getTermsIdx(val, idxs);
+}
+
+vector<Term> Formula::getMinterms() const
+{
+    return terms->getMinterms();
+}
+
+vector<Term> &Formula::getMinterms(vector<Term> &minterms) const
+{
+    return terms->getMinterms(minterms);
 }
 
 int Formula::getSize() const

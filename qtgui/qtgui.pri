@@ -1,8 +1,6 @@
 # qtgui include project file
-
 INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
-
 SOURCES += mainwindow.cpp \
     guimanager.cpp \
     controlwidget.cpp \
@@ -15,8 +13,8 @@ SOURCES += mainwindow.cpp \
     modewidget.cpp \
     modulewidget.cpp \
     modemanager.cpp \
-    aboutdialog.cpp
-
+    aboutdialog.cpp \
+    qmwidget.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -29,6 +27,6 @@ HEADERS += mainwindow.h \
     modewidget.h \
     modulewidget.h \
     modemanager.h \
-    aboutdialog.h
-
+    aboutdialog.h \
+    qmwidget.h
 RESOURCES += resources.qrc

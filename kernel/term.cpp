@@ -164,12 +164,12 @@ bool Term::operator==(const Term & t) const
 
 bool Term::operator<(const Term & t) const
 {
-    return getIdx() < t.getIdx();
+    return getIdx() > t.getIdx();
 }
 
 bool Term::operator>(const Term & t) const
 {
-    return getIdx() > t.getIdx();
+    return getIdx() < t.getIdx();
 }
 
 // index operator
@@ -220,3 +220,19 @@ ostream & operator<<(ostream & os, const Term & term)
     return os << term.toString();
 }
 
+// expands term t to all minterms
+void Term::expandTerm(vector<Term> &v, const Term &t)
+{
+    Term *pt;
+
+    if (t.valuesCount(LiteralValue::MISSING) == 0)
+        v.push_back(t);
+    else {
+        pt = t.expandMissingValue();
+        if (pt) {
+            expandTerm(v, pt[0]);
+            expandTerm(v, pt[1]);
+            delete [] pt;
+        }
+    }
+}

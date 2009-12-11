@@ -24,6 +24,7 @@
 #include "welcomewidget.h"
 #include "mapwidget.h"
 #include "cubewidget.h"
+#include "qmwidget.h"
 
 #include <QList>
 
@@ -34,17 +35,22 @@ ModeManager *ModeManager::s_instance = 0;
 ModeManager::ModeManager()
 {
     // welcome
-    m_welcome = new WelcomeWidget(tr("Welcome"), 0);
+    m_welcome = new WelcomeWidget(tr("Welcome"), ID_WELCOME);
     m_modules << m_welcome;
 
     // map
-    m_map = new MapWidget(tr("K-map"), 1);
+    m_map = new MapWidget(tr("K-map"), ID_MAP);
     m_modules << m_map;
     connect(this, SIGNAL(mapActivated(bool)), m_map, SLOT(setActivity(bool)));
 
+    // Quine-McCluskey
+    m_qm = new QmWidget(tr("Quine-McCluskey"), ID_QM);
+    m_modules << m_qm;
+    connect(this, SIGNAL(qmActivated(bool)), m_qm, SLOT(setActivity(bool)));
+
 #ifdef Q_WS_WIN
     // cube
-    m_cube = new CubeWidget(tr("Boolean n-Cube"), 2);
+    m_cube = new CubeWidget(tr("Boolean n-Cube"), ID_CUBE);
     m_modules << m_cube;
     connect(this, SIGNAL(cubeActivated(bool)), m_cube, SIGNAL(activated(bool)));
 #endif
@@ -69,9 +75,10 @@ void ModeManager::destroy()
 // set mode
 void ModeManager::setMode(int modeId)
 {
-    emit mapActivated(modeId == MAP_ID);
+    emit mapActivated(modeId == ID_MAP);
+    emit qmActivated(modeId == ID_QM);
 #ifdef Q_WS_WIN
-    emit cubeActivated(modeId == CUBE_ID);
+    emit cubeActivated(modeId == ID_CUBE);
 #endif
     emit modeChanged(modeId);
 }

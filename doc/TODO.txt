@@ -3,14 +3,14 @@
 	
 # FEATURES ----------------------------------------------------------
 
+Quine-McCluskey debugging info - make const Data
 kernel events - excptions, commands
 treating products of sums
 correct work with variables
-Quine-McCluskey debugging info
 ASCII arts
-Quine-McCluskey widget
 rewrite K-map
 creating formula wizard
+Quine-McCluskey widget improvement - Model & View
 better error (exception) information
 inlining short functions
 create iterator for formula terms; iterating in const methods 
@@ -24,23 +24,26 @@ parsing all file (no every row standalone)
 
 # CODE --------------------------------------------------------------
 
-parser.cpp
-	f(d,c,b,a) = sum m() - empty fce
-	exception handling in parse function
+- parser.cpp
+  f(d,c,b,a) = sum m() - empty fce
+  exception handling in parse function
 			
-formula.cpp	
-	Formula(FormulaSpec *spec, FormulaDecl *decl) - products
-	setVars - varibles count over and under
-	iterator
+- formula.cpp
+  Formula(FormulaSpec *spec, FormulaDecl *decl) - products
+  setVars - varibles count over and under
+  iterator
 
-termscontainer.cpp
-	TermsContainer::getTermsIdx - Term ZERO
-	iterator
-	more containers - list, ternary tree, terms tree
+- termscontainer.cpp
+  TermsContainer::getTermsIdx - Term ZERO
+  iterator
+  more containers - list, ternary tree, terms tree
 
 	
-termtree.h, termtree.cpp
-	- comleting, test
+- termtree.h, termtree.cpp
+  comleting, test
+
+- guimanager.cpp, kernel.cpp
+  correct behavior for returning QmData --> events, auto minimizing
 
 
 

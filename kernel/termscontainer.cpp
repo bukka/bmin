@@ -79,19 +79,33 @@ bool TermsContainer::hasTerm(const Term & t) const
 }
 
 
-vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms) const
+vector<Term> &TermsContainer::getMinterms(std::vector<Term> &minterms) const
 {
     minterms.clear();
-    //for (vector<Term>::iterator iter = termsVector.begin(); iter != termsVector.end(); iter++)
-    //expandTerm(minterms, *iter);
     for (unsigned i = 0; i < termsVector.size(); i++)
-        expandTerm(minterms, termsVector[i]);
+        Term::expandTerm(minterms, termsVector[i]);
     return minterms;
 }
 
-vector<int> &TermsContainer::getTermsIdx(vector<int> &idxs, int val) const
+vector<Term> TermsContainer::getMinterms() const
+{
+    vector<Term> minterms;
+    for (unsigned i = 0; i < termsVector.size(); i++)
+        Term::expandTerm(minterms, termsVector[i]);
+    return minterms;
+}
+
+vector<int> TermsContainer::getTermsIdx(int val) const
+{
+    vector<int> idxs;
+    getTermsIdx(val, idxs);
+    return idxs;
+}
+
+vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs) const
 {
     idxs.clear();
+
     // TODO - all terms with ZERO
     OutputValue value(val);
     if (value.isZero()) {
@@ -162,20 +176,4 @@ bool TermsContainer::itHasNext()
 Term &TermsContainer::itNext()
 {
     return termsVector[itPos++];
-}
-
-// expands term t to all minterms
-void TermsContainer::expandTerm(vector<Term> &v, const Term &t) const
-{
-    Term * pt;
-    if (t.valuesCount(LiteralValue::MISSING) == 0)
-        v.push_back(t);
-    else {
-        pt = t.expandMissingValue();
-        if (pt) {
-            expandTerm(v, pt[0]);
-            expandTerm(v, pt[1]);
-            delete [] pt;
-        }
-    }
 }
