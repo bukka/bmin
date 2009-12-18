@@ -1,6 +1,6 @@
 /*
  *
- * created date: 11/30/2009
+ * created date: 12/18/2009
  *
  * Copyright (C) 2009 Jakub Zelenka.
  *
@@ -20,41 +20,15 @@
  * 02111-1307 USA.
  */
 
-#ifndef QUINEMCCLUSKEYWIDGET_H
-#define QUINEMCCLUSKEYWIDGET_H
+#include "events.h"
+#include "kernel.h"
 
-#include "modulewidget.h"
-
-class GUIManager;
-class QuineMcCluskey;
-class QuineMcCluskeyData;
-
-class QString;
-class QTextEdit;
-class QTextTable;
-
-class QmWidget : public ModuleWidget
+Events::Events()
 {
-    Q_OBJECT
+    Kernel::instance()->registerEvents(this);
+}
 
-public:
-    QmWidget(const QString &name, int pos);
-
-private:
-    void showHeader();
-    void showNothing();
-    void showPrimeTable();
-    void showCoveringTable();
-    void setCell(QTextTable *table, int row, int col, const QString &html);
-
-    bool active;
-    GUIManager *gm;
-    QuineMcCluskeyData *data;
-    QTextEdit *textArea;
-
-public slots:
-    void setActivity(bool a);
-    void updateData();
-};
-
-#endif // QUINEMCCLUSKEYWIDGET_H
+Events::~Events()
+{
+    Kernel::instance()->unregisterEvents(this);
+}

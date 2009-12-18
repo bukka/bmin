@@ -75,7 +75,7 @@ void QmWidget::updateData()
             showCoveringTable();
         }
         else
-            ass(); //showNothing();
+            showNothing();
     }
 }
 
@@ -100,75 +100,18 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
     cellCursor.insertHtml(html);
 }
 
-
-void QmWidget::ass()
-{
-    int rows = 6;
-    int columns = 7;
-
-    QTextCursor cursor(textArea->textCursor());
-
-    QTextTableFormat tableFormat;
-    tableFormat.setCellPadding(4);
-    tableFormat.setCellSpacing(0);
-    tableFormat.setHeaderRowCount(1);
-    QTextTable *table = cursor.insertTable(rows, columns, tableFormat);
-    table->mergeCells(0, 0, 1, 3);
-    table->mergeCells(0, 3, 1, 2);
-    table->mergeCells(0, 5, 1, 2);
-
-    setCell(table, 0, 0, "Size 1 primes");
-    setCell(table, 0, 3, "Size 2 primes");
-    setCell(table, 0, 5, "Size 4 primes");
-
-    setCell(table, 1, 0, tr("Number of 1s"));
-    setCell(table, 1, 1, tr("Minterm"));
-    setCell(table, 1, 2, tr("0-Cube"));
-    setCell(table, 1, 3, tr("Minterms"));
-    setCell(table, 1, 4, tr("1-Cube"));
-    setCell(table, 1, 5, tr("Minterms"));
-    setCell(table, 1, 6, tr("2-Cube"));
-
-    setCell(table, 2, 0, tr("1"));
-    setCell(table, 3, 0, tr("2"));
-    setCell(table, 4, 0, tr("3"));
-    setCell(table, 5, 0, tr("4"));
-
-    setCell(table, 2, 1, tr("m4<br>m8"));
-    setCell(table, 3, 1, tr("m9<br>m10<br>m12"));
-    setCell(table, 4, 1, tr("m11<br>m14"));
-    setCell(table, 5, 1, tr("m15"));
-
-    setCell(table, 2, 2, tr("0100<br>1000"));
-    setCell(table, 3, 2, tr("1001<br>1010<br>1100"));
-    setCell(table, 4, 2, tr("1011<br>1110"));
-    setCell(table, 5, 2, tr("1111"));
-
-    setCell(table, 2, 3, tr("m(4,12)<br>m(8,9)<br>m(8,10)<br>m(8,12)"));
-    setCell(table, 3, 3, tr("m(9,11)<br>m(10,11)<br>m(10,14)<br>m(12,14)"));
-    setCell(table, 4, 3, tr("m(11,15)<br>m(14,15)"));
-
-    setCell(table, 2, 4, tr("-100*<br>100-<br>10-0<br>1-00"));
-    setCell(table, 3, 4, tr("10-1<br>101-<br>1-10<br>11-0"));
-    setCell(table, 4, 4, tr("1-11<br>111-"));
-
-    setCell(table, 2, 5, tr("m(8,9,10,11)<br>m(8,10,12,14)"));
-    setCell(table, 3, 5, tr("m(10,11,14,15)"));
-
-    setCell(table, 2, 6, tr("1--0*<br>10--*"));
-    setCell(table, 3, 6, tr("1-1-*"));
-}
-
 void QmWidget::showPrimeTable()
 {
     list<Term> *l;
     vector<Term> minterms;
 
-    //int rows = data->getVarsCount() + 2;
-    //int columns = data->getMaxMissings() + 3;
-
-    int rows = 6;
-    int columns = 7;
+    int columns = (data->getMaxMissings() * 2) + 3;
+    int rows = data->getVarsCount() + (data->hasLastMinterm()? 2: 1);
+    int firstPrime = 1;
+    if (data->hasFirstMinterm()) {
+        firstPrime++;
+        rows++;
+    }
 
     QTextCursor cursor(textArea->textCursor());
 
@@ -177,25 +120,19 @@ void QmWidget::showPrimeTable()
     tableFormat.setCellSpacing(0);
     tableFormat.setHeaderRowCount(1);
     QTextTable *table = cursor.insertTable(rows, columns, tableFormat);
+
+    QString headStr = tr("Size %1 primes");
+    QString cubeStr = tr("%1-cube");
+
     table->mergeCells(0, 0, 1, 3);
-    table->mergeCells(0, 3, 1, 2);
-    table->mergeCells(0, 5, 1, 2);
-
-    setCell(table, 0, 0, "Size 1 primes");
-    setCell(table, 0, 3, "Size 2 primes");
-    setCell(table, 0, 5, "Size 4 primes");
-
-
+    setCell(table, 0, 0, headStr.arg(1));
     setCell(table, 1, 0, tr("Number of 1s"));
     setCell(table, 1, 1, tr("Minterm"));
-    setCell(table, 1, 2, tr("0-Cube"));
+    setCell(table, 1, 2, cubeStr.arg(0));
 
-
-
-
-    /*for (int row = 1; row < rows; row++) {
-        setCell(table, row, 0, QString("%1").arg(row - 1));
-        l = data->getPrimes(0, row - 1);
+    for (int row = 2; row < rows; row++) {
+        setCell(table, row, 0, QString::number(row - firstPrime));
+        l = data->getPrimes(0, row - firstPrime);
         if (!l->empty()) {
             l->sort();
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
@@ -209,31 +146,35 @@ void QmWidget::showPrimeTable()
         }
     }
 
-    for (int column = 3; column < columns; ++column) {
+    for (int column = 3; column < columns; column += 2) {
+        table->mergeCells(0, column, 1, 2);
         // header
-        int size = 1 << (column - 2);
-        setCell(table, 0, column, tr("Size %1 Implicants").arg(size));
+        int missings = (column - 1) / 2;
+        int size = 1 << missings;
+        setCell(table, 0, column, headStr.arg(size));
+        setCell(table, 1, column, tr("Minterms"));
+        setCell(table, 1, column + 1, cubeStr.arg(missings));
 
         // body
-        for (int row = 1; row < rows; row++) {
-            l = data->getPrimes(column, row - 1);
-            if (!l->empty()) {
-                setCell(table, row, column, "<table cellpadding=\"0\" cellspacing=\"0\">");
-                for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                    minterms.clear();
-                    Term::expandTerm(minterms, *it);
-                    QStringList minstr;
-                    for (unsigned i = 0; i < minterms.size(); i++)
-                        minstr << QString("%1").arg(minterms[i].getIdx());
-                    setCell(table, row, column,
-                            QString("<tr><td>m(%1)</td><td align=\"right\">%2</td></tr>").arg(
-                                    minstr.join(","),
-                                    QString::fromStdString((*it).toString())));
+        for (int row = 2; row < rows; row++) {
+            l = data->getPrimes(missings, row - firstPrime);
+            for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
+                minterms.clear();
+                Term::expandTerm(minterms, *it);
+                QStringList minstr;
+                for (unsigned i = 0; i < minterms.size(); i++) {
+                    minstr << QString::number(minterms[i].getIdx());
                 }
-                setCell(table, row, column, "</table>");
+
+                if (it != l->begin()) {
+                    setCell(table, row, column, "<br>");
+                    setCell(table, row, column + 1, "<br>");
+                }
+                setCell(table, row, column, QString("m(%1)").arg(minstr.join(",")));
+                setCell(table, row, column + 1, QString::fromStdString((*it).toString()));
             }
         }
-    }*/
+    }
 
 
 

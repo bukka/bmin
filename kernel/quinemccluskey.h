@@ -27,6 +27,9 @@ public:
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
 
+    bool hasFirstMinterm();
+    bool hasLastMinterm();
+
 private:
     inline int getPrimesIdx(int missings, int ones);
     inline int getCoverIdx(int row, int col);
@@ -65,6 +68,8 @@ public:
     QuineMcCluskeyData *getData() { return &data; }
 
 private:
+    bool doesNotHaveTerm(std::vector<Term *> *v, Term *t);
+
     // finds essential prime implicants
     int extractEssentialImplicants(bool **table, int nImpls, int nTerms) const;
     // finds implicant by largest covering

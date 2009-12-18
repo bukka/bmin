@@ -101,6 +101,9 @@ Term *Term::combine(const Term & t) const
     int i;
     bool isOne = false;
 
+    if (missing != t.missing)
+        return 0;
+
     diff_mask = (t.liters ^ liters) & ~missing; // difference mask
 
     if (!diff_mask) // no difference
@@ -131,7 +134,7 @@ Term *Term::expandMissingValue() const
             term_t newMissing = missing & ~pos;
             Term *t = new Term[2];
             t[0] = Term(liters | pos, newMissing, size, dc);  // 1
-            t[0] = Term(liters & ~pos, newMissing, size, dc); // 0
+            t[1] = Term(liters & ~pos, newMissing, size, dc); // 0
             return t;
         }
     }
@@ -209,7 +212,7 @@ int Term::getValueAt(int position) const
 string Term::toString() const
 {
     string s;
-    for (int i = 0; i < size; i++)
+    for (int i = size - 1; i >= 0; i--)
         s += operator[](i).toString();
     return s;
 }

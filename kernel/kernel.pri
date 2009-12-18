@@ -8,7 +8,8 @@ SOURCES += formula.cpp \
     quinemccluskey.cpp \
     kernel.cpp \
     termscontainer.cpp \
-    outputvalue.cpp
+    outputvalue.cpp \
+    events.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -18,4 +19,5 @@ HEADERS += formula.h \
     kernel.h \
     constants.h \
     termscontainer.h \
-    outputvalue.h
+    outputvalue.h \
+    events.h

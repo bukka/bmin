@@ -40,14 +40,22 @@ void QuineMcCluskeyData::addPrime(int missings, int ones, Term *t)
 {
     if (missings > maxMissings)
         maxMissings = missings;
-    int idx = getPrimesIdx(missings, ones);
-    primes[idx].push_back(*t);
+    primes[getPrimesIdx(missings, ones)].push_back(*t);
 }
 
 std::list<Term> *QuineMcCluskeyData::getPrimes(int missings, int ones)
 {
-    int idx = getPrimesIdx(missings, ones);
-    return &primes[idx];
+    return &primes[getPrimesIdx(missings, ones)];
+}
+
+bool QuineMcCluskeyData::hasFirstMinterm()
+{
+    return !primes[getPrimesIdx(0, 0)].empty();
+}
+
+bool QuineMcCluskeyData::hasLastMinterm()
+{
+    return !primes[getPrimesIdx(0, varsCount)].empty();
 }
 
 void QuineMcCluskeyData::setCover(int row, int col)
@@ -62,7 +70,7 @@ bool QuineMcCluskeyData::isCovered(int row, int col)
 
 int QuineMcCluskeyData::getPrimesIdx(int missings, int ones)
 {
-    return missings * varsCount + ones;
+    return missings * (varsCount + 1) + ones;
 }
 
 int QuineMcCluskeyData::getCoverIdx(int row, int col)
@@ -143,7 +151,7 @@ void QuineMcCluskey::findPrimeImplicants()
                     combined = (*lit)->combine(**rit);
                     if (combined) {
                         // if combined isn't in out
-                        if (find(out->begin(), out->end(), combined) == out->end()) {
+                        if (doesNotHaveTerm(out, combined)) {
                             out->push_back(combined);
                             if (debug)
                                 data.addPrime(missings + 1, ones, combined);
@@ -174,6 +182,14 @@ void QuineMcCluskey::findPrimeImplicants()
     delete [] table;
 }
 
+bool QuineMcCluskey::doesNotHaveTerm(vector<Term *> *v, Term *t)
+{
+    for (unsigned i = 0; i < v->size(); i++) {
+        if (*v->at(i) == *t)
+            return false;
+    }
+    return true;
+}
 
 void QuineMcCluskey::findFinalImplicants()
 {

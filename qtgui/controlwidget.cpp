@@ -64,11 +64,10 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     fceLabel->setBuddy(m_fceLine);
 
     m_fceLine = new QLineEdit(m_prevFce,this);
-    m_fceLine->setText("f(d,c,b,a) = sum m(4,8,10,11,12,15) + sum d(9, 14)"); // hack for X36ASS
     connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
 
     m_minFcePrefix = tr("Minimal form: ");
-    m_minFceLabel = new QLabel(m_minFcePrefix + "f(d,c,b,a) = bcd + ab' + ac'", this); // hack
+    m_minFceLabel = new QLabel(m_minFcePrefix, this);
 
     m_minBtn = new QPushButton(tr("Minimize"), this);
     connect(m_minBtn, SIGNAL(clicked()), gm, SLOT(minimizeFormula()));

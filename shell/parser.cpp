@@ -45,7 +45,7 @@ string Parser::formulaToString(PrintForm form, Formula *f)
         f = (form == PF_SUM || form == PF_PROD)?
             kernel->getFormula(): kernel->getMinimizedFormula();
         if (!f)
-            return "unknown";
+            return "";
     }
 
     ostringstream oss;
