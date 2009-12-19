@@ -65,6 +65,33 @@ GUIManager::~GUIManager()
     delete m_parser;
 }
 
+void GUIManager::evtFormulaChanged(Formula *f)
+{
+    m_isCorrect = true;
+    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SUM, f));
+    emit fceChanged(m_actualFce);
+    emit minFceChanged("");
+    emit formulaChanged(f);
+}
+
+void GUIManager::evtFormulaMinimized()
+{
+    QString minFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP));
+    emit minFceChanged((minFce == "")? tr("unknown"): minFce);
+    emit formulaMinimized();
+}
+
+void GUIManager::evtError(std::exception &exc)
+{
+    emit errorInvoked(exc.what());
+}
+
+void GUIManager::evtExit()
+{
+    emit exit();
+}
+
+
 QString GUIManager::getActualFce()
 {
     emit fceRead();
@@ -74,6 +101,13 @@ QString GUIManager::getActualFce()
 QuineMcCluskeyData *GUIManager::getQmData()
 {
     return m_kernel->getQmData();
+}
+
+void GUIManager::invalidate()
+{
+    emit formulaInvalidated();
+    emit minFceChanged("");
+    m_isCorrect = false;
 }
 
 // by changing formula
@@ -88,24 +122,18 @@ void GUIManager::setFormula(const QString &fce)
     // check whether formula is empty
     if (fce == "") {
         //emit errorInvoked(tr("Formula isn't available!"));
-        m_isCorrect = false;
-        emit formulaInvalidated();
-        return;
+        invalidate();
     }
-    try {
-        // make formula
-        m_parser->parse(fce.toStdString());
-        if (m_kernel->isFormulaChanged()) { // HACK -> events
-            m_isCorrect = true;
-            emit formulaChanged(m_kernel->getFormula());
+    else {
+        try {
+            // make formula
+            m_parser->parse(fce.toStdString());
+        }
+        catch (std::exception &exc) {
+            emit errorInvoked(exc.what());
+            invalidate();
         }
     }
-    catch (std::exception &exc) {
-        emit errorInvoked(exc.what());
-        emit formulaInvalidated();
-        m_isCorrect = false;
-    }
-    emit minFceChanged("");
 }
 
 // update formula
@@ -116,19 +144,12 @@ void GUIManager::updateFormula(const QString &fce)
 }
 
 // minimization of the variables
-void GUIManager::minimizeFormula()
+void GUIManager::minimizeFormula(bool debug)
 {
-    if (!m_kernel->hasFormula() || !m_isCorrect) {
+    if (!m_kernel->hasFormula() || !m_isCorrect)
         emit errorInvoked(tr("Incorrect boolean function!"));
-        return;
-    }
-    if (m_kernel->getFormula()->isMinimized()) {
-        return;
-    }
-
-    m_kernel->minimizeFormula();
-    emit minFceChanged(QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP)));
-    emit formulaMinimized();
+    else if (!m_kernel->getFormula()->isMinimized())
+        m_kernel->minimizeFormula(debug);
 }
 
 // changes term in formula
@@ -137,15 +158,8 @@ void GUIManager::setTerm(int idx, OutputValue &value)
     if (!m_kernel->hasFormula())
         return;
 
-    Formula *formula = m_kernel->getFormula();
-
     if (value.isZero())
-        formula->removeTerm(idx);
+        m_kernel->removeTerm(idx);
     else
-        formula->pushTerm(idx, value.isDC());
-
-    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SUM));
-    emit fceChanged(m_actualFce);
-    emit minFceChanged("");
-    emit formulaChanged(m_kernel->getFormula());
+        m_kernel->pushTerm(idx, value.isDC());
 }

@@ -58,9 +58,10 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(mainWidget);
 
-    // connect with guimanager
+    // connection with guimanager
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
+    connect(m_gm, SIGNAL(exit()), this, SLOT(close()));
 
     // set default formula
     if (Constants::DEFAULT_FORMULA) {

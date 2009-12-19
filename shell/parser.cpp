@@ -109,7 +109,7 @@ void Parser::parse(std::string str)
         cmpre(LexicalAnalyzer::END);
     }
     catch (exception &exc) {
-        cout << exc.what() << endl;
+        kernel->error(exc);
     }
 }
 

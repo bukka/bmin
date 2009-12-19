@@ -33,6 +33,7 @@
 #include <exception>
 #include <stdexcept>
 
+class Kernel;
 class OutputValue;
 class TermsContainer;
 class Term;
@@ -79,10 +80,6 @@ public:
     // Destructor
     ~Formula();
 
-    // adds new term to formula
-    void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
-    // removes term with idx
-    void removeTerm(int idx) throw(InvalidIndexExc);
     // finds out whether term t is in TermsContainer
     bool hasTerm(const Term &t) const;
     // returns value of term with idx
@@ -96,6 +93,7 @@ public:
     // returns number of terms
     int getSize() const;
 
+    // iterating
     void itInit();
     bool itHasNext();
     Term &itNext();
@@ -117,12 +115,6 @@ public:
     // form getter
     inline Form getForm() const { return form; }
 
-    // set default names for n variables
-    void setVars(int n);
-    // sets variables name by array of characters v
-    void setVars(char * v, int n);
-    // sets variables name by vector v
-    void setVars(const std::vector<char> *v, int vs = 0);
     // returns variables
     std::vector<char> getVars() const;
     // returns number of varibles
@@ -132,10 +124,22 @@ public:
     friend std::ostream &operator<<(std::ostream &os, Formula &t);
 
     friend class QuineMcCluskey;
+    friend class Kernel;
 
 private:
     void init(int vs, const std::vector<char> *v, char fn, Form f = FORM_SOP);
     inline void setMinimized(bool m) { minimized = m; }
+
+    // adds new term to formula
+    void pushTerm(int idx, bool isDC = false) throw(InvalidIndexExc);
+    // removes term with idx
+    void removeTerm(int idx) throw(InvalidIndexExc);
+    // set default names for n variables
+    void setVars(int n);
+    // sets variables name by array of characters v
+    void setVars(char * v, int n);
+    // sets variables name by vector v
+    void setVars(const std::vector<char> *v, int vs = 0);
 
     // container for terms
     TermsContainer *terms;

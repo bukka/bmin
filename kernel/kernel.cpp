@@ -31,7 +31,6 @@ void Kernel::destroy()
 Kernel::Kernel()
 {
     formula = minFormula = 0;
-    formulaChanged = false; // hack
     qm = new QuineMcCluskey;
 }
 
@@ -80,22 +79,21 @@ bool Kernel::hasMinimizedFormula() const
 
 void Kernel::setFormula(Formula *f)
 {
+    delete formula;
     formula = f;
+    emitEvent(evtFormulaChanged(f));
     if (minFormula) {
         delete minFormula;
         minFormula = 0;
     }
-    formulaChanged = true; // hack
 }
 
-bool Kernel::minimizeFormula(bool debug)
+void Kernel::minimizeFormula(bool debug)
 {
     if (formula && (!formula->isMinimized() || (debug && !qm->isDebug()))) {
         minFormula = qm->minimize(formula, debug);
-        return true;
+        emitEvent(evtFormulaMinimized());
     }
-    else
-        return false;
 }
 
 void Kernel::deleteFomula()
@@ -106,18 +104,50 @@ void Kernel::deleteFomula()
 
 QuineMcCluskeyData *Kernel::getQmData()
 {
-    if (formula && (minimizeFormula(true) || (formula->isMinimized() && qm->isDebug())))
+    if (formula && (formula->isMinimized() && qm->isDebug()))
         return qm->getData();
     else
         return 0;
 }
 
-// hack
-bool Kernel::isFormulaChanged()
+void Kernel::pushTerm(int idx, bool isDC)
 {
-    bool changed = formulaChanged;
-    formulaChanged = false;
-    return changed;
+    try {
+        formula->pushTerm(idx, isDC);
+        emitEvent(evtFormulaChanged(formula));
+    }
+    catch (InvalidIndexExc &exc) {
+        emitEvent(evtError(exc));
+    }
+}
+
+void Kernel::removeTerm(int idx)
+{
+    try {
+        formula->removeTerm(idx);
+        emitEvent(evtFormulaChanged(formula));
+    }
+    catch (InvalidIndexExc &exc) {
+        emitEvent(evtError(exc));
+    }
+}
+
+void Kernel::setVars(int n)
+{
+    formula->setVars(n);
+    emitEvent(evtFormulaChanged(formula));
+}
+
+void Kernel::setVars(char *v, int n)
+{
+    formula->setVars(v, n);
+    emitEvent(evtFormulaChanged(formula));
+}
+
+void Kernel::setVars(const vector<char> *v, int vs)
+{
+    formula->setVars(v, vs);
+    emitEvent(evtFormulaChanged(formula));
 }
 
 void Kernel::error(exception &exc)

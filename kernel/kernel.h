@@ -4,6 +4,7 @@
 #include <string>
 #include <exception>
 #include <list>
+#include <vector>
 
 class Events;
 class Formula;
@@ -25,13 +26,20 @@ public:
     bool hasMinimizedFormula() const;
     void setFormula(Formula *f);
     void deleteFomula();
-    bool minimizeFormula(bool debug = false);
+    void minimizeFormula(bool debug = false);
+
+    // adds new term to formula
+    void pushTerm(int idx, bool isDC = false);
+    // removes term with idx
+    void removeTerm(int idx);
+    // set default names for n variables
+    void setVars(int n);
+    // sets variables name by array of characters v
+    void setVars(char * v, int n);
+    // sets variables name by vector v
+    void setVars(const std::vector<char> *v, int vs = 0);
 
     QuineMcCluskeyData *getQmData();
-
-    // hack - will be changed for events
-    bool isFormulaChanged();
-    bool formulaChanged;
 
     void error(std::exception &exc);
     void exit();
@@ -45,7 +53,7 @@ private:
     // events
     std::list<Events *> events;
 
-    Formula *formula; // original formula
+    Formula *formula;    // original formula
     Formula *minFormula; // minimized formula
 
     QuineMcCluskey *qm;

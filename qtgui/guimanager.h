@@ -23,9 +23,9 @@
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 
-#include <QObject>
+#include "kernel/events.h"
 
-// #include "kernel/quinemccluskey.h"
+#include <QObject>
 
 class Kernel;
 class Formula;
@@ -34,10 +34,14 @@ class Parser;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
 
+namespace std {
+    class exception;
+}
+
 class QString;
 
 // GUIManager class
-class GUIManager : public QObject
+class GUIManager : public QObject, public Events
 {
     Q_OBJECT
 
@@ -53,10 +57,17 @@ public:
     // return data for Quine-McCluskey algorithm
     QuineMcCluskeyData *getQmData();
 
+protected:
+    virtual void evtFormulaMinimized();
+    virtual void evtFormulaChanged(Formula *f);
+    virtual void evtError(std::exception &);
+    virtual void evtExit();
 
 private:
     GUIManager();
     ~GUIManager();
+
+    void invalidate();
 
      // static instance
     static GUIManager *s_instance;
@@ -72,7 +83,7 @@ private:
 
 public slots:
     // minimization variables
-    void minimizeFormula();
+    void minimizeFormula(bool debug = false);
     // changing formula
     void setFormula(const QString &);
     // updating formula - the same like setFormule and fceChanged is emitted
@@ -95,6 +106,8 @@ signals:
     void formulaInvalidated();
     // emitted when error message is required
     void errorInvoked(const QString &);
+    // emmited by exiting
+    void exit();
 
 };
 

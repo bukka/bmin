@@ -28,6 +28,7 @@
 class GUIManager;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
+class Formula;
 
 class QString;
 class QTextEdit;
@@ -47,13 +48,14 @@ private:
     void showCoveringTable();
     void setCell(QTextTable *table, int row, int col, const QString &html);
 
-    bool active;
-    GUIManager *gm;
-    QuineMcCluskeyData *data;
-    QTextEdit *textArea;
+    bool m_active;
+    GUIManager *m_gm;
+    QuineMcCluskeyData *m_data;
+    QTextEdit *m_textArea;
 
 public slots:
     void setActivity(bool a);
+    void makeData(Formula *);
     void updateData();
 };
 

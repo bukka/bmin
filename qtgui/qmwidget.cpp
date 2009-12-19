@@ -24,6 +24,7 @@
 #include "modulewidget.h"
 #include "guimanager.h"
 
+#include "kernel/kernel.h"
 #include "kernel/quinemccluskey.h"
 #include "kernel/term.h"
 
@@ -40,37 +41,43 @@ using namespace std;
 QmWidget::QmWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
 {
-    data = 0;
-    gm = GUIManager::instance();
+    m_data = 0;
+    m_gm = GUIManager::instance();
 
-    //hack connect(gm, SIGNAL(formulaMinimized()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(formulaChanged(Formula *)), this, SLOT(makeData(Formula *)));
 
-    textArea = new QTextEdit;
-    textArea->setFont(QFont("monospace", 10));
-    textArea->setLineWrapMode(QTextEdit::NoWrap);
-    textArea->setReadOnly(true);
-    textArea->setUndoRedoEnabled(false);
+    m_textArea = new QTextEdit;
+    m_textArea->setFont(QFont("monospace", 10));
+    m_textArea->setLineWrapMode(QTextEdit::NoWrap);
+    m_textArea->setReadOnly(true);
+    m_textArea->setUndoRedoEnabled(false);
 
     // set layout
     QVBoxLayout *mainLayout = new QVBoxLayout;
     mainLayout->setMargin(0);
-    mainLayout->addWidget(textArea);
+    mainLayout->addWidget(m_textArea);
     setLayout(mainLayout);
 }
 
 void QmWidget::setActivity(bool a)
 {
-    active = a;
+    m_active = a;
+    m_gm->minimizeFormula(true);
+}
 
-    updateData();
+void QmWidget::makeData(Formula *)
+{
+    if (m_active)
+        m_gm->minimizeFormula(true);
 }
 
 void QmWidget::updateData()
 {
-    if (active) {
-        data = gm->getQmData();
+    if (m_active) {
+        m_data = m_gm->getQmData();
         showHeader();
-        if (data) {
+        if (m_data) {
             showPrimeTable();
             showCoveringTable();
         }
@@ -81,14 +88,14 @@ void QmWidget::updateData()
 
 void QmWidget::showHeader()
 {
-    textArea->clear();
-    textArea->insertHtml(QString("<h1 align=\"center\">%1</h1><br>").arg(
+    m_textArea->clear();
+    m_textArea->insertHtml(QString("<h1 align=\"center\">%1</h1><br>").arg(
             tr("Quine-McCluskey Algorithm")));
 }
 
 void QmWidget::showNothing()
 {
-    textArea->insertHtml(QString("<h3 align=\"left\">%1</h1>").arg(
+    m_textArea->insertHtml(QString("<h3 align=\"left\">%1</h1>").arg(
             tr("The formula is unknown.")));
 }
 
@@ -105,15 +112,15 @@ void QmWidget::showPrimeTable()
     list<Term> *l;
     vector<Term> minterms;
 
-    int columns = (data->getMaxMissings() * 2) + 3;
-    int rows = data->getVarsCount() + (data->hasLastMinterm()? 2: 1);
+    int columns = (m_data->getMaxMissings() * 2) + 3;
+    int rows = m_data->getVarsCount() + (m_data->hasLastMinterm()? 2: 1);
     int firstPrime = 1;
-    if (data->hasFirstMinterm()) {
+    if (m_data->hasFirstMinterm()) {
         firstPrime++;
         rows++;
     }
 
-    QTextCursor cursor(textArea->textCursor());
+    QTextCursor cursor(m_textArea->textCursor());
 
     QTextTableFormat tableFormat;
     tableFormat.setCellPadding(2);
@@ -132,7 +139,7 @@ void QmWidget::showPrimeTable()
 
     for (int row = 2; row < rows; row++) {
         setCell(table, row, 0, QString::number(row - firstPrime));
-        l = data->getPrimes(0, row - firstPrime);
+        l = m_data->getPrimes(0, row - firstPrime);
         if (!l->empty()) {
             l->sort();
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
@@ -157,7 +164,7 @@ void QmWidget::showPrimeTable()
 
         // body
         for (int row = 2; row < rows; row++) {
-            l = data->getPrimes(missings, row - firstPrime);
+            l = m_data->getPrimes(missings, row - firstPrime);
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
                 minterms.clear();
                 Term::expandTerm(minterms, *it);

@@ -26,6 +26,7 @@
 #include <exception>
 
 class Kernel;
+class Formula;
 
 class Events
 {
@@ -34,7 +35,8 @@ public:
     virtual ~Events();
 
 protected:
-    virtual void evtMinimized() {}
+    virtual void evtFormulaChanged(Formula *) {}
+    virtual void evtFormulaMinimized() {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
 
