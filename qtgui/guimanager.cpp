@@ -56,6 +56,8 @@ GUIManager::GUIManager()
 {
     m_kernel = Kernel::instance();
     m_parser = new Parser;
+    m_actualFce = "";
+    m_isCorrect = false;
 }
 
 // destructor

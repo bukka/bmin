@@ -4,15 +4,15 @@
 # FEATURES ----------------------------------------------------------
 
 Quine-McCluskey debugging info - make const Data
-kernel events - excptions, commands
+ASCII art
 treating products of sums
 correct work with variables
-ASCII arts
 rewrite K-map
 creating formula wizard
 Quine-McCluskey widget improvement - Model & View
 better error (exception) information
 inlining short functions
+better behavior of parsing fce - idx precedence (diff to old formula)
 create iterator for formula terms; iterating in const methods 
 more containers - comparing, testing
 optimize Quine-McCluskey algorithm
@@ -20,6 +20,12 @@ espresso
 improve 3D cube
 more formulas
 parsing all file (no every row standalone)
+
+
+-- Completed
+   kernel events ._/
+   Quine-McCluskey debugging info ._/
+
 
 
 # CODE --------------------------------------------------------------

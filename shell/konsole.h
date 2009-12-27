@@ -6,7 +6,7 @@ class Konsole
 public:
     Konsole();
 
-    void process();
+    void run();
 
 };
 

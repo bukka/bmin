@@ -71,4 +71,23 @@ protected:
     Reason reason;
 };
 
+class OptionsExc : public std::exception
+{
+public:
+    enum Type { ARGS, ABBR, NAME };
+
+    OptionsExc() : type(ARGS) {}
+    OptionsExc(char c) : abbr(c), type(ABBR) {}
+    OptionsExc(const char *n, bool noPar = false);
+    virtual ~OptionsExc() throw();
+
+    const char *what() const throw();
+
+private:
+    bool noParam;
+    char abbr;
+    char *name;
+    Type type;
+};
+
 #endif // SHELLEXC_H

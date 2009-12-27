@@ -63,7 +63,14 @@ QmWidget::QmWidget(const QString &name, int pos)
 void QmWidget::setActivity(bool a)
 {
     m_active = a;
-    m_gm->minimizeFormula(true);
+    if (a) {
+        if (m_gm->isCorrectFormula())
+            m_gm->minimizeFormula(true);
+        else {
+            showHeader();
+            showNothing();
+        }
+    }
 }
 
 void QmWidget::makeData(Formula *)

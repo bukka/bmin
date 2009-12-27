@@ -4,8 +4,10 @@ DEPENDPATH += $$PWD
 HEADERS += konsole.h \
     lexicalanalyzer.h \
     parser.h \
-    shellexc.h
+    shellexc.h \
+    options.h
 SOURCES += konsole.cpp \
     lexicalanalyzer.cpp \
     parser.cpp \
-    shellexc.cpp
+    shellexc.cpp \
+    options.cpp

@@ -4,7 +4,7 @@ Konsole::Konsole()
 {
 }
 
-void Konsole::process()
+void Konsole::run()
 {
 }
 
