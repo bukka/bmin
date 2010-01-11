@@ -76,11 +76,13 @@ void GUIManager::evtFormulaChanged(Formula *f)
     emit formulaChanged(f);
 }
 
-void GUIManager::evtFormulaMinimized()
+void GUIManager::evtFormulaMinimized(bool minimizing)
 {
-    QString minFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP));
-    emit minFceChanged((minFce == "")? tr("unknown"): minFce);
-    emit formulaMinimized();
+    if (minimizing) {
+        QString minFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP));
+        emit minFceChanged((minFce == "")? tr("unknown"): minFce);
+        emit formulaMinimized();
+    }
 }
 
 void GUIManager::evtError(std::exception &exc)

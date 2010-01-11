@@ -17,6 +17,8 @@ public:
     static Kernel *instance();
     static void destroy();
 
+    static const char CURRENT_FCE_NAME = '\0';
+
     void registerEvents(Events *evt);
     void unregisterEvents(Events *evt);
 
@@ -43,6 +45,11 @@ public:
 
     void error(std::exception &exc);
     void exit();
+    void help();
+    void showQm();
+    void showMap();
+    void showCube();
+    void showFce(char name = CURRENT_FCE_NAME);
 private:
     Kernel();
     ~Kernel();

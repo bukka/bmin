@@ -92,8 +92,10 @@ void Kernel::minimizeFormula(bool debug)
 {
     if (formula && (!formula->isMinimized() || (debug && !qm->isDebug()))) {
         minFormula = qm->minimize(formula, debug);
-        emitEvent(evtFormulaMinimized());
+        emitEvent(evtFormulaMinimized(true));
     }
+    else
+        emitEvent(evtFormulaMinimized(false));
 }
 
 void Kernel::deleteFomula()
@@ -159,4 +161,32 @@ void Kernel::error(exception &exc)
 void Kernel::exit()
 {
     emitEvent(evtExit());
+}
+
+void Kernel::help()
+{
+    emitEvent(evtHelp());
+}
+
+void Kernel::showQm()
+{
+    emitEvent(evtShowQm());
+}
+
+void Kernel::showMap()
+{
+    emitEvent(evtShowMap());
+}
+
+void Kernel::showCube()
+{
+    emitEvent(evtShowCube());
+}
+
+void Kernel::showFce(char name)
+{
+    if (formula && (name == CURRENT_FCE_NAME || formula->getName() == name))
+        emitEvent(evtShowFce(formula, formula->isMinimized()? minFormula: 0));
+    else
+        emitEvent(evtShowFce(0, 0));
 }

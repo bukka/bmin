@@ -32,6 +32,11 @@ static const char * const CMD_SUM      = "sum";
 static const char * const CMD_PROD     = "prod";
 static const char * const CMD_MINIMIZE = "minimize";
 static const char * const CMD_EXIT     = "exit";
+static const char * const CMD_HELP     = "help";
+static const char * const CMD_SHOW     = "show";
+static const char * const CMD_QM       = "qm";
+static const char * const CMD_MAP      = "map";
+static const char * const CMD_CUBE     = "cube";
 
 class LexicalAnalyzer
 {
@@ -53,7 +58,12 @@ public:
         SUM,
         PROD,
         MINIMIZE,
-        EXIT
+        EXIT,
+        HELP,
+        SHOW,
+        QM,
+        MAP,
+        CUBE
     };
 
     LexicalAnalyzer();

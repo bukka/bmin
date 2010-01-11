@@ -135,11 +135,44 @@ void Parser::command() throw(ShellExc)
     case LexicalAnalyzer::EXIT:
         kernel->exit();
         break;
+    case LexicalAnalyzer::HELP:
+        kernel->help();
+        break;
+    case LexicalAnalyzer::SHOW:
+        readToken();
+        showArg();
+        break;
     default:
         throw commandExc();
     }
     readToken();
 }
+
+void Parser::showArg() throw(ShellExc)
+{
+    if (cmp(LexicalAnalyzer::END))
+        kernel->showFce();
+    else if (cmp(LexicalAnalyzer::LETTER))
+        kernel->showFce(lex.getLetter());
+    else {
+        cmpe(LexicalAnalyzer::CMD);
+        switch (lex.getCommand()) {
+        case LexicalAnalyzer::QM:
+            kernel->showQm();
+            break;
+        case LexicalAnalyzer::MAP:
+            kernel->showMap();
+            break;
+        case LexicalAnalyzer::CUBE:
+            kernel->showCube();
+            break;
+        default:
+            throw commandExc();
+        }
+    }
+}
+
+
 
 void Parser::fceDef() throw(ShellExc, KernelExc)
 {

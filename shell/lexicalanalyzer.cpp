@@ -37,6 +37,11 @@ const char *LexicalAnalyzer::getCommandName(Command cmd) const
     case SUM: return CMD_SUM;
     case PROD: return CMD_PROD;
     case MINIMIZE: return CMD_MINIMIZE;
+    case HELP: return CMD_HELP;
+    case SHOW: return CMD_SHOW;
+    case QM: return CMD_QM;
+    case MAP: return CMD_MAP;
+    case CUBE: return CMD_CUBE;
     default: return CMD_EXIT;
     }
 }
@@ -93,6 +98,16 @@ bool LexicalAnalyzer::isCommand(const string &str)
         command = SUM;
     else if (strcmpi(word, CMD_PROD))
         command = PROD;
+    else if (strcmpi(word, CMD_HELP))
+        command = HELP;
+    else if (strcmpi(word, CMD_SHOW))
+        command = SHOW;
+    else if (strcmpi(word, CMD_QM))
+        command = QM;
+    else if (strcmpi(word, CMD_MAP))
+        command = MAP;
+    else if (strcmpi(word, CMD_CUBE))
+        command = CUBE;
     else
         return false;
 
@@ -137,7 +152,6 @@ LexicalAnalyzer::Token LexicalAnalyzer::readToken() throw(ShellExc)
             return setToken(CMD);
         else
             throw CommandExc(word.c_str(), CommandExc::UNKNOWN, col);
-
     default: // OTHER
         switch (inputChar) {
         case SYM_LPAR:

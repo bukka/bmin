@@ -36,9 +36,15 @@ public:
 
 protected:
     virtual void evtFormulaChanged(Formula *) {}
-    virtual void evtFormulaMinimized() {}
+    virtual void evtFormulaMinimized(bool) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
+    virtual void evtHelp() {}
+    virtual void evtShowQm() {}
+    virtual void evtShowMap() {}
+    virtual void evtShowCube() {}
+    virtual void evtShowFce(Formula *, Formula *) {}
+
 
     friend class Kernel;
 };

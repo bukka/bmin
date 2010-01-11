@@ -57,8 +57,8 @@ class CommandExc : public ShellExc
 public:
     enum Reason { CONTEXT, UNKNOWN };
 
-    CommandExc(const char *cmd, Reason r, int c, int l = 1)
-            : ShellExc(c, l), command(cmd), reason(r) {}
+    CommandExc(const char *cmd, Reason r, int c, int l = 1);
+    virtual ~CommandExc() throw();
 
     virtual Type getType() { return COMMAND; }
 
@@ -67,7 +67,7 @@ public:
     inline Reason getReason() { return reason; }
 
 protected:
-    const char *command;
+    char *command;
     Reason reason;
 };
 

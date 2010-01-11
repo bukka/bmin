@@ -4,6 +4,7 @@
 #include <sstream>
 #include <exception>
 #include <cstring>
+#include <iostream>
 
 using namespace std;
 
@@ -30,14 +31,33 @@ const char *SyntaxExc::what() const throw()
     return oss.str().c_str();
 }
 
+CommandExc::CommandExc(const char *cmd, Reason r, int c, int l)
+            : ShellExc(c, l), reason(r)
+{
+    command = new char[strlen(cmd) + 1];
+    strcpy(command, cmd);
+}
+
+CommandExc::~CommandExc() throw()
+{
+    delete command;
+}
+
+
 const char *CommandExc::what() const throw()
 {
-    ostringstream oss;
-    if (reason == CONTEXT)
-        oss << "Command '" << command << "' cannot be used in this context." << col;
-    else // UNKNOWN
-        oss << "Unknown command '" << command << "'";
-    return oss.str().c_str();
+    string s;
+    if (reason == CONTEXT) {
+        s += "Command '";
+        s += command;
+        s += "' cannot be used in this context.";
+    }
+    else { // UNKNOWN
+        s = "Unknown command '";
+        s += command;
+        s += "'";
+    }
+    return s.c_str();
 }
 
 OptionsExc::OptionsExc(const char *n, bool noPar)

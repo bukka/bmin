@@ -3,23 +3,25 @@
 	
 # FEATURES ----------------------------------------------------------
 
-Quine-McCluskey debugging info - make const Data
 ASCII art
 treating products of sums
 correct work with variables
+more formulas
 rewrite K-map
+more icons and images
 creating formula wizard
-Quine-McCluskey widget improvement - Model & View
-better error (exception) information
-inlining short functions
-better behavior of parsing fce - idx precedence (diff to old formula)
-create iterator for formula terms; iterating in const methods 
+algorithm testing interface - measure time
 more containers - comparing, testing
 optimize Quine-McCluskey algorithm
 espresso
-improve 3D cube
-more formulas
+improve 3D cube - new dimension
+better error (exception) information
+better behavior of parsing fce - idx precedence (diff to old formula)
+Quine-McCluskey widget improvement - Model & View
+inlining short functions
+create iterator for formula terms; iterating in const methods 
 parsing all file (no every row standalone)
+shell programming language - special bytecode
 
 
 -- Completed
