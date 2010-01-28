@@ -48,7 +48,7 @@ class QuineMcCluskey : public MinimizingAlgorithm
 {
 public:
     QuineMcCluskey();
-    ~QuineMcCluskey();
+    virtual ~QuineMcCluskey();
 
     // complete minimization
     Formula *minimize(Formula *f) { return minimize(f, false); }
