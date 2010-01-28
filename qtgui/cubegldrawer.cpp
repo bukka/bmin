@@ -22,13 +22,13 @@
 
 #include "cubegldrawer.h"
 #include "cubeglconf.h"
-
-#include "kernel/formula.h"
-#include "kernel/term.h"
-#include "kernel/outputvalue.h"
-#include "kernel/literalvalue.h"
-
-#include "shell/parser.h"
+// kernel
+#include "formula.h"
+#include "term.h"
+#include "outputvalue.h"
+#include "literalvalue.h"
+// shell
+#include "parser.h"
 
 #include <math.h>
 

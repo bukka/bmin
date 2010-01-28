@@ -2,12 +2,13 @@
 #include "lexicalanalyzer.h"
 #include "shellexc.h"
 
-#include "kernel/kernel.h"
-#include "kernel/kernelexc.h"
-#include "kernel/formula.h"
-#include "kernel/term.h"
-#include "kernel/outputvalue.h"
-#include "kernel/literalvalue.h"
+// kernel
+#include "kernel.h"
+#include "kernelexc.h"
+#include "formula.h"
+#include "term.h"
+#include "outputvalue.h"
+#include "literalvalue.h"
 
 #include <string>
 #include <iostream>

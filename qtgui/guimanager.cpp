@@ -21,14 +21,14 @@
  */
 
 #include "guimanager.h"
-
-#include "shell/parser.h"
-
-#include "kernel/kernel.h"
-#include "kernel/formula.h"
-#include "kernel/quinemccluskey.h"
-#include "kernel/outputvalue.h"
-#include "kernel/constants.h"
+// kernel
+#include "kernel.h"
+#include "formula.h"
+#include "quinemccluskey.h"
+#include "outputvalue.h"
+#include "constants.h"
+// shell
+#include "parser.h"
 
 #include <QList>
 

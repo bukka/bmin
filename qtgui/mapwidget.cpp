@@ -23,10 +23,10 @@
 #include "mapwidget.h"
 #include "mapcell.h"
 #include "guimanager.h"
-
-#include "kernel/formula.h"
-#include "kernel/term.h"
-#include "kernel/outputvalue.h"
+// kernel
+#include "formula.h"
+#include "term.h"
+#include "outputvalue.h"
 
 #include <QPalette>
 #include <QColor>

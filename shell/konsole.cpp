@@ -1,8 +1,8 @@
 #include "konsole.h"
 #include "parser.h"
-
-#include "kernel/kernel.h"
-#include "kernel/formula.h"
+// kernel
+#include "kernel.h"
+#include "formula.h"
 
 #include <iostream>
 #include <string>

@@ -1,7 +1,8 @@
 #ifndef KONSOLE_H
 #define KONSOLE_H
 
-#include "kernel/events.h"
+// kernel
+#include "events.h"
 
 #include <iostream>
 

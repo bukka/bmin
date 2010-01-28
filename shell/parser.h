@@ -3,7 +3,8 @@
 
 #include "lexicalanalyzer.h"
 #include "shellexc.h"
-#include "kernel/kernelexc.h"
+// kernel
+#include "kernelexc.h"
 
 #include <istream>
 #include <string>

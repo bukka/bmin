@@ -44,7 +44,7 @@ AboutDialog::AboutDialog(QWidget *parent)
             "<h3>Bmin</h3>"
             "Boolean minimizer<br/><br/>"
             "Version: %1<br/>"
-            "Copyright 2007-2009 Jakub Zelenka<br/><br/>"
+            "Copyright 2007-2010 Jakub Zelenka<br/><br/>"
             ).arg(Constants::VERSION);
 
     QLabel *descLabel = new QLabel(desc);

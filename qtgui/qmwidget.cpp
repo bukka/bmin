@@ -23,10 +23,10 @@
 #include "qmwidget.h"
 #include "modulewidget.h"
 #include "guimanager.h"
-
-#include "kernel/kernel.h"
-#include "kernel/quinemccluskey.h"
-#include "kernel/term.h"
+// kernel
+#include "kernel.h"
+#include "quinemccluskey.h"
+#include "term.h"
 
 #include <QString>
 #include <QStringList>

@@ -23,7 +23,8 @@
 #ifndef GUIMANAGER_H
 #define GUIMANAGER_H
 
-#include "kernel/events.h"
+// kernel
+#include "events.h"
 
 #include <QObject>
 

@@ -5,9 +5,11 @@ HEADERS += konsole.h \
     lexicalanalyzer.h \
     parser.h \
     shellexc.h \
-    options.h
+    options.h \
+    asciiart.h
 SOURCES += konsole.cpp \
     lexicalanalyzer.cpp \
     parser.cpp \
     shellexc.cpp \
-    options.cpp
+    options.cpp \
+    asciiart.cpp
