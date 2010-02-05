@@ -24,7 +24,7 @@
 
 #include "asciiart.h"
 
-void AsciiArt::showQm(QuineMcCluskeyData */* data */)
+void AsciiArt::showQm(QuineMcCluskeyData *data)
 {
 
 }

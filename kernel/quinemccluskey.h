@@ -18,12 +18,11 @@ public:
     void initPrimes(int vars);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
 
+    bool isCovered(int row, int col);
+    void setCover(int row, int col);
+
     void addPrime(int missings, int ones, Term *t);
     std::list<Term> *getPrimes(int missings, int ones);
-
-    void setCover(int row, int col);
-    bool isCovered(int row, int col);
-
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
 

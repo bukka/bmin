@@ -165,14 +165,37 @@ bool Term::operator==(const Term & t) const
     return t.missing == missing && !((t.liters ^ liters) & ~missing);
 }
 
-bool Term::operator<(const Term & t) const
+// noneqaulity operator
+bool Term::operator!=(const Term & t) const
 {
-    return getIdx() > t.getIdx();
+    return !operator==(t);
 }
 
+// less operator
+bool Term::operator<(const Term & t) const
+{
+    if (missing) {
+        vector<Term> v1, v2;
+        expandTerm(v1, *this);
+        expandTerm(v2, t);
+        sort(v1.begin(), v1.end());
+        sort(v2.begin(), v2.end());
+        unsigned min = (v1.size() < v2.size())? v1.size(): v2.size();
+        for (unsigned i = 0; i < min; i++) {
+            if (v1[i] != v2[i])
+                return v1[i].getIdx() < v2[i].getIdx();
+        }
+        // the same
+        return v1.size() < v2.size();
+    }
+    else
+        return getIdx() < t.getIdx();
+}
+
+// greater operator
 bool Term::operator>(const Term & t) const
 {
-    return getIdx() < t.getIdx();
+    return operator!=(t) && !operator<(t);
 }
 
 // index operator
@@ -208,13 +231,34 @@ int Term::getValueAt(int position) const
         return 0;
 }
 
-// term in string form: 0X10
-string Term::toString() const
+// term to string
+string Term::toString(StringForm sf) const
 {
-    string s;
-    for (int i = size - 1; i >= 0; i--)
-        s += operator[](i).toString();
-    return s;
+    if (sf == SF_MSET) {
+        ostringstream oss;
+        if (missing) {
+            oss << "m(";
+            vector<Term> v;
+            Term::expandTerm(v, *this);
+            sort(v.begin(), v.end());
+            for (unsigned i = 0; i < v.size(); i++) {
+                if (i != 0)
+                    oss << ",";
+                oss << v[i].getIdx();
+            }
+            oss << ")";
+        }
+        else
+            oss << "m" << getIdx();
+
+        return oss.str();
+    }
+    else { // SF_BIN
+        string s;
+        for (int i = size - 1; i >= 0; i--)
+            s += operator[](i).toString();
+        return s;
+    }
 }
 
 // friend function to place term to ostream

@@ -36,7 +36,10 @@
 
 #include <list>
 #include <algorithm>
+#include <functional>
 using namespace std;
+
+#include <iostream>
 
 QmWidget::QmWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
@@ -117,7 +120,6 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
 void QmWidget::showPrimeTable()
 {
     list<Term> *l;
-    vector<Term> minterms;
 
     int columns = (m_data->getMaxMissings() * 2) + 3;
     int rows = m_data->getVarsCount() + (m_data->hasLastMinterm()? 2: 1);
@@ -148,7 +150,7 @@ void QmWidget::showPrimeTable()
         setCell(table, row, 0, QString::number(row - firstPrime));
         l = m_data->getPrimes(0, row - firstPrime);
         if (!l->empty()) {
-            l->sort();
+            l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
                 if (it != l->begin()) {
                     setCell(table, row, 1, "<br>");
@@ -172,19 +174,13 @@ void QmWidget::showPrimeTable()
         // body
         for (int row = 2; row < rows; row++) {
             l = m_data->getPrimes(missings, row - firstPrime);
+            l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                minterms.clear();
-                Term::expandTerm(minterms, *it);
-                QStringList minstr;
-                for (unsigned i = 0; i < minterms.size(); i++) {
-                    minstr << QString::number(minterms[i].getIdx());
-                }
-
                 if (it != l->begin()) {
                     setCell(table, row, column, "<br>");
                     setCell(table, row, column + 1, "<br>");
                 }
-                setCell(table, row, column, QString("m(%1)").arg(minstr.join(",")));
+                setCell(table, row, column, QString::fromStdString((*it).toString(Term::SF_MSET)));
                 setCell(table, row, column + 1, QString::fromStdString((*it).toString()));
             }
         }

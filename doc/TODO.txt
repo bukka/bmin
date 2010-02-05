@@ -41,12 +41,14 @@ shell programming language - special bytecode
   setVars - varibles count over and under
   iterator
 
+- quinemccluskey.h
+  make const QuineMcCluskeyData
+
 - termscontainer.cpp
   TermsContainer::getTermsIdx - Term ZERO
   iterator
   more containers - list, ternary tree, terms tree
 
-	
 - termtree.h, termtree.cpp
   comleting, test
 

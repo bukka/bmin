@@ -43,6 +43,9 @@ class InvalidPositionExc;
 class Term
 {
 public:
+    // Term string format
+    enum StringForm { SF_BIN, SF_MSET };
+
     // constructor - the term of size s with all variables setted to missing value
     Term(int s = 0, bool isDC = false);
     // constructor - makes the variables array with size s by index idx
@@ -71,6 +74,7 @@ public:
 
     // eqaulity operators
     bool operator==(const Term & t) const;
+    bool operator!=(const Term & t) const;
     bool operator<(const Term & t) const;
     bool operator>(const Term & t) const;
 
@@ -79,8 +83,8 @@ public:
     LiteralValue at(int position) const throw(InvalidPositionExc);
     int getValueAt(int position) const;
     
-    // term in string form: 0X10
-    std::string toString() const;
+    // term to string
+    std::string toString(StringForm sf = SF_BIN) const;
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 
