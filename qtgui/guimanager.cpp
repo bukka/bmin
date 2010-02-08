@@ -152,7 +152,7 @@ void GUIManager::minimizeFormula(bool debug)
 {
     if (!m_kernel->hasFormula() || !m_isCorrect)
         emit errorInvoked(tr("Incorrect boolean function!"));
-    else if (!m_kernel->getFormula()->isMinimized())
+    else // if (!m_kernel->getFormula()->isMinimized())
         m_kernel->minimizeFormula(debug);
 }
 

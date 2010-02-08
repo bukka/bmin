@@ -39,7 +39,8 @@ void Term::init(term_t lit, term_t mis, int s, bool isDC)
     liters = lit;
     missing = mis;
     size = s;
-    dc = isDC;
+    flags = 0;
+    setDC(isDC);
 }
 
 // default constructor - the term of size s with all variables setted to dont care
@@ -59,6 +60,24 @@ Term::Term(int idx, int s, bool isDC)
 Term::Term(term_t lit, term_t miss, int size, bool isDC)
 {
     init(lit, miss, size, isDC);
+}
+
+// sets whether this term is don't care term
+void Term::setDC(bool isDC)
+{
+    if (isDC)
+        flags |= DC;
+    else
+        flags &= ~DC;
+}
+
+// sets whether this term is prime implicant
+void Term::setPrime(bool isPrime)
+{
+    if (isPrime)
+        flags |= PRIME;
+    else
+        flags &= ~PRIME;
 }
 
 // returns the count of values in term
@@ -119,7 +138,7 @@ Term *Term::combine(const Term & t) const
     }
 
     // if it's possible to combine the terms, return new Term
-    return new Term(liters, diff_mask | missing, size, dc);
+    return new Term(liters, diff_mask | missing, size, isDC());
 }
 
 // replace first missing value by zero and one
@@ -133,8 +152,8 @@ Term *Term::expandMissingValue() const
         if (missing & pos) {
             term_t newMissing = missing & ~pos;
             Term *t = new Term[2];
-            t[0] = Term(liters | pos, newMissing, size, dc);  // 1
-            t[1] = Term(liters & ~pos, newMissing, size, dc); // 0
+            t[0] = Term(liters | pos, newMissing, size, isDC());  // 1
+            t[1] = Term(liters & ~pos, newMissing, size, isDC()); // 0
             return t;
         }
     }
@@ -257,6 +276,8 @@ string Term::toString(StringForm sf) const
         string s;
         for (int i = size - 1; i >= 0; i--)
             s += operator[](i).toString();
+        if (isPrime())
+            s += "*";
         return s;
     }
 }

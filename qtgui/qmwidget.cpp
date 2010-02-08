@@ -99,13 +99,13 @@ void QmWidget::updateData()
 void QmWidget::showHeader()
 {
     m_textArea->clear();
-    m_textArea->insertHtml(QString("<h1 align=\"center\">%1</h1><br>").arg(
+    m_textArea->insertHtml(QString("<h1 align=\"center\">%1</h1>").arg(
             tr("Quine-McCluskey Algorithm")));
 }
 
 void QmWidget::showNothing()
 {
-    m_textArea->insertHtml(QString("<h3 align=\"left\">%1</h1>").arg(
+    m_textArea->insertHtml(QString("<br><h3 align=\"left\">%1</h3>").arg(
             tr("The formula is unknown.")));
 }
 
@@ -119,13 +119,14 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
 
 void QmWidget::showPrimeTable()
 {
-    list<Term> *l;
+    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2>").arg(
+            tr("Finding Prime Implicants ")));
 
     int columns = (m_data->getMaxMissings() * 2) + 3;
     int rows = m_data->getVarsCount() + (m_data->hasLastMinterm()? 2: 1);
-    int firstPrime = 1;
+    int firstImpl = 1;
     if (m_data->hasFirstMinterm()) {
-        firstPrime++;
+        firstImpl++;
         rows++;
     }
 
@@ -146,9 +147,10 @@ void QmWidget::showPrimeTable()
     setCell(table, 1, 1, tr("Minterm"));
     setCell(table, 1, 2, cubeStr.arg(0));
 
+    list<Term> *l;
     for (int row = 2; row < rows; row++) {
-        setCell(table, row, 0, QString::number(row - firstPrime));
-        l = m_data->getPrimes(0, row - firstPrime);
+        setCell(table, row, 0, QString::number(row - firstImpl));
+        l = m_data->getImpls(0, row - firstImpl);
         if (!l->empty()) {
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
@@ -173,7 +175,7 @@ void QmWidget::showPrimeTable()
 
         // body
         for (int row = 2; row < rows; row++) {
-            l = m_data->getPrimes(missings, row - firstPrime);
+            l = m_data->getImpls(missings, row - firstImpl);
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
                 if (it != l->begin()) {
@@ -187,7 +189,26 @@ void QmWidget::showPrimeTable()
     }
 
 
+    // Table
+    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2>").arg(
+            tr("Prime Implicants Table")));
 
+    vector<Term> *headRow = m_data->getCoverHeadRow();
+    vector<Term> *headCol = m_data->getCoverHeadCol();
+
+    table = m_textArea->textCursor().insertTable(headRow->size() + 1, headCol->size() + 1, tableFormat);
+
+    for (unsigned i = 1; i <= headRow->size(); i++)
+        setCell(table, i, 0, QString::fromStdString(headRow->at(i-1).toString(Term::SF_MSET)));
+    for (unsigned j = 1; j <= headCol->size(); j++)
+        setCell(table, 0, j, QString::number(headCol->at(j-1).getIdx()));
+
+    for (unsigned i = 1; i <= headRow->size(); i++) {
+        for (unsigned j = 1; j <= headCol->size(); j++) {
+            if (m_data->isCovered(i - 1, j - 1))
+                setCell(table, i, j, "X");
+        }
+    }
 }
 
 void QmWidget::showCoveringTable()

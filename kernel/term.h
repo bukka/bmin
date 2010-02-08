@@ -43,6 +43,9 @@ class InvalidPositionExc;
 class Term
 {
 public:
+    static const int DC = 1;
+    static const int PRIME = 2;
+
     // Term string format
     enum StringForm { SF_BIN, SF_MSET };
 
@@ -53,10 +56,14 @@ public:
     // constructor - internal usage
     Term(term_t lit, term_t miss, int size, bool isDC = false);
 
-    // true if this is don't care term
-    inline bool isDC() const { return dc; }
-    // sets whether this is dont care term
-    inline void setDC(bool isDC) { dc = isDC; }
+    // true if this term is don't care term
+    inline bool isDC() const { return flags & DC; }
+    // sets whether this term is don't care term
+    void setDC(bool isDC);
+    // true if this term is prime implicant
+    inline bool isPrime() const { return flags & PRIME; }
+    // sets whether this term is prime implicant
+    void setPrime(bool isPrime);
     // returns size of term, if all is false returns size reduced of dont cares
     int getSize(bool all = true) const;
     // returns terms index of boolean function
@@ -98,7 +105,7 @@ private:
     term_t liters;     // literals value
     term_t missing;    // which literals are missing literals
     int size;		   // number of literals
-    bool dc;		   // dont care term
+    int flags;		   // flags
 };
 
 #endif /* TERM_H */

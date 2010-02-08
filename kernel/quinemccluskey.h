@@ -15,29 +15,33 @@ class QuineMcCluskeyData
 public:
     QuineMcCluskeyData();
     // initialization
-    void initPrimes(int vars);
+    void initImpls(int vars);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
 
     bool isCovered(int row, int col);
     void setCover(int row, int col);
 
-    void addPrime(int missings, int ones, Term *t);
-    std::list<Term> *getPrimes(int missings, int ones);
+    void addImpl(int missings, int ones, Term *t);
+    std::list<Term> *getImpls(int missings, int ones);
+    void setPrimes(std::vector<Term> primes);
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
 
     bool hasFirstMinterm();
     bool hasLastMinterm();
 
+    std::vector<Term> *getCoverHeadRow() { return &coverHeadRow; }
+    std::vector<Term> *getCoverHeadCol() { return &coverHeadCol; }
+
 private:
-    inline int getPrimesIdx(int missings, int ones);
+    inline int getImplsIdx(int missings, int ones);
     inline int getCoverIdx(int row, int col);
 
     int varsCount;
     int maxMissings;
     int coverRowsCount;
     int coverColsCount;
-    std::vector<std::list<Term> > primes;
+    std::vector<std::list<Term> > impls;
     std::vector<Term> coverHeadRow;
     std::vector<Term> coverHeadCol;
     std::set<int> coverTable;
