@@ -7,6 +7,8 @@
 #include <iostream>
 
 class Parser;
+class AsciiArt;
+class QuineMcCluskeyData;
 
 class Konsole : public Events
 {
@@ -18,11 +20,11 @@ public:
 
 protected:
     virtual void evtFormulaChanged(Formula *f);
-    virtual void evtFormulaMinimized(bool minimizing);
+    virtual void evtFormulaMinimized(MinimizeEvent &evt);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
     virtual void evtHelp();
-    virtual void evtShowQm();
+    virtual void evtShowQm(QuineMcCluskeyData *data);
     virtual void evtShowMap();
     virtual void evtShowCube();
     virtual void evtShowFce(Formula *f, Formula *mf);
@@ -31,6 +33,7 @@ protected:
 private:
     bool running;
     Parser *parser;
+    AsciiArt *art;
 
     std::istream &in;
     std::ostream &out;
@@ -39,9 +42,10 @@ private:
 
 static const char * const PS = "> ";
 static const char * const MSG_WELCOME           = "Welcome to Bmin";
+static const char * const MSG_NO_FCE            = "No function is set";
 static const char * const MSG_MINIMIZING        = "Function was minimized";
-static const char * const MSG_ALREADY_MINIMIZED = "Function has been already minimized";
-static const char * const MSG_SETTING           = "Formula was set";
+static const char * const MSG_ALREADY_MINIMIZED = "Function has already been minimized";
+static const char * const MSG_SETTING           = "Function was set";
 static const char * const MSG_ERROR             = "Error: ";
 static const char * const MSG_FCE               = "Function: ";
 static const char * const MSG_MINIMIZED_FORM    = "Minimized form: ";

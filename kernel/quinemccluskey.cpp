@@ -46,7 +46,7 @@ void QuineMcCluskeyData::addImpl(int missings, int ones, Term *t)
 void QuineMcCluskeyData::setPrimes(vector<Term> primes)
 {
     vector<Term>::iterator prime;
-    for (unsigned i = impls.size() - 1; i >= 0; i--) {
+    for (int i = impls.size() - 1; i >= 0; i--) {
         for (list<Term>::iterator it = impls[i].begin(); it != impls[i].end(); it++) {
             if ((prime = find(primes.begin(), primes.end(), *it)) != primes.end()) {
                 (*it).setPrime(true);
@@ -63,14 +63,28 @@ std::list<Term> *QuineMcCluskeyData::getImpls(int missings, int ones)
     return &impls[getImplsIdx(missings, ones)];
 }
 
-bool QuineMcCluskeyData::hasFirstMinterm()
+int QuineMcCluskeyData::firstMintermOnes()
 {
-    return !impls[getImplsIdx(0, 0)].empty();
+    int first = 0;
+    while (first <= varsCount) {
+        if (impls[getImplsIdx(0, first)].empty())
+            first++;
+        else
+            return first;
+    }
+    return first;
 }
 
-bool QuineMcCluskeyData::hasLastMinterm()
+int QuineMcCluskeyData::lastMintermOnes()
 {
-    return !impls[getImplsIdx(0, varsCount)].empty();
+    int last = varsCount;
+    while (last >= 0) {
+        if (impls[getImplsIdx(0, last)].empty())
+            last--;
+        else
+            return last;
+    }
+    return last;
 }
 
 void QuineMcCluskeyData::setCover(int row, int col)

@@ -123,13 +123,12 @@ void QmWidget::showPrimeTable()
             tr("Finding Prime Implicants ")));
 
     int columns = (m_data->getMaxMissings() * 2) + 3;
-    int rows = m_data->getVarsCount() + (m_data->hasLastMinterm()? 2: 1);
-    int firstImpl = 1;
-    if (m_data->hasFirstMinterm()) {
-        firstImpl++;
-        rows++;
-    }
+    int varsCount = m_data->getVarsCount();
+    int firstImpl = m_data->firstMintermOnes();
+    int lastImpl = m_data->lastMintermOnes();
+    int rows = varsCount - (firstImpl + (varsCount - lastImpl)) + 3;
 
+    list<Term> *l;
     QTextCursor cursor(m_textArea->textCursor());
 
     QTextTableFormat tableFormat;
@@ -147,10 +146,10 @@ void QmWidget::showPrimeTable()
     setCell(table, 1, 1, tr("Minterm"));
     setCell(table, 1, 2, cubeStr.arg(0));
 
-    list<Term> *l;
-    for (int row = 2; row < rows; row++) {
-        setCell(table, row, 0, QString::number(row - firstImpl));
-        l = m_data->getImpls(0, row - firstImpl);
+    // first col
+    for (int row = 2, ones = firstImpl; row < rows; row++, ones++) {
+        setCell(table, row, 0, QString::number(ones));
+        l = m_data->getImpls(0, ones);
         if (!l->empty()) {
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
@@ -158,7 +157,7 @@ void QmWidget::showPrimeTable()
                     setCell(table, row, 1, "<br>");
                     setCell(table, row, 2, "<br>");
                 }
-                setCell(table, row, 1, QString("m%1").arg((*it).getIdx()));
+                setCell(table, row, 1, QString::fromStdString((*it).toString(Term::SF_MSET)));
                 setCell(table, row, 2, QString::fromStdString((*it).toString()));
             }
         }
@@ -174,8 +173,8 @@ void QmWidget::showPrimeTable()
         setCell(table, 1, column + 1, cubeStr.arg(missings));
 
         // body
-        for (int row = 2; row < rows; row++) {
-            l = m_data->getImpls(missings, row - firstImpl);
+        for (int row = 2, ones = firstImpl; row < rows; row++, ones++) {
+            l = m_data->getImpls(missings, ones);
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
                 if (it != l->begin()) {

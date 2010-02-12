@@ -76,9 +76,9 @@ void GUIManager::evtFormulaChanged(Formula *f)
     emit formulaChanged(f);
 }
 
-void GUIManager::evtFormulaMinimized(bool minimizing)
+void GUIManager::evtFormulaMinimized(MinimizeEvent &evt)
 {
-    if (minimizing) {
+    if (evt.isRun()) {
         QString minFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP));
         emit minFceChanged((minFce == "")? tr("unknown"): minFce);
         emit formulaMinimized();

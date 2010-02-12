@@ -90,12 +90,22 @@ void Kernel::setFormula(Formula *f)
 
 void Kernel::minimizeFormula(bool debug)
 {
-    if (formula && (!formula->isMinimized() || (debug && !qm->isDebug()))) {
-        minFormula = qm->minimize(formula, debug);
-        emitEvent(evtFormulaMinimized(true));
+    MinimizeEvent me;
+    if (!formula)
+        emitEvent(evtFormulaMinimized(me));
+    else {
+        me.enableFormula();
+        if (debug)
+            me.enableDebug();
+
+        if (!formula->isMinimized() || (debug && !qm->isDebug())) {
+            me.enableRun();
+            minFormula = qm->minimize(formula, debug);
+            emitEvent(evtFormulaMinimized(me));
+        }
+        else
+            emitEvent(evtFormulaMinimized(me));
     }
-    else
-        emitEvent(evtFormulaMinimized(false));
 }
 
 void Kernel::deleteFomula()
@@ -170,7 +180,8 @@ void Kernel::help()
 
 void Kernel::showQm()
 {
-    emitEvent(evtShowQm());
+    minimizeFormula(true);
+    emitEvent(evtShowQm(getQmData()));
 }
 
 void Kernel::showMap()

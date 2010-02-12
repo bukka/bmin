@@ -59,7 +59,7 @@ public:
     QuineMcCluskeyData *getQmData();
 
 protected:
-    virtual void evtFormulaMinimized(bool minimizing);
+    virtual void evtFormulaMinimized(MinimizeEvent &evt);
     virtual void evtFormulaChanged(Formula *f);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();

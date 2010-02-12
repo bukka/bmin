@@ -27,6 +27,29 @@
 
 class Kernel;
 class Formula;
+class QuineMcCluskeyData;
+
+class MinimizeEvent
+{
+public:
+    static const int FORMULA = 1;  // Some formula is set
+    static const int DEBUG   = 2;  // Minimized in debug mode
+    static const int RUN     = 4;  // Minimizing was run
+
+    MinimizeEvent(int f = 0) : flags(f) {}
+
+    void enableFormula() { flags |= FORMULA; }
+    void enableDebug() { flags |= DEBUG; }
+    void enableRun() { flags |= RUN; }
+
+    bool isFormula() { return flags & FORMULA; }
+    bool isDebug() { return flags & DEBUG; }
+    bool isRun() { return flags & RUN; }
+
+
+    int flags;
+protected:
+};
 
 class Events
 {
@@ -36,11 +59,11 @@ public:
 
 protected:
     virtual void evtFormulaChanged(Formula *) {}
-    virtual void evtFormulaMinimized(bool) {}
+    virtual void evtFormulaMinimized(MinimizeEvent &) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}
-    virtual void evtShowQm() {}
+    virtual void evtShowQm(QuineMcCluskeyData *) {}
     virtual void evtShowMap() {}
     virtual void evtShowCube() {}
     virtual void evtShowFce(Formula *, Formula *) {}
@@ -48,5 +71,6 @@ protected:
 
     friend class Kernel;
 };
+
 
 #endif // EVENTS_H

@@ -1,5 +1,6 @@
 #include "konsole.h"
 #include "parser.h"
+#include "asciiart.h"
 // kernel
 #include "kernel.h"
 #include "formula.h"
@@ -13,11 +14,13 @@ Konsole::Konsole(istream &i, ostream &o, ostream &e)
 {
     running = true;
     parser = new Parser;
+    art = new AsciiArt(&o);
 }
 
 Konsole::~Konsole()
 {
     delete parser;
+    delete art;
 }
 
 
@@ -41,15 +44,20 @@ void Konsole::evtFormulaChanged(Formula *)
     out << MSG_SETTING << endl;
 }
 
-void Konsole::evtFormulaMinimized(bool minimizing)
+void Konsole::evtFormulaMinimized(MinimizeEvent &evt)
 {
-    if (minimizing)
+    if (evt.isDebug())
+        return;
+
+    if (!evt.isFormula())
+        out << MSG_NO_FCE << endl;
+    else if (evt.isRun())
         out << MSG_MINIMIZING << endl;
     else
         out << MSG_ALREADY_MINIMIZED << endl;
 }
 
-void Konsole::evtError(std::exception &exc)
+void Konsole::evtError(exception &exc)
 {
     out << MSG_ERROR << exc.what() << endl;
 }
@@ -80,9 +88,9 @@ void Konsole::evtHelp()
     out << "      NAME    show function which name is NAME (empty NAME means current fce)" << endl;
 }
 
-void Konsole::evtShowQm()
+void Konsole::evtShowQm(QuineMcCluskeyData *data)
 {
-    out << "qm" << endl;
+    art->showQm(data);
 }
 
 void Konsole::evtShowMap()

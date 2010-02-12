@@ -15,6 +15,7 @@
 #include <sstream>
 #include <list>
 #include <set>
+#include <algorithm>
 
 using namespace std;
 
@@ -64,6 +65,7 @@ string Parser::formulaToString(PrintForm form, Formula *f)
         oss << CMD_SUM << ' ';
         oss << FCE_MINTERM << SYM_LPAR;
         vector<int> idx = f->getTermsIdx(OutputValue::ONE);
+        sort(idx.begin(), idx.end());
         for (unsigned i = 0; i < idx.size(); i++) {
             if (i != 0)
                 oss << SYM_COMMA;
@@ -75,6 +77,7 @@ string Parser::formulaToString(PrintForm form, Formula *f)
             oss << ' ' << SYM_PLUS << ' ';
             oss << CMD_SUM << ' ';
             oss << FCE_DC << SYM_LPAR;
+            sort(idx.begin(), idx.end());
             for (unsigned i = 0; i < idx.size(); i++) {
                 if (i != 0)
                     oss << SYM_COMMA;

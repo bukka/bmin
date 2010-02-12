@@ -27,8 +27,8 @@ public:
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
 
-    bool hasFirstMinterm();
-    bool hasLastMinterm();
+    int firstMintermOnes();
+    int lastMintermOnes();
 
     std::vector<Term> *getCoverHeadRow() { return &coverHeadRow; }
     std::vector<Term> *getCoverHeadCol() { return &coverHeadCol; }

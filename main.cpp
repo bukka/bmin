@@ -20,14 +20,18 @@
  * 02111-1307 USA.
  */
 
+#define KONSOLE_ONLY 0
+
 #include "kernel/constants.h"
 
 #include "shell/konsole.h"
 #include "shell/options.h"
 
+#if !KONSOLE_ONLY
 #include "qtgui/mainwindow.h"
 
 #include <QtGui/QApplication>
+#endif
 
 #include <exception>
 #include <iostream>
@@ -65,6 +69,7 @@ int main(int argc, char *argv[])
 
         ostream &os = cout;
 
+#if !KONSOLE_ONLY
         if (!opt.hasOpt()) {
             QApplication a(argc, argv);
 
@@ -78,6 +83,7 @@ int main(int argc, char *argv[])
             w.show();
             return a.exec();
         }
+#endif
 
         if (opt.hasOpt("version"))
             showVersion(os);
@@ -85,10 +91,14 @@ int main(int argc, char *argv[])
             showHelp(os);
         if (opt.hasOpt("file"))
             os << "file: " << opt.getValue("file") << endl;
+#if !KONSOLE_ONLY
         if (opt.hasOpt("shell")) {
+#endif
             Konsole konsole;
             konsole.run();
+#if !KONSOLE_ONLY
         }
+#endif
 
         return 0;
     }
