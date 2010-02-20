@@ -27,16 +27,41 @@ Parser::Parser()
 string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
 {
     ostringstream oss;
-    if (form == PF_PROD || form == PF_SOP) {
+    bool allMissing = true;
+    if (form == PF_SOP || form == PF_PROD) {
         for (int i = 0; i < term.getSize(); i++) {
             if (!term[i].isMissing()) {
+                allMissing = false;
                 oss << vars[i];
                 if (term[i].isZero())
                     oss << '\''; // negation
             }
         }
+        if (allMissing)
+            oss << '1';
     }
-    // TODO prod
+    else if (form == PF_POS || form == PF_SUM) {
+        bool brackets = term.getSize(false) > 1;
+        bool first = true;
+        if (brackets)
+            oss << '(';
+        for (int i = 0; i < term.getSize(); i++) {
+            if (!term[i].isMissing()) {
+                allMissing = false;
+                if (first)
+                    first = false;
+                else
+                    oss << " + ";
+                oss << vars[i];
+                if (term[i].isOne())
+                    oss << '\''; // negation
+            }
+        }
+        if (brackets)
+            oss << ')';
+        else if (allMissing)
+            oss << '0';
+    }
 
     return oss.str();
 }
@@ -61,10 +86,17 @@ string Parser::formulaToString(PrintForm form, Formula *f)
     }
     oss << SYM_RPAR << ' ' << SYM_ASSIGN << ' ';
 
-    if (form == PF_SUM) {
-        oss << CMD_SUM << ' ';
+    if (form == PF_SUM || form == PF_PROD) {
+        vector<int> idx;
+        if (form == PF_SUM) {
+            f->getTermsIdx(OutputValue::ONE, idx);
+            oss << CMD_SUM << ' ';
+        }
+        else {
+            f->getTermsIdx(OutputValue::ZERO, idx);
+            oss << CMD_PROD << ' ';
+        }
         oss << FCE_MINTERM << SYM_LPAR;
-        vector<int> idx = f->getTermsIdx(OutputValue::ONE);
         sort(idx.begin(), idx.end());
         for (unsigned i = 0; i < idx.size(); i++) {
             if (i != 0)
@@ -74,8 +106,14 @@ string Parser::formulaToString(PrintForm form, Formula *f)
         oss << SYM_RPAR;
         idx = f->getTermsIdx(OutputValue::DC, idx);
         if (!idx.empty()) {
-            oss << ' ' << SYM_PLUS << ' ';
-            oss << CMD_SUM << ' ';
+            if (form == PF_SUM) {
+                oss << ' ' << SYM_PLUS << ' ';
+                oss << CMD_SUM << ' ';
+            }
+            else {
+                oss << ' ' << SYM_MULT << ' ';
+                oss << CMD_PROD << ' ';
+            }
             oss << FCE_DC << SYM_LPAR;
             sort(idx.begin(), idx.end());
             for (unsigned i = 0; i < idx.size(); i++) {
@@ -86,17 +124,19 @@ string Parser::formulaToString(PrintForm form, Formula *f)
             oss << SYM_RPAR;
         }
     }
-    else if (f->getSize() == 0)
+    else if (f->isContradiction())
             oss << " 0";
+    else if (f->isTautology())
+            oss << " 1";
     else {
         f->itInit();
         bool first = true;
         while (f->itHasNext()) {
             if (first)
                 first = false;
-            else
+            else if (form == PF_SOP)
                 oss << ' ' << SYM_PLUS << ' ';
-            oss << termToString(f->itNext(), vars, PF_PROD);
+            oss << termToString(f->itNext(), vars, form);
         }
     }
     
@@ -256,6 +296,7 @@ FormulaSpec *Parser::sum() throw(ShellExc)
         spec->f = mTerms();
         if (cmpr(LexicalAnalyzer::PLUS))
             spec->d = sumRem();
+        spec->sop = true;
     }
     catch (ShellExc &exc) {
         delete spec;
@@ -282,6 +323,7 @@ FormulaSpec *Parser::prod() throw(ShellExc)
         spec->r = mTerms();
         if (cmpr(LexicalAnalyzer::PLUS))
             spec->d = prodRem();
+        spec->sop = false;
     }
     catch (ShellExc &exc) {
         delete spec;

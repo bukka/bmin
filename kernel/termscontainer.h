@@ -11,35 +11,54 @@ class Term;
 class TermsContainer
 {
 public:
+    enum TermsType { MINTERMS, MAXTERMS };
     enum ContainerType {STL_SET, STL_VECTOR, TERMS_TREE };
 
-    TermsContainer(int ts, ContainerType t = STL_VECTOR);
+    TermsContainer(int varsCount, TermsType tt = MINTERMS, ContainerType ct = STL_VECTOR);
+    TermsContainer(const TermsContainer &tc);
+    ~TermsContainer();
 
     void setContainer(std::vector<Term> &v);
+    void setTermsType(TermsType tt);
 
     int getSize() const;
 
-    bool pushTerm(int idx, bool isDC = false);
+    // sets changing
+    void touch() { changed = true; }
+    // pushes new term to container
     bool pushTerm(const Term &t);
-    bool removeTerm(int idx);
+    // pushes new term to container by idx
+    bool pushTerm(int idx, bool isDC = false);
+    // removes term from container
     bool removeTerm(const Term &t);
+    // removes term from container by idx
+    bool removeTerm(int idx);
+    // finds out whether term t is in container
     bool hasTerm(const Term &t) const;
-
-    /* returns terms id with val from original terms */
-    std::vector<int> getTermsIdx(int val) const;
-    std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs) const;
-    /* returns actual minterms */
-    std::vector<Term> getMinterms() const;
-    std::vector<Term> &getMinterms(std::vector<Term> &minterms) const;
-
+    // sets value of term with idx
+    bool setTermValue(int idx, OutputValue val);
     // returns value of term with idx
     OutputValue getTermValue(int idx) const;
+
+    // returns terms id with val from original terms
+    std::vector<int> getTermsIdx(int val);
+    std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs);
+    // returns actual minterms
+    std::vector<Term> getMinterms();
+    std::vector<Term> &getMinterms(std::vector<Term> &minterms);
+    // returns actual maxterms
+    std::vector<Term> getMaxterms();
+    std::vector<Term> &getMaxterms(std::vector<Term> &minterms);
+
 
     void clear();
 
     // equality
     bool operator==(const TermsContainer &tc) const;
+    // nonequality
     bool operator!=(const TermsContainer &tc) const;
+    // assignment
+    TermsContainer &operator=(const TermsContainer &tc);
 
     // iterating
     void itInit();
@@ -47,10 +66,18 @@ public:
     Term &itNext();
 
 private:
-    std::vector<Term> termsVector;
+    void setComplement();
+    void toBaseTerms();
+    void copy(const TermsContainer &tc);
 
-    ContainerType type;
-    int termSize;
+    std::vector<Term> *termsVectorOnes;
+    std::vector<Term> *termsVectorZeros;
+    std::vector<Term> *termsVector;
+
+    TermsType ttype;
+    ContainerType ctype;
+    int termVarsCount;
+    bool changed;
 
     unsigned itPos;
 };

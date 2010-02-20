@@ -58,6 +58,7 @@ GUIManager::GUIManager()
     m_parser = new Parser;
     m_actualFce = "";
     m_isCorrect = false;
+    m_isSoP =  Constants::SOP_DEFAULT;
 }
 
 // destructor
@@ -70,16 +71,23 @@ GUIManager::~GUIManager()
 void GUIManager::evtFormulaChanged(Formula *f)
 {
     m_isCorrect = true;
-    m_actualFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SUM, f));
+    bool sop = (f->getRepre() == Formula::REP_SOP);
+    if (sop != m_isSoP) {
+        m_isSoP = sop;
+        emit repreChanged(sop);
+    }
+    m_actualFce = QString::fromStdString(m_parser->formulaToString(
+            sop? Parser::PF_SUM: Parser::PF_PROD, f));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
     emit formulaChanged(f);
 }
 
-void GUIManager::evtFormulaMinimized(MinimizeEvent &evt)
+void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
 {
     if (evt.isRun()) {
-        QString minFce = QString::fromStdString(m_parser->formulaToString(Parser::PF_SOP));
+        QString minFce = QString::fromStdString(m_parser->formulaToString(
+                (mf->getRepre() == Formula::REP_SOP)? Parser::PF_SOP: Parser::PF_POS, mf));
         emit minFceChanged((minFce == "")? tr("unknown"): minFce);
         emit formulaMinimized();
     }
@@ -161,9 +169,12 @@ void GUIManager::setTerm(int idx, OutputValue &value)
 {
     if (!m_kernel->hasFormula())
         return;
+    m_kernel->setTermValue(idx, value);
+}
 
-    if (value.isZero())
-        m_kernel->removeTerm(idx);
-    else
-        m_kernel->pushTerm(idx, value.isDC());
+// changes representation mode
+void GUIManager::setRepre(bool sop)
+{
+    m_isSoP = sop;
+    m_kernel->setRepre(sop? Formula::REP_SOP: Formula::REP_POS);
 }

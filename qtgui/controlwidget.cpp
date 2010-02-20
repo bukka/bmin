@@ -48,9 +48,13 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
             this, SLOT(setFce(const QString &)));
     // sending fce when it is read
     connect(gm, SIGNAL(fceRead()), this, SLOT(sendFce()));
-    // emit by changing fce
+    // change repre
+    connect(gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
+    // emitte by changing fce
     connect(this, SIGNAL(fceChanged(const QString &)),
             gm, SLOT(setFormula(const QString &)));
+    // emitted by changing rep combo box
+    connect(this, SIGNAL(repreChanged(bool)), gm, SLOT(setRepre(bool)));
 
     m_prevFce = "";
 
@@ -60,31 +64,41 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     int sepGS = Constants::SEP_COLOR_GS;
     m_sepColor = QColor(sepGS, sepGS, sepGS);
 
-    QLabel *fceLabel = new QLabel(tr("Normal form: "), this);
+    m_fceLine = new QLineEdit(m_prevFce);
+    connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
+    QLabel *fceLabel = new QLabel(tr("&Normal form: "));
     fceLabel->setBuddy(m_fceLine);
 
-    m_fceLine = new QLineEdit(m_prevFce,this);
-    connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
-
     m_minFcePrefix = tr("Minimal form: ");
-    m_minFceLabel = new QLabel(m_minFcePrefix, this);
-
-    m_minBtn = new QPushButton(tr("Minimize"), this);
-    connect(m_minBtn, SIGNAL(clicked()), gm, SLOT(minimizeFormula()));
+    m_minFceLabel = new QLabel(m_minFcePrefix);
 
     QHBoxLayout *fceLayout = new QHBoxLayout;
     fceLayout->addWidget(fceLabel);
     fceLayout->addWidget(m_fceLine);
 
+    m_repreCombo = new QComboBox;
+    m_repreCombo->insertItem(SOP_REP_IDX, tr("Sum of Products"));
+    m_repreCombo->insertItem(POS_REP_IDX, tr("Product of Sums"));
+    setRepre(gm->isSoP());
+    connect(m_repreCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(sendRepre(int)));
+    QLabel *repreLabel = new QLabel(tr("&Representation of logic function: "));
+    repreLabel->setBuddy(m_repreCombo);
+
+    QHBoxLayout *repreLayout = new QHBoxLayout;
+    repreLayout->addWidget(repreLabel);
+    repreLayout->addWidget(m_repreCombo);
+
+    m_minBtn = new QPushButton(tr("&Minimize"), this);
+    connect(m_minBtn, SIGNAL(clicked()), gm, SLOT(minimizeFormula()));
+
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->setVerticalSpacing(5);
     mainLayout->addLayout(fceLayout, 0, 0, 1, 3);
-    mainLayout->addWidget(m_minFceLabel, 1, 0);
-    mainLayout->addWidget(m_minBtn, 1, 2);
+    mainLayout->addWidget(m_minFceLabel, 1, 0, 1, 3);
+    mainLayout->addLayout(repreLayout, 2, 0);
+    mainLayout->addWidget(m_minBtn, 2, 2);
     mainLayout->setColumnStretch(1, 10);
     setLayout(mainLayout);
-
-
 
 }
 
@@ -123,6 +137,21 @@ void ControlWidget::setFce(const QString &fceStr)
 void ControlWidget::setMinFce(const QString &minFceStr)
 {
     m_minFceLabel->setText(m_minFcePrefix + minFceStr);
+}
+
+// called when rep combo is changed
+void ControlWidget::sendRepre(int idx)
+{
+    emit repreChanged(idx == SOP_REP_IDX);
+}
+
+// called by changing formula for checking repre setting
+void ControlWidget::setRepre(bool sop)
+{
+    if (sop)
+        m_repreCombo->setCurrentIndex(SOP_REP_IDX);
+    else
+        m_repreCombo->setCurrentIndex(POS_REP_IDX);
 }
 
 

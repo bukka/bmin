@@ -25,11 +25,11 @@
 
 // kernel
 #include "events.h"
+#include "formula.h"
 
 #include <QObject>
 
 class Kernel;
-class Formula;
 class OutputValue;
 class Parser;
 class QuineMcCluskey;
@@ -55,11 +55,13 @@ public:
     QString getActualFce();
     // whether formula is correct
     inline bool isCorrectFormula() const { return m_isCorrect; }
+    // whether formula has Sum of Products representation
+    bool isSoP() const { return m_isSoP; }
     // return data for Quine-McCluskey algorithm
     QuineMcCluskeyData *getQmData();
 
 protected:
-    virtual void evtFormulaMinimized(MinimizeEvent &evt);
+    virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
     virtual void evtFormulaChanged(Formula *f);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
@@ -81,6 +83,8 @@ private:
     QString m_actualFce;
     // whether formula is correct
     bool m_isCorrect;
+    // whether formula has Sum of Product form
+    bool m_isSoP;
 
 public slots:
     // minimization variables
@@ -91,6 +95,8 @@ public slots:
     void updateFormula(const QString &);
     // changes term in formula
     void setTerm(int idx, OutputValue &);
+    // changes representation mode
+    void setRepre(bool sop);
 
 signals:
     // emitted when it is essential to change formula in the text field
@@ -105,6 +111,8 @@ signals:
     void formulaMinimized();
     // emitted when user sets invalid formula string
     void formulaInvalidated();
+    // emitted when representation is changed
+    void repreChanged(bool);
     // emitted when error message is required
     void errorInvoked(const QString &);
     // emmited by exiting

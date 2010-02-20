@@ -43,11 +43,13 @@ class InvalidPositionExc;
 class Term
 {
 public:
-    static const int DC = 1;
-    static const int PRIME = 2;
+    static const int MISSING_ALL = -1;
+    static const int ONE   = 1;
+    static const int DC    = 2;
+    static const int PRIME = 4;
 
     // Term string format
-    enum StringForm { SF_BIN, SF_MSET };
+    enum StringForm { SF_BIN, SF_SET };
 
     // constructor - the term of size s with all variables setted to missing value
     Term(int s = 0, bool isDC = false);
@@ -56,14 +58,20 @@ public:
     // constructor - internal usage
     Term(term_t lit, term_t miss, int size, bool isDC = false);
 
+    // sets certain flag
+    void setFlag(int flag, bool is);
+    // true if this term is don't care term
+    inline bool isOne() const { return flags & ONE; }
+    // sets whether this term is don't care term
+    inline void setOne(bool isOne) { setFlag(ONE, isOne); }
     // true if this term is don't care term
     inline bool isDC() const { return flags & DC; }
     // sets whether this term is don't care term
-    void setDC(bool isDC);
+    inline void setDC(bool isDC) { setFlag(DC, isDC); }
     // true if this term is prime implicant
     inline bool isPrime() const { return flags & PRIME; }
     // sets whether this term is prime implicant
-    void setPrime(bool isPrime);
+    inline void setPrime(bool isPrime)  { setFlag(PRIME, isPrime); }
     // returns size of term, if all is false returns size reduced of dont cares
     int getSize(bool all = true) const;
     // returns terms index of boolean function

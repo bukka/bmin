@@ -113,8 +113,8 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
     char num[16];
     list<Term> *l;
 
-    int firstImpl = data->firstMintermOnes();
-    int lastImpl = data->lastMintermOnes();
+    int firstImpl = data->firstExplicitTerm();
+    int lastImpl = data->lastExplicitTerm();
     int columns = data->getMaxMissings() * 2 + 3;
     vector<Implicants> impls(columns);
 
@@ -122,8 +122,8 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
 
     // head line for first column
     sprintf(msgCube, MSG_CUBE, 0);
-    impls[0].addImpl(MSG_NUMBER_OF_1S);
-    impls[1].addImpl(MSG_MINTERM);
+    impls[0].addImpl(data->isSoP()? MSG_NUMBER_OF_1S: MSG_NUMBER_OF_0S);
+    impls[1].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
     impls[2].addImpl(msgCube);
     // another lines for first column
     for (int ones = firstImpl; ones <= lastImpl; ones++) {
@@ -138,7 +138,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
             }
             else
                 impls[0].addEmpty();
-            impls[1].addImpl((*it).toString(Term::SF_MSET));
+            impls[1].addImpl((*it).toString(Term::SF_SET));
             impls[2].addImpl((*it).toString());
         }
     }
@@ -148,7 +148,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
         int missings = (column - 1) / 2;
         // header
         sprintf(msgCube, MSG_CUBE, missings);
-        impls[column].addImpl(MSG_MINTERM);
+        impls[column].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
         impls[column + 1].addImpl(msgCube);
 
         // body
@@ -162,7 +162,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
 
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                impls[column].addImpl((*it).toString(Term::SF_MSET));
+                impls[column].addImpl((*it).toString(Term::SF_SET));
                 impls[column + 1].addImpl((*it).toString());
             }
         }
@@ -238,7 +238,7 @@ void AsciiArt::showQmCover(QuineMcCluskeyData *data)
     impls.addEmpty();
     impls.addSep();
     for (unsigned i = 0; i < headRow->size(); i++) {
-        impls.addImpl(headRow->at(i).toString(Term::SF_MSET));
+        impls.addImpl(headRow->at(i).toString(Term::SF_SET));
         impls.addSep();
     }
     impls.printInit(os, EMPTY, SEP_ROW);

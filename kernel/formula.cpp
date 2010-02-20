@@ -57,7 +57,7 @@ FormulaSpec::~FormulaSpec()
 // Constructors
 
 // default setting
-void Formula::init(int vs, const vector<char> *v, char fn, Form f)
+void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
 {
     varsCount = vs;
     maxIdx = (1 << vs) - 1;
@@ -65,15 +65,15 @@ void Formula::init(int vs, const vector<char> *v, char fn, Form f)
     terms = new TermsContainer(vs);
 
     name = fn;
-    form = f;
+    repre = r;
     minimized = false;
 }
 
 // gets terms from t array of terms
-Formula::Formula(int vs, Term *t, int n, const vector<char> *v, char fn, Form f)
+Formula::Formula(int vs, Term *t, int n, const vector<char> *v, char fn, Repre r)
         throw(InvalidTermExc)
 {
-    init(vs, v, fn, f);
+    init(vs, v, fn, r);
 
     if (n == 0) // array is emtpy
         return;
@@ -92,10 +92,10 @@ Formula::Formula(int vs, Term *t, int n, const vector<char> *v, char fn, Form f)
 }
 
 // gets terms from vector t
-Formula::Formula(int vs, vector<Term> &t, const vector<char> *v, char fn, Form f)
+Formula::Formula(int vs, vector<Term> &t, const vector<char> *v, char fn, Repre r)
         throw(InvalidTermExc)
 {
-    init(vs, v, fn, f);
+    init(vs, v, fn, r);
 
     if (t.size() == 0) // t is empty
         return;
@@ -117,16 +117,29 @@ Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(Invalid
         for (it = spec->d->begin(); it != spec->d->end(); it++)
             pushTerm(*it, true);
     }
-    if (spec->f) {
-        for (it = spec->f->begin(); it != spec->f->end(); it++)
-            pushTerm(*it, false);
+    if (spec->sop) {
+        setRepre(Formula::REP_SOP);
+        if (spec->f) {
+            for (it = spec->f->begin(); it != spec->f->end(); it++)
+                pushTerm(*it, false);
+        }
+        else
+            terms->touch();
     }
-    //TODO else product
+    else { // pos
+        setRepre(Formula::REP_POS);
+        if (spec->r) {
+            for (it = spec->r->begin(); it != spec->r->end(); it++)
+                pushTerm(*it, false);
+        }
+        else
+            terms->touch();
+    }
 }
 
 Formula::Formula(const Formula &f, bool toMinterms)
 {
-    init(f.varsCount, &f.vars, f.name, f.form);
+    init(f.varsCount, &f.vars, f.name, f.repre);
     if (toMinterms) {
         vector<Term> v;
         terms->setContainer(f.getMinterms(v));
@@ -141,7 +154,29 @@ Formula::~Formula()
     delete terms;
 }
 
+// finds out whether formula is tautology
+bool Formula::isTautology() const
+{
+    if (repre == REP_SOP) {
+        Term t(Term::MISSING_ALL, varsCount);
+        return terms->hasTerm(t);
+    }
+    else // REP_POS
+        return terms->getSize() == 0;
+}
 
+// finds out whether formula is contradiction
+bool Formula::isContradiction() const
+{
+    if (repre == REP_POS) {
+        Term t(Term::MISSING_ALL, varsCount);
+        return terms->hasTerm(t);
+    }
+    else // REP_SOP
+        return terms->getSize() == 0;
+}
+
+// adds new term to formula
 void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
 {
     if (idx > maxIdx)
@@ -151,6 +186,7 @@ void Formula::pushTerm(int idx, bool isDC) throw(InvalidIndexExc)
         minimized = false;
 }
 
+// removes term with idx
 void Formula::removeTerm(int idx) throw(InvalidIndexExc)
 {
     if (idx > maxIdx)
@@ -160,36 +196,65 @@ void Formula::removeTerm(int idx) throw(InvalidIndexExc)
         minimized = false;
 }
 
+// finds out whether term t is in TermsContainer
 bool Formula::hasTerm(const Term &t) const
 {
     return terms->hasTerm(t);
 }
 
+// sets term with idx to value
+void Formula::setTermValue(int idx, OutputValue val) throw(InvalidIndexExc)
+{
+    if (idx > maxIdx)
+        throw InvalidIndexExc(idx);
+
+    if (terms->setTermValue(idx, val))
+        minimized = false;
+}
+
+// returns value of term with idx
 OutputValue Formula::getTermValue(int idx) const
 {
     return terms->getTermValue(idx);
 }
 
+// returns terms id with val from original terms
 vector<int> Formula::getTermsIdx(int val) const
 {
     return terms->getTermsIdx(val);
 }
 
+// returns terms id with val from original terms (without creating new vector)
 vector<int> &Formula::getTermsIdx(int val, vector<int> &idxs) const
 {
     return terms->getTermsIdx(val, idxs);
 }
 
+// returns actual minterms
 vector<Term> Formula::getMinterms() const
 {
     return terms->getMinterms();
 }
 
+// returns actual minterms (without creating new vector)
 vector<Term> &Formula::getMinterms(vector<Term> &minterms) const
 {
     return terms->getMinterms(minterms);
 }
 
+// returns actual maxterms
+vector<Term> Formula::getMaxterms() const
+{
+    return terms->getMaxterms();
+}
+
+// returns actual maxterms (without creating new vector)
+vector<Term> &Formula::getMaxterms(vector<Term> &maxterms) const
+{
+    return terms->getMaxterms(maxterms);
+}
+
+// returns number of terms
 int Formula::getSize() const
 {
     return terms->getSize();
@@ -225,6 +290,19 @@ bool Formula::equal(const Formula &f, bool inclVars) const
     if (inclVars)
         return (f.vars == vars);
     return true;
+}
+
+// set representation
+bool Formula::setRepre(Repre rep)
+{
+    if (repre != rep) {
+        repre = rep;
+        minimized = false;
+        terms->setTermsType((rep == REP_SOP)? TermsContainer::MINTERMS: TermsContainer::MAXTERMS);
+        return true;
+    }
+    else
+        return false;
 }
 
 // set default names for n variables

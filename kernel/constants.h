@@ -43,6 +43,9 @@ namespace Constants {
     // Whether show default formula
     const bool DEFAULT_FORMULA = false;
 
+    // whether Sum of Product is default representation
+    const bool SOP_DEFAULT = true;
+
     // Color in grey scale for main widget separator
     const int SEP_COLOR_GS = 180;
 

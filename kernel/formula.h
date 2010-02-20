@@ -54,24 +54,27 @@ struct FormulaSpec
     std::set<int> *f; // one
     std::set<int> *d; // dc
     std::set<int> *r; // zero
+
+    bool sop;
 };
 
 // class represented logical formula
 class Formula
 {
 public:
-    enum Form { FORM_SOP, FORM_POS };
+    // representation (SOP = sum of products, POS = product of sums)
+    enum Repre { REP_SOP, REP_POS };
 
-    static const char DEFAULT_NAME = 'f';
-    static const Form DEFAULT_FORM = FORM_SOP;
+    static const char DEFAULT_NAME      = 'f';
     static const char DEFAULT_FIRST_VAR = 'a';
+    static const Repre  DEFAULT_REP       = REP_SOP;
 
     // Constructors
     Formula(int vc, Term *t = 0, int n = 0, const std::vector<char> *v = 0,
-            char fn = DEFAULT_NAME, Form f = DEFAULT_FORM)
+            char fn = DEFAULT_NAME, Repre r = DEFAULT_REP)
             throw(InvalidTermExc);
     Formula(int vc, std::vector<Term> &t, const std::vector<char> *v = 0,
-            char fn = DEFAULT_NAME, Form f = DEFAULT_FORM)
+            char fn = DEFAULT_NAME, Repre r = DEFAULT_REP)
             throw(InvalidTermExc);
     Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidIndexExc);
     // Copy Construtor
@@ -80,16 +83,28 @@ public:
     // Destructor
     ~Formula();
 
+    // finds out whether formula is tautology
+    bool isTautology() const;
+    // finds out whether formula is contradiction
+    bool isContradiction() const;
     // finds out whether term t is in TermsContainer
     bool hasTerm(const Term &t) const;
+    // sets term with idx to value
+    void setTermValue(int idx, OutputValue val) throw(InvalidIndexExc);
     // returns value of term with idx
     OutputValue getTermValue(int idx) const;
     // returns terms id with val from original terms
     std::vector<int> getTermsIdx(int val) const;
+    // returns terms id with val from original terms (without creating new vector)
     std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs) const;
     // returns actual minterms
     std::vector<Term> getMinterms() const;
-    std::vector<Term> &getMinterms(std::vector<Term> &minterms) const;
+    // returns actual minterms (without creating new vector)
+    std::vector<Term> &getMinterms(std::vector<Term> &maxterms) const;
+    // returns actual maxterms
+    std::vector<Term> getMaxterms() const;
+    // returns actual maxterms (without creating new vector)
+    std::vector<Term> &getMaxterms(std::vector<Term> &maxterms) const;
     // returns number of terms
     int getSize() const;
 
@@ -110,10 +125,10 @@ public:
     inline void setName(char fn) { name = fn; }
     // name getter
     inline char getName() const { return name; }
-    // form setter
-    inline void setForm(Form f) { form = f; }
-    // form getter
-    inline Form getForm() const { return form; }
+    // repre setter and return true if repre was changed
+    bool setRepre(Repre r);
+    // repre getter
+    inline Repre getRepre() const { return repre; }
 
     // returns variables
     std::vector<char> getVars() const;
@@ -127,7 +142,7 @@ public:
     friend class Kernel;
 
 private:
-    void init(int vs, const std::vector<char> *v, char fn, Form f = FORM_SOP);
+    void init(int vs, const std::vector<char> *v, char fn, Repre r = DEFAULT_REP);
     inline void setMinimized(bool m) { minimized = m; }
 
     // adds new term to formula
@@ -146,7 +161,7 @@ private:
     // formula name
     char name;
     // formula visible form
-    Form form;
+    Repre repre;
     // names of variables
     std::vector<char> vars;
 

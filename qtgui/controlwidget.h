@@ -30,6 +30,7 @@ class QLineEdit;
 class QPushButton;
 class QString;
 class QLabel;
+class QComboBox;
 
 class ControlWidget : public QWidget
 {
@@ -44,12 +45,17 @@ protected:
     virtual void paintEvent(QPaintEvent* e);
 
 private:
+    static const int SOP_REP_IDX = 0;
+    static const int POS_REP_IDX = 1;
+
     // line input
     QLineEdit *m_fceLine;
     // minimize button
     QPushButton *m_minBtn;
     // label with minimized function
     QLabel *m_minFceLabel;
+    // combo box for choosing fce representation
+    QComboBox *m_repreCombo;
 
     // previous function
     QString m_prevFce;
@@ -63,14 +69,20 @@ public slots:
     void setFce(const QString &fceStr);
     // sets minFceLabel to new value
     void setMinFce(const QString &minFceStr);
+    // called by changing formula for checking repre setting
+    void setRepre(bool sop);
 
 private slots:
     // called when QLineEdit with fce is changed
     void sendFce();
+    // called when rep combo is changed
+    void sendRepre(int idx);
 
 signals:
-    // emited by changing boolean function
+    // emitted by changing boolean function
     void fceChanged(const QString &);
+    // emitted when rep is changed
+    void repreChanged(bool);
 };
 
 #endif // CONTROLWIDGET_H

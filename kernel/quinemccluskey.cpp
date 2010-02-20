@@ -20,11 +20,12 @@ QuineMcCluskeyData::QuineMcCluskeyData() : varsCount(0)
     impls.clear();
 }
 
-void QuineMcCluskeyData::initImpls(int vars)
+void QuineMcCluskeyData::initImpls(int vars, bool sp)
 {
     varsCount = vars;
     maxMissings = 0;
-    impls = vector<list<Term> >((vars + 1) * vars);
+    impls = vector<list<Term> >((vars + 1) * (vars + 1));
+    sop = sp;
 }
 
 void QuineMcCluskeyData::initCover(vector<Term> *row, vector<Term> *col)
@@ -36,11 +37,11 @@ void QuineMcCluskeyData::initCover(vector<Term> *row, vector<Term> *col)
     coverTable.clear();
 }
 
-void QuineMcCluskeyData::addImpl(int missings, int ones, Term *t)
+void QuineMcCluskeyData::addImpl(int missings, int explicits, Term *t)
 {
     if (missings > maxMissings)
         maxMissings = missings;
-    impls[getImplsIdx(missings, ones)].push_back(*t);
+    impls[getImplsIdx(missings, explicits)].push_back(*t);
 }
 
 void QuineMcCluskeyData::setPrimes(vector<Term> primes)
@@ -58,12 +59,12 @@ void QuineMcCluskeyData::setPrimes(vector<Term> primes)
     }
 }
 
-std::list<Term> *QuineMcCluskeyData::getImpls(int missings, int ones)
+std::list<Term> *QuineMcCluskeyData::getImpls(int missings, int explicits)
 {
-    return &impls[getImplsIdx(missings, ones)];
+    return &impls[getImplsIdx(missings, explicits)];
 }
 
-int QuineMcCluskeyData::firstMintermOnes()
+int QuineMcCluskeyData::firstExplicitTerm()
 {
     int first = 0;
     while (first <= varsCount) {
@@ -75,7 +76,7 @@ int QuineMcCluskeyData::firstMintermOnes()
     return first;
 }
 
-int QuineMcCluskeyData::lastMintermOnes()
+int QuineMcCluskeyData::lastExplicitTerm()
 {
     int last = varsCount;
     while (last >= 0) {
@@ -97,9 +98,9 @@ bool QuineMcCluskeyData::isCovered(int row, int col)
     return coverTable.find(getCoverIdx(row, col)) != coverTable.end();
 }
 
-int QuineMcCluskeyData::getImplsIdx(int missings, int ones)
+int QuineMcCluskeyData::getImplsIdx(int missings, int explicits)
 {
-    return missings * (varsCount + 1) + ones;
+    return missings * (varsCount + 1) + explicits;
 }
 
 int QuineMcCluskeyData::getCoverIdx(int row, int col)
@@ -141,38 +142,44 @@ void QuineMcCluskey::findPrimeImplicants()
         return;
 
     // inicialization
-    int missings, ones, varsCount;
+    int missings, explicits, varsCount;
     Term *pterm, *combined;
     vector<Term *> *left, *right, *out;
     vector<Term *>::iterator lit, rit, it;
 
+    bool sop = (of->getRepre() == Formula::REP_SOP);
     varsCount = of->varsCount;
 
     if (debug)
-        data.initImpls(varsCount);
+        data.initImpls(varsCount, sop);
 
     // inicializing matrix with vectors contained pointers to terms
-    vector<Term *> **table = new vector<Term *> *[varsCount+1];
+    vector<Term *> **table = new vector<Term *> *[varsCount + 1];
     for (int i = 0; i <= varsCount; i++)
-        table[i] = new vector<Term *>[varsCount+1];
+        table[i] = new vector<Term *>[varsCount + 1];
 
-    // sorting terms by numbers of dont cares and ones
+    // sorting terms by numbers of dont cares and explicits
+    int foundLiteral = LiteralValue::ZERO;
+    if (sop)
+        foundLiteral = LiteralValue::ONE;
     of->itInit();
     while (of->itHasNext()) {
         pterm = &of->itNext();
-        ones = pterm->valuesCount(LiteralValue::ONE);
-        table[0][ones].push_back(pterm);
+        explicits = pterm->valuesCount(foundLiteral);
+        table[0][explicits].push_back(pterm);
 
-        if (debug)
-            data.addImpl(0, ones, pterm);
+        if (debug) {
+            pterm->setOne(sop);
+            data.addImpl(0, explicits, pterm);
+        }
     }
 
     // generating new terms - minimazation
     for (missings = 0; missings < varsCount; missings++) {
-        for (ones = 0; ones < varsCount; ones++) {
-            left = &table[missings][ones];
-            right = &table[missings][ones + 1];
-            out = &table[missings + 1][ones];
+        for (explicits = 0; explicits < varsCount; explicits++) {
+            left = &table[missings][explicits];
+            right = &table[missings][explicits + 1];
+            out = &table[missings + 1][explicits];
 
             for (lit = left->begin(); lit != left->end(); lit++) {
                 for (rit = right->begin(); rit != right->end(); rit++) {
@@ -182,8 +189,10 @@ void QuineMcCluskey::findPrimeImplicants()
                         // if combined isn't in out
                         if (doesNotHaveTerm(out, combined)) {
                             out->push_back(combined);
-                            if (debug)
-                                data.addImpl(missings + 1, ones, combined);
+                            if (debug) {
+                                combined->setOne(sop);
+                                data.addImpl(missings + 1, explicits, combined);
+                            }
                         }
 
                         mf->terms->removeTerm(**lit);
@@ -227,16 +236,16 @@ void QuineMcCluskey::findFinalImplicants()
 
     int impl, term, implsCount, origTermsSize;
 
-    vector<Term> *onesTerms = getTermsVector(of->terms, true);
+    vector<Term> *explicitsTerms = getTermsVector(of->terms, true);
     vector<Term> *terms = getTermsVector(mf->terms);
 
     implsCount = mf->terms->getSize();
-    origTermsSize = onesTerms->size();
+    origTermsSize = explicitsTerms->size();
 
     if (debug) {
         sort(terms->begin(), terms->end());
-        sort(onesTerms->begin(), onesTerms->end());
-        data.initCover(terms, onesTerms);
+        sort(explicitsTerms->begin(), explicitsTerms->end());
+        data.initCover(terms, explicitsTerms);
         data.setPrimes(*terms);
     }
 
@@ -246,7 +255,7 @@ void QuineMcCluskey::findFinalImplicants()
     for (impl = 0; impl < implsCount; impl++) {
         table[impl] = new bool[origTermsSize];
         for (term = 0; term < origTermsSize; term++) {
-            table[impl][term] = (*terms)[impl].implies(onesTerms->at(term));
+            table[impl][term] = (*terms)[impl].implies(explicitsTerms->at(term));
             if (debug && table[impl][term])
                 data.setCover(impl, term);
         }
@@ -270,16 +279,16 @@ void QuineMcCluskey::findFinalImplicants()
     }
     mf->terms->setContainer(v);
 
-    delete onesTerms;
+    delete explicitsTerms;
 }
 
-vector<Term> *QuineMcCluskey::getTermsVector(TermsContainer *tc, bool onlyOnes) const
+vector<Term> *QuineMcCluskey::getTermsVector(TermsContainer *tc, bool onlyExplicits) const
 {
     vector<Term> *pv = new vector<Term>;
     tc->itInit();
     while (tc->itHasNext()) {
         Term t = tc->itNext();
-        if (!onlyOnes || !t.isDC())
+        if (!onlyExplicits || !t.isDC())
             pv->push_back(t);
     }
     return pv;

@@ -8,54 +8,109 @@
 
 using namespace std;
 
-TermsContainer::TermsContainer(int ts, ContainerType t)
+TermsContainer::TermsContainer(int varsCount, TermsType tt, ContainerType ct)
 {
-    termSize = ts;
-    type = t;
+    termVarsCount = varsCount;
+    ttype = tt;
+    ctype = ct;
+    changed = false;
+
+    termsVectorOnes = new vector<Term>;
+    termsVectorZeros = new vector<Term>;
+    termsVector = (ttype == MINTERMS)? termsVectorOnes: termsVectorZeros;
+}
+
+TermsContainer::TermsContainer(const TermsContainer &tc)
+{
+    copy(tc);
+}
+
+TermsContainer &TermsContainer::operator=(const TermsContainer &tc)
+{
+    if (this == &tc)
+        return *this;
+
+    delete termsVectorOnes;
+    delete termsVectorZeros;
+
+    copy(tc);
+    return *this;
+}
+
+void TermsContainer::copy(const TermsContainer &tc)
+{
+    termVarsCount = tc.termVarsCount;
+    ttype = tc.ttype;
+    ctype = tc.ctype;
+    changed = tc.changed;
+
+    termsVectorOnes = new vector<Term>(tc.termsVectorOnes->begin(), tc.termsVectorOnes->end());
+    termsVectorZeros = new vector<Term>(tc.termsVectorZeros->begin(), tc.termsVectorZeros->end());
+    termsVector = (ttype == MINTERMS)? termsVectorOnes: termsVectorZeros;
+}
+
+TermsContainer::~TermsContainer()
+{
+    delete termsVectorOnes;
+    delete termsVectorZeros;
 }
 
 void TermsContainer::setContainer(vector<Term> &v)
 {
-    termsVector = vector<Term>(v.begin(), v.end());
+    delete termsVector;
+    termsVector = new vector<Term>(v.begin(), v.end());
+    if (ttype == MINTERMS)
+        termsVectorOnes = termsVector;
+    else
+        termsVectorZeros = termsVector;
+    changed = true;
+}
+
+void TermsContainer::setTermsType(TermsType tt)
+{
+    if (tt != ttype) {
+        setComplement();
+        ttype = tt;
+        termsVector = (ttype == MINTERMS)? termsVectorOnes: termsVectorZeros;
+    }
 }
 
 int TermsContainer::getSize() const
 {
-    return termsVector.size();
+    return termsVector->size();
 }
 
 bool TermsContainer::pushTerm(int idx, bool isDC)
 {
-    for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
+    for (vector<Term>::iterator it = termsVector->begin(); it != termsVector->end(); it++) {
         if (idx == (*it).getIdx()) {
-            if ((*it).isDC())
-                return false;
-            else {
+            if ((*it).isDC() ^ isDC) {
                 (*it).setDC(isDC);
-                return true;
+                return (changed = true);
             }
+            else
+                return false;
         }
     }
-    termsVector.push_back(Term(idx, termSize, isDC));
-
-    return true;
+    termsVector->push_back(Term(idx, termVarsCount, isDC));
+    return (changed = true);
 }
 
 bool TermsContainer::pushTerm(const Term &t)
 {
-    if (find(termsVector.begin(), termsVector.end(), t) == termsVector.end()) {
-        termsVector.push_back(t);
-        return true;
+    if (find(termsVector->begin(), termsVector->end(), t) == termsVector->end()) {
+        termsVector->push_back(t);
+        return (changed = true);
     }
     return false;
 }
 
 bool TermsContainer::removeTerm(int idx)
 {
-    for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
+    for (vector<Term>::iterator it = termsVector->begin(); it != termsVector->end(); it++) {
         if (idx == (*it).getIdx()) {
-            termsVector.erase(it);
-            return true;
+            termsVector->erase(it);
+            return (changed = true);
         }
     }
     return false;
@@ -64,94 +119,145 @@ bool TermsContainer::removeTerm(int idx)
 bool TermsContainer::removeTerm(const Term &t)
 {
     vector<Term>::iterator it;
-    if ((it = find(termsVector.begin(), termsVector.end(), t)) != termsVector.end()) {
-        termsVector.erase(it);
-        return true;
+    if ((it = find(termsVector->begin(), termsVector->end(), t)) != termsVector->end()) {
+        termsVector->erase(it);
+        return (changed = true);
     }
     return false;
 }
 
 bool TermsContainer::hasTerm(const Term & t) const
 {
-    if (termsVector.size() == 0 || termsVector[0].getSize() != t.getSize())
+    if (termsVector->empty() || termsVector->at(0).getSize() != t.getSize())
         return false;
-    return find(termsVector.begin(), termsVector.end(),t) != termsVector.end();
+    return find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
 }
 
+bool TermsContainer::setTermValue(int idx, OutputValue val)
+{
+    if (val.isDC())
+        return pushTerm(idx, true);
+    else if ((val.isOne() && ttype == MINTERMS) || (val.isZero() && ttype == MAXTERMS))
+        return pushTerm(idx, false);
+    else
+        return removeTerm(idx);
+}
 
-vector<Term> &TermsContainer::getMinterms(std::vector<Term> &minterms) const
+OutputValue TermsContainer::getTermValue(int idx) const
+{
+    for (unsigned i = 0; i < termsVector->size(); i++) {
+        if (idx == termsVector->at(i).getIdx()) {
+            if (termsVector->at(i).isDC())
+                return OutputValue::DC;
+            else if (ttype == MINTERMS)
+                return OutputValue::ONE;
+            else
+                return OutputValue::ZERO;
+        }
+    }
+    if (ttype == MINTERMS)
+        return OutputValue::ZERO;
+    else
+        return OutputValue::ONE;
+}
+
+vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms)
 {
     minterms.clear();
-    for (unsigned i = 0; i < termsVector.size(); i++)
-        Term::expandTerm(minterms, termsVector[i]);
+    if (ttype == MINTERMS) {
+        minterms.reserve(termsVector->size());
+        for (unsigned i = 0; i < termsVector->size(); i++)
+            Term::expandTerm(minterms, termsVector->at(i));
+    }
+    else {
+        setComplement();
+        minterms.reserve(termsVectorZeros->size());
+        for (unsigned i = 0; i < termsVectorZeros->size(); i++)
+            Term::expandTerm(minterms, termsVectorZeros->at(i));
+    }
     return minterms;
 }
 
-vector<Term> TermsContainer::getMinterms() const
+vector<Term> TermsContainer::getMinterms()
 {
     vector<Term> minterms;
-    for (unsigned i = 0; i < termsVector.size(); i++)
-        Term::expandTerm(minterms, termsVector[i]);
-    return minterms;
+    return getMinterms(minterms);
 }
 
-vector<int> TermsContainer::getTermsIdx(int val) const
+vector<Term> &TermsContainer::getMaxterms(vector<Term> &maxterms)
+{
+    maxterms.clear();
+    if (ttype == MAXTERMS) {
+        maxterms.reserve(termsVector->size());
+        for (unsigned i = 0; i < termsVector->size(); i++)
+            Term::expandTerm(maxterms, termsVector->at(i));
+    }
+    else {
+        setComplement();
+        maxterms.reserve(termsVectorOnes->size());
+        for (unsigned i = 0; i < termsVectorOnes->size(); i++)
+            Term::expandTerm(maxterms, termsVectorOnes->at(i));
+    }
+    return maxterms;
+}
+
+vector<Term> TermsContainer::getMaxterms()
+{
+    vector<Term> maxterms;
+    return getMaxterms(maxterms);
+}
+
+vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs)
+{
+    OutputValue value(val);
+    vector<Term> v;
+
+    idxs.clear();
+
+    if ((!value.isZero() && ttype == MINTERMS) || (!value.isOne() && ttype == MAXTERMS)) {
+        v.reserve(termsVector->size());
+        for (unsigned i = 0; i < termsVector->size(); i++)
+            Term::expandTerm(v, termsVector->at(i));
+    }
+    else {
+        setComplement();
+        vector<Term> *cv = (ttype == MINTERMS)? termsVectorZeros: termsVectorOnes;
+        v.reserve(cv->size());
+        for (unsigned i = 0; i < cv->size(); i++)
+            Term::expandTerm(v, cv->at(i));
+    }
+
+    for (unsigned i = 0; i < v.size(); i++) {
+        if (!(value.isDC() ^ v[i].isDC()))
+            idxs.push_back(v[i].getIdx());
+    }
+
+    return idxs;
+}
+
+vector<int> TermsContainer::getTermsIdx(int val)
 {
     vector<int> idxs;
     getTermsIdx(val, idxs);
     return idxs;
 }
 
-vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs) const
-{
-    idxs.clear();
 
-    // TODO - all terms with ZERO
-    OutputValue value(val);
-    if (value.isZero()) {
-        return idxs; // termporary
-    }
-    else {
-        for (unsigned i = 0; i < termsVector.size(); i++) {
-            if (!(value.isDC() ^ termsVector[i].isDC()))
-                idxs.push_back(termsVector[i].getIdx());
-        }
-    }
-    return idxs;
-}
-
-
-
-OutputValue TermsContainer::getTermValue(int idx) const
-{
-    //for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++) {
-    //  if (idx == (*it).getIdx()) {
-    //    if ((*it).isDC())
-    for (unsigned i = 0; i < termsVector.size(); i++) {
-        if (idx == termsVector[i].getIdx()) {
-            if (termsVector[i].isDC())
-                return OutputValue::DC;
-            else
-                return OutputValue::ONE;
-        }
-    }
-    return OutputValue::ZERO;
-}
 
 void TermsContainer::clear()
 {
-    termsVector.clear();
+    termsVector->clear();
+    changed = true;
 }
 
 // equality
 bool TermsContainer::operator==(const TermsContainer &tc) const
 {
-    if (termsVector.size() != tc.termsVector.size())
+    if (termsVector->size() != tc.termsVector->size())
         return false;
     // checks all terms
-    //for (vector<Term>::iterator it = termsVector.begin(); it != termsVector.end(); it++)
-    for (unsigned i = 0; i < termsVector.size(); i++) {
-        if (find(tc.termsVector.begin(), tc.termsVector.end(), termsVector[i]) == tc.termsVector.end())
+    for (unsigned i = 0; i < termsVector->size(); i++) {
+        if (find(tc.termsVector->begin(), tc.termsVector->end(), termsVector->at(i)) == tc.termsVector->end())
             return false;
     }
     return true;
@@ -162,6 +268,48 @@ bool TermsContainer::operator!=(const TermsContainer &tc) const
     return !operator==(tc);
 }
 
+void TermsContainer::setComplement()
+{
+    if (changed) {
+        toBaseTerms();
+        vector<Term> *v = (ttype == MINTERMS)? termsVectorZeros: termsVectorOnes;
+        vector<Term> *complement = new vector<Term>;
+        complement->reserve(v->size());
+
+        int all = 1 << termVarsCount;
+        int tSize = static_cast<int>(termsVector->size());
+        int i;
+        for (int idx = 0; idx < all; idx++) {
+            for (i = 0; i < tSize; i++) {
+                if (termsVector->at(i).getIdx() == idx) {
+                    if (termsVector->at(i).isDC())
+                        complement->push_back(termsVector->at(i));
+                    break;
+                }
+            }
+            if (i == tSize) // not found in termsVector
+                complement->push_back(Term(idx, termVarsCount));
+        }
+
+        delete v;
+        if (ttype == MINTERMS)
+            termsVectorZeros = complement;
+        else
+            termsVectorOnes = complement;
+
+        changed = false;
+    }
+}
+
+void TermsContainer::toBaseTerms()
+{
+    vector<Term> v;
+    v.reserve(termsVector->size());
+    for (unsigned i = 0; i < termsVector->size(); i++)
+            Term::expandTerm(v, termsVector->at(i));
+    *termsVector = vector<Term>(v.begin(), v.end());
+}
+
 void TermsContainer::itInit()
 {
     itPos = 0;
@@ -170,10 +318,12 @@ void TermsContainer::itInit()
 
 bool TermsContainer::itHasNext()
 {
-    return termsVector.size() != itPos;
+    return termsVector->size() != itPos;
 }
 
 Term &TermsContainer::itNext()
 {
-    return termsVector[itPos++];
+    return termsVector->at(itPos++);
 }
+
+

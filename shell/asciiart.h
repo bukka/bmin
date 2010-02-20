@@ -87,7 +87,9 @@ static const char * const MSG_P_IMPLS_COVERING  = "Prime Implicants Covering Tab
 static const char * const MSG_FINDING_IMPLS     = "Finding Prime Implicants";
 static const char * const MSG_SIZE_IMPLS        = "Size %d Implicants";
 static const char * const MSG_NUMBER_OF_1S      = "Number of 1s";
+static const char * const MSG_NUMBER_OF_0S      = "Number of 0s";
 static const char * const MSG_MINTERM           = "Minterm";
+static const char * const MSG_MAXTERM           = "Maxterm";
 static const char * const MSG_CUBE              = "%d-Cube";
 static const char * const MSG_MAX_VARS_QM       = "Too many variables for QM algorithm (max %d)";
 

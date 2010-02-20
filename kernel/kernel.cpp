@@ -1,12 +1,15 @@
 #include "kernel.h"
 #include "events.h"
 #include "formula.h"
+#include "outputvalue.h"
 #include "quinemccluskey.h"
+#include "constants.h"
 
 #include <algorithm>
 
 using namespace std;
 
+// macro for generating event
 #define emitEvent(_fce) \
 for (list<Events *>::iterator _it = events.begin(); _it != events.end(); _it++) (*_it)->_fce
 
@@ -32,6 +35,7 @@ Kernel::Kernel()
 {
     formula = minFormula = 0;
     qm = new QuineMcCluskey;
+    repre = (Constants::SOP_DEFAULT? Formula::REP_SOP: Formula::REP_POS);
 }
 
 Kernel::~Kernel()
@@ -41,11 +45,13 @@ Kernel::~Kernel()
     delete qm;
 }
 
+// adds new events' class
 void Kernel::registerEvents(Events *evt)
 {
     events.push_back(evt);
 }
 
+// removes events' class
 void Kernel::unregisterEvents(Events *evt)
 {
     list<Events *>::iterator it = find(events.begin(), events.end(), evt);
@@ -53,30 +59,34 @@ void Kernel::unregisterEvents(Events *evt)
         events.erase(it);
 }
 
+// returns formula with minterms or maxterms
 Formula *Kernel::getFormula() const
 {
     return formula;
 }
 
+// returns minimized formula
 Formula *Kernel::getMinimizedFormula() const
 {
     return formula->isMinimized()? minFormula: 0;
 }
 
+// whether formula was set
 bool Kernel::hasFormula() const
 {
     return formula != 0;
 }
 
+// returns true if actual formula is minimized otherwise false
 bool Kernel::hasMinimizedFormula() const
 {
-    if (minFormula == 0)
+    if (!minFormula || !formula)
         return false;
 
     return formula->isMinimized();
 }
 
-
+// sets new actual formula
 void Kernel::setFormula(Formula *f)
 {
     delete formula;
@@ -88,32 +98,35 @@ void Kernel::setFormula(Formula *f)
     }
 }
 
+// minimizes actual formula - debug arg for qm
 void Kernel::minimizeFormula(bool debug)
 {
-    MinimizeEvent me;
+    MinimizeEvent me; // info data
     if (!formula)
-        emitEvent(evtFormulaMinimized(me));
+        emitEvent(evtFormulaMinimized(0, me));
     else {
         me.enableFormula();
         if (debug)
             me.enableDebug();
-
+        // minimize only when it is necessary (no redundant minimization)
         if (!formula->isMinimized() || (debug && !qm->isDebug())) {
             me.enableRun();
             minFormula = qm->minimize(formula, debug);
-            emitEvent(evtFormulaMinimized(me));
+            emitEvent(evtFormulaMinimized(minFormula, me));
         }
         else
-            emitEvent(evtFormulaMinimized(me));
+            emitEvent(evtFormulaMinimized(minFormula, me));
     }
 }
 
+// deletes actual formula
 void Kernel::deleteFomula()
 {
     delete formula;
     formula = 0;
 }
 
+// returns debugging data from Quine-McCluskey
 QuineMcCluskeyData *Kernel::getQmData()
 {
     if (formula && (formula->isMinimized() && qm->isDebug()))
@@ -122,10 +135,14 @@ QuineMcCluskeyData *Kernel::getQmData()
         return 0;
 }
 
-void Kernel::pushTerm(int idx, bool isDC)
+// adds new term to formula
+void Kernel::setTermValue(int idx, OutputValue val)
 {
+    if (!formula)
+        return;
+
     try {
-        formula->pushTerm(idx, isDC);
+        formula->setTermValue(idx, val);
         emitEvent(evtFormulaChanged(formula));
     }
     catch (InvalidIndexExc &exc) {
@@ -133,35 +150,52 @@ void Kernel::pushTerm(int idx, bool isDC)
     }
 }
 
-void Kernel::removeTerm(int idx)
-{
-    try {
-        formula->removeTerm(idx);
-        emitEvent(evtFormulaChanged(formula));
-    }
-    catch (InvalidIndexExc &exc) {
-        emitEvent(evtError(exc));
-    }
-}
-
+// set default names for n variables
 void Kernel::setVars(int n)
 {
+    if (!formula)
+        return;
+
     formula->setVars(n);
     emitEvent(evtFormulaChanged(formula));
 }
 
+// sets variables name by array of characters v
 void Kernel::setVars(char *v, int n)
 {
+    if (!formula)
+        return;
+
     formula->setVars(v, n);
     emitEvent(evtFormulaChanged(formula));
 }
 
+// sets variables name by vector v
 void Kernel::setVars(const vector<char> *v, int vs)
 {
+    if (!formula)
+        return;
+
     formula->setVars(v, vs);
     emitEvent(evtFormulaChanged(formula));
 }
 
+// sets represatation of logic function
+void Kernel::setRepre(Formula::Repre rep)
+{
+    repre = rep;
+    if (formula) {
+        bool minimized = formula->isMinimized(); // whether minimize after repre setting
+        if (formula->setRepre(rep)) { // repre changed
+            emitEvent(evtFormulaChanged(formula));
+            // minimize but not twice (second condition)
+            if (minimized && !formula->isMinimized())
+                minimizeFormula(qm->isDebug());
+        }
+    }
+}
+
+// some error
 void Kernel::error(exception &exc)
 {
     emitEvent(evtError(exc));
@@ -173,27 +207,32 @@ void Kernel::exit()
     emitEvent(evtExit());
 }
 
+// show help
 void Kernel::help()
 {
     emitEvent(evtHelp());
 }
 
+// show Quine-McCluskey Algorithm
 void Kernel::showQm()
 {
     minimizeFormula(true);
     emitEvent(evtShowQm(getQmData()));
 }
 
+// show Karnaugh map
 void Kernel::showMap()
 {
     emitEvent(evtShowMap());
 }
 
+// show Boolean n-Cube
 void Kernel::showCube()
 {
     emitEvent(evtShowCube());
 }
 
+// show logic function
 void Kernel::showFce(char name)
 {
     if (formula && (name == CURRENT_FCE_NAME || formula->getName() == name))

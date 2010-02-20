@@ -44,8 +44,7 @@ public:
 private:
     void showHeader();
     void showNothing();
-    void showPrimeTable();
-    void showCoveringTable();
+    void showData();
     void setCell(QTextTable *table, int row, int col, const QString &html);
 
     bool m_active;

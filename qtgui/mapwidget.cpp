@@ -378,7 +378,11 @@ void MapWidget::setMapData(Formula *formula)
     for (int i = int(revVars.size()) - 1; i >= 0; i--)
         vars.push_back(revVars[i]);
 
-    int zero = MapCell::ZERO;
+    int value;
+    if (formula->getRepre() == Formula::REP_SOP)
+        value = MapCell::ZERO;
+    else
+        value = MapCell::ONE;
 
     if (size != mapSize) {
         if (!cells.empty())
@@ -388,17 +392,17 @@ void MapWidget::setMapData(Formula *formula)
         x = y = 0;
 
         if (size == 1) {
-            cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
-            cells.push_back(new MapCell(x+cellSize,y,cellSize,cellBorder,zero));
+            cells.push_back(new MapCell(x,y,cellSize,cellBorder,value));
+            cells.push_back(new MapCell(x+cellSize,y,cellSize,cellBorder,value));
         }
         else if (size > 1) {
             n = power(2,size);
             for (i = 0; i < min(n,64); i += 32) {
                 for (j = 0; j < min(n,32); j += 8) {
                     for (k = 0; k < min(n,8); k += 2) {
-                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
+                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,value));
                         y += cellSize;
-                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,zero));
+                        cells.push_back(new MapCell(x,y,cellSize,cellBorder,value));
                         x += cellSize;
                         y -= cellSize;
                     }
@@ -411,10 +415,14 @@ void MapWidget::setMapData(Formula *formula)
         }
     }
     else
-        setAllValues(zero);
+        setAllValues(value);
 
     std::vector<int> idx;
-    setValues(formula->getTermsIdx(OutputValue::ONE, idx), MapCell::ONE,size);
+    if (formula->getRepre() == Formula::REP_SOP)
+        setValues(formula->getTermsIdx(OutputValue::ONE, idx), MapCell::ONE, size);
+    else
+        setValues(formula->getTermsIdx(OutputValue::ZERO, idx), MapCell::ZERO, size);
+
     setValues(formula->getTermsIdx(OutputValue::DC, idx), MapCell::DONT_CARE, size);
 
 

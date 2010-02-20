@@ -15,28 +15,30 @@ class QuineMcCluskeyData
 public:
     QuineMcCluskeyData();
     // initialization
-    void initImpls(int vars);
+    void initImpls(int vars, bool sp);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
 
+    bool isSoP() { return sop; }
     bool isCovered(int row, int col);
     void setCover(int row, int col);
 
-    void addImpl(int missings, int ones, Term *t);
-    std::list<Term> *getImpls(int missings, int ones);
+    void addImpl(int missings, int explicits, Term *t);
+    std::list<Term> *getImpls(int missings, int explicits);
     void setPrimes(std::vector<Term> primes);
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
 
-    int firstMintermOnes();
-    int lastMintermOnes();
+    int firstExplicitTerm();
+    int lastExplicitTerm();
 
     std::vector<Term> *getCoverHeadRow() { return &coverHeadRow; }
     std::vector<Term> *getCoverHeadCol() { return &coverHeadCol; }
 
 private:
-    inline int getImplsIdx(int missings, int ones);
+    inline int getImplsIdx(int missings, int explicits);
     inline int getCoverIdx(int row, int col);
 
+    bool sop;
     int varsCount;
     int maxMissings;
     int coverRowsCount;
@@ -82,7 +84,7 @@ private:
     void extractImplicant(bool **table, int nImpls, int nTerms, int impl) const;
 
     // duplicates vector with terms, but dont care terms are ignored
-    std::vector<Term> *getTermsVector(TermsContainer *tc, bool onlyOnes = false) const;
+    std::vector<Term> *getTermsVector(TermsContainer *tc, bool onlyExplicits = false) const;
 
     bool debug;
     QuineMcCluskeyData data;

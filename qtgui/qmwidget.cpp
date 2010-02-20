@@ -88,8 +88,7 @@ void QmWidget::updateData()
         m_data = m_gm->getQmData();
         showHeader();
         if (m_data) {
-            showPrimeTable();
-            showCoveringTable();
+            showData();
         }
         else
             showNothing();
@@ -117,15 +116,15 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
     cellCursor.insertHtml(html);
 }
 
-void QmWidget::showPrimeTable()
+void QmWidget::showData()
 {
     m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2>").arg(
             tr("Finding Prime Implicants ")));
 
     int columns = (m_data->getMaxMissings() * 2) + 3;
     int varsCount = m_data->getVarsCount();
-    int firstImpl = m_data->firstMintermOnes();
-    int lastImpl = m_data->lastMintermOnes();
+    int firstImpl = m_data->firstExplicitTerm();
+    int lastImpl = m_data->lastExplicitTerm();
     int rows = varsCount - (firstImpl + (varsCount - lastImpl)) + 3;
 
     list<Term> *l;
@@ -139,17 +138,19 @@ void QmWidget::showPrimeTable()
 
     QString headStr = tr("Size %1 primes");
     QString cubeStr = tr("%1-cube");
+    QString minterm = tr("Minterm");
+    QString maxterm = tr("Maxterm");
 
     table->mergeCells(0, 0, 1, 3);
     setCell(table, 0, 0, headStr.arg(1));
-    setCell(table, 1, 0, tr("Number of 1s"));
-    setCell(table, 1, 1, tr("Minterm"));
+    setCell(table, 1, 0, tr("Number of %1s").arg(m_data->isSoP()? "1": "0"));
+    setCell(table, 1, 1, m_data->isSoP()? minterm: maxterm);
     setCell(table, 1, 2, cubeStr.arg(0));
 
     // first col
-    for (int row = 2, ones = firstImpl; row < rows; row++, ones++) {
-        setCell(table, row, 0, QString::number(ones));
-        l = m_data->getImpls(0, ones);
+    for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
+        setCell(table, row, 0, QString::number(explicits));
+        l = m_data->getImpls(0, explicits);
         if (!l->empty()) {
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
@@ -157,7 +158,7 @@ void QmWidget::showPrimeTable()
                     setCell(table, row, 1, "<br>");
                     setCell(table, row, 2, "<br>");
                 }
-                setCell(table, row, 1, QString::fromStdString((*it).toString(Term::SF_MSET)));
+                setCell(table, row, 1, QString::fromStdString((*it).toString(Term::SF_SET)));
                 setCell(table, row, 2, QString::fromStdString((*it).toString()));
             }
         }
@@ -169,19 +170,19 @@ void QmWidget::showPrimeTable()
         int missings = (column - 1) / 2;
         int size = 1 << missings;
         setCell(table, 0, column, headStr.arg(size));
-        setCell(table, 1, column, tr("Minterms"));
+        setCell(table, 1, column, m_data->isSoP()? minterm: maxterm);
         setCell(table, 1, column + 1, cubeStr.arg(missings));
 
         // body
-        for (int row = 2, ones = firstImpl; row < rows; row++, ones++) {
-            l = m_data->getImpls(missings, ones);
+        for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
+            l = m_data->getImpls(missings, explicits);
             l->sort(greater<Term>());
             for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
                 if (it != l->begin()) {
                     setCell(table, row, column, "<br>");
                     setCell(table, row, column + 1, "<br>");
                 }
-                setCell(table, row, column, QString::fromStdString((*it).toString(Term::SF_MSET)));
+                setCell(table, row, column, QString::fromStdString((*it).toString(Term::SF_SET)));
                 setCell(table, row, column + 1, QString::fromStdString((*it).toString()));
             }
         }
@@ -198,7 +199,7 @@ void QmWidget::showPrimeTable()
     table = m_textArea->textCursor().insertTable(headRow->size() + 1, headCol->size() + 1, tableFormat);
 
     for (unsigned i = 1; i <= headRow->size(); i++)
-        setCell(table, i, 0, QString::fromStdString(headRow->at(i-1).toString(Term::SF_MSET)));
+        setCell(table, i, 0, QString::fromStdString(headRow->at(i-1).toString(Term::SF_SET)));
     for (unsigned j = 1; j <= headCol->size(); j++)
         setCell(table, 0, j, QString::number(headCol->at(j-1).getIdx()));
 
@@ -208,11 +209,6 @@ void QmWidget::showPrimeTable()
                 setCell(table, i, j, "X");
         }
     }
-}
-
-void QmWidget::showCoveringTable()
-{
-
 }
 
 

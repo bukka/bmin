@@ -59,7 +59,7 @@ public:
 
 protected:
     virtual void evtFormulaChanged(Formula *) {}
-    virtual void evtFormulaMinimized(MinimizeEvent &) {}
+    virtual void evtFormulaMinimized(Formula *, MinimizeEvent &) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}

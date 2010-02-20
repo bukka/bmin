@@ -39,7 +39,7 @@ void Term::init(term_t lit, term_t mis, int s, bool isDC)
     liters = lit;
     missing = mis;
     size = s;
-    flags = 0;
+    flags = ONE;
     setDC(isDC);
 }
 
@@ -53,7 +53,10 @@ Term::Term(int s, bool isDC)
 // constructor - makes the variables array with size s by idx (index of boolean function)
 Term::Term(int idx, int s, bool isDC)
 {
-    init(idx, 0, s, isDC);
+    if (idx == MISSING_ALL)
+        init(idx, (1 << s) - 1, s, isDC);
+    else
+        init(idx, 0, s, isDC);
 }
 
 // constructor - internal usage
@@ -62,22 +65,13 @@ Term::Term(term_t lit, term_t miss, int size, bool isDC)
     init(lit, miss, size, isDC);
 }
 
-// sets whether this term is don't care term
-void Term::setDC(bool isDC)
+// sets certain flag
+void Term::setFlag(int flag, bool is)
 {
-    if (isDC)
-        flags |= DC;
+    if (is)
+        flags |= flag;
     else
-        flags &= ~DC;
-}
-
-// sets whether this term is prime implicant
-void Term::setPrime(bool isPrime)
-{
-    if (isPrime)
-        flags |= PRIME;
-    else
-        flags &= ~PRIME;
+        flags &= ~flag;
 }
 
 // returns the count of values in term
@@ -253,10 +247,11 @@ int Term::getValueAt(int position) const
 // term to string
 string Term::toString(StringForm sf) const
 {
-    if (sf == SF_MSET) {
+    if (sf == SF_SET) {
+        char type = isOne()? 'm': 'M';
         ostringstream oss;
         if (missing) {
-            oss << "m(";
+            oss << type << "(";
             vector<Term> v;
             Term::expandTerm(v, *this);
             sort(v.begin(), v.end());
@@ -268,7 +263,7 @@ string Term::toString(StringForm sf) const
             oss << ")";
         }
         else
-            oss << "m" << getIdx();
+            oss << type << getIdx();
 
         return oss.str();
     }
