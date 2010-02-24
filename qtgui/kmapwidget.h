@@ -1,8 +1,8 @@
 /*
  *
- * created date: 11/30/2009
+ * created date: 2/20/2010
  *
- * Copyright (C) 2009 Jakub Zelenka.
+ * Copyright (C) 2009-2010 Jakub Zelenka.
  *
  * Bmin is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -20,42 +20,32 @@
  * 02111-1307 USA.
  */
 
-#ifndef QUINEMCCLUSKEYWIDGET_H
-#define QUINEMCCLUSKEYWIDGET_H
+#ifndef KMAPWIDGET_H
+#define KMAPWIDGET_H
 
 #include "modulewidget.h"
 
+#include <QWidget>
+
 class GUIManager;
-class QuineMcCluskey;
-class QuineMcCluskeyData;
-class Formula;
+class Kernel;
+class KMap;
 
-class QString;
-class QTextEdit;
-class QTextTable;
-
-class QmWidget : public ModuleWidget
+class KMapWidget : public ModuleWidget
 {
     Q_OBJECT
 
 public:
-    QmWidget(const QString &name, int pos);
+    KMapWidget(const QString &name, int pos);
 
 private:
-    void showHeader();
-    void showNothing();
-    void showData();
-    void setCell(QTextTable *table, int row, int col, const QString &html);
-
-    bool m_active;
     GUIManager *m_gm;
-    QuineMcCluskeyData *m_data;
-    QTextEdit *m_textArea;
+    Kernel *m_kernel;
+    KMap *m_kmap;
 
 public slots:
     void setActivity(bool a);
     void updateData();
-    void setMinimizedData();
 };
 
-#endif // QUINEMCCLUSKEYWIDGET_H
+#endif // KMAPWIDGET_H

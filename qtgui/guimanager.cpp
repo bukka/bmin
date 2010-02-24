@@ -81,6 +81,7 @@ void GUIManager::evtFormulaChanged(Formula *f)
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
     emit formulaChanged(f);
+    emit formulaChanged();
 }
 
 void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)

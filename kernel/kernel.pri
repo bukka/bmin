@@ -9,7 +9,8 @@ SOURCES += formula.cpp \
     kernel.cpp \
     termscontainer.cpp \
     outputvalue.cpp \
-    events.cpp
+    events.cpp \
+    kmap.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -20,4 +21,5 @@ HEADERS += formula.h \
     constants.h \
     termscontainer.h \
     outputvalue.h \
-    events.h
+    events.h \
+    kmap.h

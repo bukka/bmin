@@ -3,6 +3,7 @@
 #include "formula.h"
 #include "outputvalue.h"
 #include "quinemccluskey.h"
+#include "kmap.h"
 #include "constants.h"
 
 #include <algorithm>
@@ -35,6 +36,7 @@ Kernel::Kernel()
 {
     formula = minFormula = 0;
     qm = new QuineMcCluskey;
+    kmap = new KMap;
     repre = (Constants::SOP_DEFAULT? Formula::REP_SOP: Formula::REP_POS);
 }
 
@@ -42,7 +44,7 @@ Kernel::~Kernel()
 {
     delete formula;
     delete minFormula;
-    delete qm;
+    delete kmap;
 }
 
 // adds new events' class
@@ -133,6 +135,13 @@ QuineMcCluskeyData *Kernel::getQmData()
         return qm->getData();
     else
         return 0;
+}
+
+// returns Karnaugh map class
+KMap *Kernel::getKMap()
+{
+    kmap->setFormula(formula);
+    return kmap;
 }
 
 // adds new term to formula

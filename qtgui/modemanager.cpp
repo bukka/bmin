@@ -22,6 +22,7 @@
 
 #include "modemanager.h"
 #include "welcomewidget.h"
+#include "kmapwidget.h"
 #include "mapwidget.h"
 #include "cubewidget.h"
 #include "qmwidget.h"
@@ -39,7 +40,12 @@ ModeManager::ModeManager()
     m_modules << m_welcome;
 
     // map
-    m_map = new MapWidget(tr("K-map"), ID_MAP);
+    m_kmap = new KMapWidget(tr("K-Map"), ID_MAP);
+    m_modules << m_kmap;
+    connect(this, SIGNAL(kmapActivated(bool)), m_kmap, SLOT(setActivity(bool)));
+
+    // map
+    m_map = new MapWidget(tr("Map"), ID_MAP);
     m_modules << m_map;
     connect(this, SIGNAL(mapActivated(bool)), m_map, SLOT(setActivity(bool)));
 

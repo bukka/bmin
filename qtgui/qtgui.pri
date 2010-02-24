@@ -14,7 +14,8 @@ SOURCES += mainwindow.cpp \
     modulewidget.cpp \
     modemanager.cpp \
     aboutdialog.cpp \
-    qmwidget.cpp
+    qmwidget.cpp \
+    kmapwidget.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -28,5 +29,6 @@ HEADERS += mainwindow.h \
     modulewidget.h \
     modemanager.h \
     aboutdialog.h \
-    qmwidget.h
+    qmwidget.h \
+    kmapwidget.h
 RESOURCES += resources.qrc

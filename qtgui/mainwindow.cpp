@@ -65,7 +65,7 @@ MainWindow::MainWindow(QWidget *parent)
 
     // set default formula
     if (Constants::DEFAULT_FORMULA) {
-        m_gm->updateFormula("f(c,b,a) = Em(1,2,6)");
+        m_gm->updateFormula("f(c,b,a) = sum m(1,2,6)");
     }
 }
 

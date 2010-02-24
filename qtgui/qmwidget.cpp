@@ -47,8 +47,8 @@ QmWidget::QmWidget(const QString &name, int pos)
     m_data = 0;
     m_gm = GUIManager::instance();
 
-    connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(updateData()));
-    connect(m_gm, SIGNAL(formulaChanged(Formula *)), this, SLOT(makeData(Formula *)));
+    connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(setMinimizedData()));
+    connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
 
     m_textArea = new QTextEdit;
     m_textArea->setFont(QFont("monospace", 10));
@@ -76,13 +76,13 @@ void QmWidget::setActivity(bool a)
     }
 }
 
-void QmWidget::makeData(Formula *)
+void QmWidget::updateData()
 {
     if (m_active)
         m_gm->minimizeFormula(true);
 }
 
-void QmWidget::updateData()
+void QmWidget::setMinimizedData()
 {
     if (m_active) {
         m_data = m_gm->getQmData();

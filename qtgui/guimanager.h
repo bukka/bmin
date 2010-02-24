@@ -107,6 +107,7 @@ signals:
     void minFceChanged(const QString &);
     // emitted when it is essential to change the formula's term
     void formulaChanged(Formula *);
+    void formulaChanged();
     // emitted when formula is minimized
     void formulaMinimized();
     // emitted when user sets invalid formula string

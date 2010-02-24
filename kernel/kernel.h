@@ -12,6 +12,7 @@
 class Events;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
+class KMap;
 
 class Kernel
 {
@@ -55,6 +56,8 @@ public:
 
     // returns debugging data from Quine-McCluskey
     QuineMcCluskeyData *getQmData();
+    // returns Karnaugh map class
+    KMap *getKMap();
 
     // some error
     void error(std::exception &exc);
@@ -88,6 +91,8 @@ private:
 
     // Quine-McCluskey algorithm class
     QuineMcCluskey *qm;
+    // Karnaugh map class
+    KMap *kmap;
 };
 
 
