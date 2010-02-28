@@ -37,6 +37,7 @@ public:
     GreyCode();
     void generate(int vc);
     unsigned getSize() { return size; }
+    unsigned getVarsCount() { return varsCount; }
     int getCode(int idx);
 
 private:
@@ -51,6 +52,10 @@ class KMap
 public:
     enum Error { OK, NO_FORMULA, TOO_MANY_VARS };
     static const int MAX_VARS = 6;
+    static const int MAX_VARS_IN_ROW = 3;
+    static const int MAX_VARS_IN_COL = 3;
+    static const int MAX_ROWS = 1 << MAX_VARS_IN_ROW;
+    static const int MAX_COLS = 1 << MAX_VARS_IN_COL;
 
     KMap();
 
@@ -60,20 +65,25 @@ public:
     std::vector<char> *getTopVars() { return &topVars; }
     std::vector<char> *getSideVars() { return &sideVars; }
 
-    GreyCode *getTopGC() { return &topGC; }
-    GreyCode *getSideGC() { return &sideGC; }
+    int getTopGC(int idx) { return topGC.getCode(idx); }
+    int getSideGC(int idx) { return sideGC.getCode(idx); }
 
-    int getVarsCount() { return varsCount; }
-    int getCellsCount() { return cellsCount; }
+    inline unsigned getVarsCount() { return varsCount; }
+    inline unsigned getCellsCount() { return cellsCount; }
+    inline unsigned getColsCount() { return topGC.getSize(); }
+    inline unsigned getRowsCount() { return sideGC.getSize(); }
+    inline unsigned getColsVarsCount() { return topGC.getVarsCount(); }
+    inline unsigned getRowsVarsCount() { return sideGC.getVarsCount(); }
 
+    int getIdx(unsigned row, unsigned col);
     OutputValue getCellValue(unsigned row, unsigned col);
 
 private:
     void makeVarsAndGC();
 
     Error error;
-    int varsCount;
-    int cellsCount;
+    unsigned varsCount;
+    unsigned cellsCount;
 
     Formula *formula;
 

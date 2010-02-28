@@ -14,6 +14,7 @@ public:
     static OutputValue getNextValue(OutputValue ov);
 
     OutputValue(int v = UNDEFINED) : value(v) {}
+    OutputValue(char ch);
 
     inline int getValue() const { return value; }
 
@@ -26,6 +27,7 @@ public:
     bool operator==(const OutputValue & val) const { return val.getValue() == value; }
 
     std::string toString() const;
+    char toChar() const;
 
  private:
     int value;

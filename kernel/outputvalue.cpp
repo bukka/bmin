@@ -2,6 +2,20 @@
 
 #include <string>
 
+OutputValue::OutputValue(char ch)
+{
+    switch (ch) {
+    case '0':
+        value = ZERO;
+        break;
+    case '1':
+        value = ONE;
+        break;
+    default:
+        value = DC;
+    }
+}
+
 OutputValue OutputValue::getNextValue(OutputValue ov)
 {
     switch (ov.getValue()) {
@@ -23,5 +37,17 @@ std::string OutputValue::toString() const
         return "1";
     default: // dont care value
         return "X";
+    }
+}
+
+char OutputValue::toChar() const
+{
+    switch (value) {
+    case ZERO:
+        return '0';
+    case ONE:
+        return '1';
+    default: // dont care value
+        return 'X';
     }
 }

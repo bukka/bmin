@@ -63,7 +63,7 @@ void KMap::setFormula(Formula *f)
         varsCount = f->getVarsCount();
         cellsCount = 1 << varsCount;
         // setting side and top vars and grey codes
-        vars = vector<char>(f->getVars().begin(), f->getVars().end());
+        vars = f->getVars();
         makeVarsAndGC();
     }
 }
@@ -79,64 +79,72 @@ void KMap::makeVarsAndGC()
         sideGC.generate(0);
         break;
     case 2:
-        topVars.push_back(vars[1]);
-        sideVars.push_back(vars[0]);
+        topVars.push_back(vars[0]);
+        sideVars.push_back(vars[1]);
         topGC.generate(1);
         sideGC.generate(1);
         break;
     case 3:
-        topVars.push_back(vars[2]);
+        topVars.push_back(vars[0]);
         topVars.push_back(vars[1]);
-        sideVars.push_back(vars[0]);
+        sideVars.push_back(vars[2]);
         topGC.generate(2);
         sideGC.generate(1);
         break;
     case 4:
-        topVars.push_back(vars[3]);
-        topVars.push_back(vars[2]);
-        sideVars.push_back(vars[1]);
-        sideVars.push_back(vars[0]);
+        topVars.push_back(vars[0]);
+        topVars.push_back(vars[1]);
+        sideVars.push_back(vars[2]);
+        sideVars.push_back(vars[3]);
         topGC.generate(2);
         sideGC.generate(2);
         break;
     case 5:
-        topVars.push_back(vars[4]);
-        topVars.push_back(vars[3]);
+        topVars.push_back(vars[0]);
+        topVars.push_back(vars[1]);
         sideVars.push_back(vars[2]);
-        sideVars.push_back(vars[1]);
-        sideVars.push_back(vars[0]);
+        sideVars.push_back(vars[3]);
+        sideVars.push_back(vars[4]);
         topGC.generate(2);
         sideGC.generate(3);
         break;
     case 6:
-        topVars.push_back(vars[5]);
-        topVars.push_back(vars[4]);
         topVars.push_back(vars[0]);
-        sideVars.push_back(vars[3]);
+        topVars.push_back(vars[1]);
+        topVars.push_back(vars[5]);
         sideVars.push_back(vars[2]);
-        sideVars.push_back(vars[1]);
+        sideVars.push_back(vars[3]);
+        sideVars.push_back(vars[4]);
         topGC.generate(3);
         sideGC.generate(3);
         break;
     }
 }
 
+int KMap::getIdx(unsigned row, unsigned col)
+{
+    int sideCode = sideGC.getCode(row);
+    int topCode = topGC.getCode(col);
+
+    if (sideCode < 0 || topCode < 0)
+        return -1;
+
+    // composition of Grey codes
+    if (topGC.getVarsCount() == 3) // 6 variables (the first bit of topCode is before sideCode)
+        return (sideCode << 2) | (3 & topCode) | ((4 & topCode) << 3);
+    else
+        return (sideCode << topGC.getVarsCount()) | topCode;
+}
+
 OutputValue KMap::getCellValue(unsigned row, unsigned col)
 {
-    if (row >= sideGC.getSize() || col >= topGC.getSize())
+    if (row >= getRowsCount() || col >= getColsCount())
         return OutputValue(OutputValue::UNDEFINED);
     else {
-        int sideCode = sideGC.getCode(row);
-        int topCode = topGC.getCode(col);
-        if (sideCode < 0 || topCode < 0)
+        int idx = getIdx(row, col);
+        if (idx < 0)
             return OutputValue(OutputValue::UNDEFINED);
-        // composition of Grey codes
-        int idx;
-        if (topGC.getSize() == 3) // 6 variables (the first bit of topCode is before sideCode)
-           idx = (sideCode << 2) | (~3 & topCode) | ((~4 & topCode) << 3);
         else
-            idx = (sideCode << topGC.getSize()) | topCode;
-
-        return formula->getTermValue(idx);
+            return formula->getTermValue(idx);
     }
 }

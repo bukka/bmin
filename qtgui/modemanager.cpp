@@ -82,6 +82,7 @@ void ModeManager::destroy()
 void ModeManager::setMode(int modeId)
 {
     emit mapActivated(modeId == ID_MAP);
+    emit kmapActivated(modeId == ID_KMAP);
     emit qmActivated(modeId == ID_QM);
 #ifdef Q_WS_WIN
     emit cubeActivated(modeId == ID_CUBE);
