@@ -20,8 +20,6 @@
  * 02111-1307 USA.
  */
 
-#define KONSOLE_ONLY 0
-
 #include "kernel/constants.h"
 
 #include "shell/konsole.h"

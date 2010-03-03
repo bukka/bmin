@@ -35,8 +35,10 @@ static const char * const CMD_EXIT     = "exit";
 static const char * const CMD_HELP     = "help";
 static const char * const CMD_SHOW     = "show";
 static const char * const CMD_QM       = "qm";
-static const char * const CMD_MAP      = "map";
+static const char * const CMD_KMAP     = "kmap";
 static const char * const CMD_CUBE     = "cube";
+static const char * const CMD_SOP      = "sop";
+static const char * const CMD_POS      = "pos";
 
 class LexicalAnalyzer
 {
@@ -62,8 +64,10 @@ public:
         HELP,
         SHOW,
         QM,
-        MAP,
-        CUBE
+        KMAP,
+        CUBE,
+        SOP,
+        POS
     };
 
     LexicalAnalyzer();

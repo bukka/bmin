@@ -26,8 +26,10 @@
 #include "modulewidget.h"
 // kernel
 #include "outputvalue.h"
+#include "kmap.h"
 
 #include <vector>
+#include <list>
 
 #include <QWidget>
 #include <QGraphicsWidget>
@@ -37,7 +39,6 @@
 
 class GUIManager;
 class Kernel;
-class KMap;
 class QPainter;
 class QGraphicsScene;
 class QGraphicsView;
@@ -149,10 +150,14 @@ public:
     static const qreal SIZE    = 35.0;
     static const qreal BORDER  = 2.0;
     static const int FONT_SIZE = 10;
+    static const int PADDING   = 4;
 
     KMapCellWidget(QGraphicsItem *parent = 0);
     void setWalls(bool top, bool bottom, bool left, bool right);
     void setValue(char value);
+    bool hasCoverPos(unsigned pos);
+    unsigned addCover(KMapCell &cell, unsigned pos = 0);
+    void setLastCoverPos(unsigned pos);
     inline void setIdx(int idx) { m_idx = idx; }
 
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
@@ -175,6 +180,8 @@ private:
     int m_penSize;
     int m_wallSize;
     int m_cellSize;
+
+    std::list<KMapCell> m_covers;
 
     // value
     char m_value;
@@ -199,11 +206,13 @@ public:
     ~KMapGridWidget();
 
     void setMapData(KMap *data);
+    void showCovers();
 
 private:
     unsigned m_varsCount;
     unsigned m_rowsCount;
     unsigned m_colsCount;
+    KMap *m_kmap;
 
     std::vector<char> m_vars;
     // selecting mode

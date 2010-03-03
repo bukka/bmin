@@ -9,6 +9,7 @@
 class Parser;
 class AsciiArt;
 class QuineMcCluskeyData;
+class KMap;
 
 class Konsole : public Events
 {
@@ -25,13 +26,14 @@ protected:
     virtual void evtExit();
     virtual void evtHelp();
     virtual void evtShowQm(QuineMcCluskeyData *data);
-    virtual void evtShowMap();
+    virtual void evtShowKMap(KMap *kmap);
     virtual void evtShowCube();
     virtual void evtShowFce(Formula *f, Formula *mf);
 
 
 private:
     bool running;
+    bool isSoP;
     Parser *parser;
     AsciiArt *art;
 
@@ -51,5 +53,8 @@ static const char * const MSG_FCE               = "Function: ";
 static const char * const MSG_MINIMIZED_FORM    = "Minimized form: ";
 static const char * const MSG_NO_SUCH_FCE       = "No such function";
 static const char * const MSG_NO_FCE_SET        = "No function was set";
+static const char * const MSG_REPRE_CHANGED     = "Function representation was changed to ";
+static const char * const MSG_SOP               = "Sum of Products";
+static const char * const MSG_POS               = "Product of Sums";
 
 #endif // KONSOLE_H

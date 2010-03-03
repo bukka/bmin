@@ -182,6 +182,12 @@ void Parser::command() throw(ShellExc)
     case LexicalAnalyzer::HELP:
         kernel->help();
         break;
+    case LexicalAnalyzer::SOP:
+        kernel->setRepre(Formula::REP_SOP);
+        break;
+    case LexicalAnalyzer::POS:
+        kernel->setRepre(Formula::REP_POS);
+        break;
     case LexicalAnalyzer::SHOW:
         readToken();
         showArg();
@@ -204,8 +210,8 @@ void Parser::showArg() throw(ShellExc)
         case LexicalAnalyzer::QM:
             kernel->showQm();
             break;
-        case LexicalAnalyzer::MAP:
-            kernel->showMap();
+        case LexicalAnalyzer::KMAP:
+            kernel->showKMap();
             break;
         case LexicalAnalyzer::CUBE:
             kernel->showCube();

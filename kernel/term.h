@@ -27,6 +27,7 @@
 
 #include <iostream>
 #include <vector>
+#include <list>
 #include <string>
 #include <limits.h>
 
@@ -82,6 +83,8 @@ public:
     // returns the new term combined (only by difference of one varible)
     // with *this and t, for example 0010 & 0000 => 00X0
     Term *combine(const Term & t) const;
+    // returns true if term t can be combined with this term, otherwise returns false
+    bool isCombinable(const Term & t) const;
     // replace first dont care by zero and one
     Term *expandMissingValue() const;
     // returns true if *this term implies term t
@@ -105,6 +108,7 @@ public:
 
     // expands term t to all minterms
     static void expandTerm(std::vector<Term> &v, const Term &t);
+    static void expandTerm(std::list<Term> &l, const Term &t);
 
 private:
     // term initialization

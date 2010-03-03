@@ -21,10 +21,13 @@
  */
 
 #include "kmap.h"
+#include "kernel.h"
 #include "formula.h"
+#include "term.h"
 #include "outputvalue.h"
 
 #include <vector>
+#include <list>
 using namespace std;
 
 const int GreyCode::code[1 << GC_MAX_VC] = {0, 1, 3, 2, 6, 7, 5, 4};
@@ -44,6 +47,72 @@ int GreyCode::getCode(int idx)
 {
     return (idx < static_cast<int>(size))? code[idx]: -1;
 }
+
+int GreyCode::getIdx(int gc)
+{
+    for (int i = 0; i < (1 << GC_MAX_VC); i++) {
+        if (gc == code[i])
+            return i;
+    }
+    return -1;
+}
+
+
+// KMap CELL
+KMapCell::KMapCell(unsigned row,  unsigned col, Term &t)
+{
+    term = t;
+    mapRow = row;
+    mapCol = col;
+    flags = 0;
+    sortValue = (mapRow << 3) | mapCol;
+}
+
+bool KMapCell::operator<(const KMapCell &cell) const
+{
+    return sortValue < cell.sortValue;
+}
+
+
+// KMap COVER
+
+KMapCover::KMapCover(Term &t, KMap *kmap)
+{
+    list<Term> terms;
+    Term::expandTerm(terms, t);
+
+    unsigned row, col;
+    for (list<Term>::iterator it = terms.begin(); it != terms.end(); it++) {
+        kmap->getRowCol((*it).getIdx(), row, col);
+        cells.push_back(KMapCell(row, col, *it));
+    }
+
+    cells.sort();
+
+    list<KMapCell>::iterator actual, other;
+    for (actual = cells.begin(); actual != cells.end(); actual++) {
+        int flags = KMapCell::TOP | KMapCell::RIGHT | KMapCell::BOTTOM | KMapCell::LEFT;
+        for (other = cells.begin(); other != cells.end(); other++) {
+            if (actual != other && (*actual).term.isCombinable((*other).term)) {
+                if ((*actual).getRow() == (*other).getRow()) {
+                    if ((*actual).getCol() < (*other).getCol())
+                        flags &= ~KMapCell::RIGHT;
+                    else
+                        flags &= ~KMapCell::LEFT;
+                }
+                else if ((*actual).getRow() < (*other).getRow())
+                    flags &= ~KMapCell::BOTTOM;
+                else
+                    flags &= ~KMapCell::TOP;
+            }
+        }
+        (*actual).enableFlag(flags);
+    }
+
+}
+
+
+// KMap
 
 KMap::KMap()
 {
@@ -147,4 +216,44 @@ OutputValue KMap::getCellValue(unsigned row, unsigned col)
         else
             return formula->getTermValue(idx);
     }
+}
+
+bool KMap::getRowCol(int idx, unsigned &row, unsigned &col)
+{
+    if (idx >= (1 << varsCount))
+        return false;
+
+    int topCode, sideCode;
+    if (topGC.getVarsCount() == 3) { // 6 variables
+        topCode = idx & 3;
+        if (idx & 32)
+            topCode |= 4;
+        sideCode = (idx >> 2) & 7;
+    }
+    else {
+        int mask = ((topGC.getVarsCount() == 1)? 1: 3);
+        topCode = mask & idx;
+        sideCode = idx >> topGC.getVarsCount();
+    }
+    row = sideGC.getIdx(sideCode);
+    col = topGC.getIdx(topCode);
+
+    return true;
+}
+
+list<KMapCover> *KMap::getMinCovers()
+{
+    Kernel *kernel = Kernel::instance();
+    if (!formula->isMinimized())
+        kernel->minimizeFormula();
+    Formula *minFormula = kernel->getMinimizedFormula();
+    if (!minFormula)
+        return 0;
+
+    covers.clear();
+    minFormula->itInit();
+    while (minFormula->itHasNext())
+        covers.push_back(KMapCover(minFormula->itNext(), this));
+
+    return &covers;
 }

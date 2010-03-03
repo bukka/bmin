@@ -24,8 +24,10 @@
 #define KMAP_H
 
 #include "outputvalue.h"
+#include "term.h"
 
 #include <vector>
+#include <list>
 
 class Formula;
 
@@ -39,12 +41,67 @@ public:
     unsigned getSize() { return size; }
     unsigned getVarsCount() { return varsCount; }
     int getCode(int idx);
+    int getIdx(int gc);
 
 private:
     static const int code[1 << GC_MAX_VC];
 
     int varsCount;
     unsigned size;
+};
+
+class KMap;
+class KMapCover;
+
+class KMapCell
+{
+public:
+    static const int TOP     = 0x01;
+    static const int BOTTOM  = 0x02;
+    static const int LEFT    = 0x04;
+    static const int RIGHT   = 0x08;
+    static const int VISITED = 0x10;
+
+    KMapCell(unsigned row,  unsigned col, Term &t);
+
+    Term getTerm() const { return term; }
+    inline unsigned getRow() const { return mapRow; }
+    inline unsigned getCol() const { return mapCol; }
+
+    inline void setPos(unsigned pos) { position = pos; }
+    inline unsigned getPos() const { return position; }
+
+    inline bool hasFlag(int flag) const { return flags & flag; }
+    inline bool hasTop() const { return hasFlag(TOP); }
+    inline bool hasBottom() const { return hasFlag(BOTTOM); }
+    inline bool hasLeft() const { return hasFlag(LEFT); }
+    inline bool hasRight() const { return hasFlag(RIGHT); }
+
+    bool operator<(const KMapCell &cell) const;
+
+    friend class KMapCover;
+
+private:
+    inline void enableFlag(int flag) { flags |= flag; }
+    inline void visited() { return enableFlag(VISITED); }
+    inline bool isVisited() const { return hasFlag(VISITED); }
+
+    Term term;
+    int sortValue;
+    int flags;
+    unsigned mapRow;
+    unsigned mapCol;
+    unsigned position;
+};
+
+class KMapCover
+{
+public:
+    KMapCover(Term &t, KMap *kmap);
+
+    std::list<KMapCell> *getCells() { return &cells; }
+private:
+    std::list<KMapCell> cells;
 };
 
 class KMap
@@ -75,8 +132,13 @@ public:
     inline unsigned getColsVarsCount() { return topGC.getVarsCount(); }
     inline unsigned getRowsVarsCount() { return sideGC.getVarsCount(); }
 
+    bool getRowCol(int idx, unsigned &row, unsigned &col);
     int getIdx(unsigned row, unsigned col);
     OutputValue getCellValue(unsigned row, unsigned col);
+
+    std::list<KMapCover> *getMinCovers();
+
+    Error getError() { return error; }
 
 private:
     void makeVarsAndGC();
@@ -86,6 +148,7 @@ private:
     unsigned cellsCount;
 
     Formula *formula;
+    std::list<KMapCover> covers;
 
     std::vector<char> vars;
     std::vector<char> topVars;

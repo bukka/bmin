@@ -259,6 +259,39 @@ void KMapCellWidget::setValue(char value)
 {
     m_value = value;
     m_valueStr = QString(QChar(value));
+
+    m_covers.clear();
+}
+
+bool KMapCellWidget::hasCoverPos(unsigned pos)
+{
+    for (list<KMapCell>::iterator it = m_covers.begin(); it != m_covers.end(); it++) {
+        if (pos == (*it).getPos())
+            return true;
+    }
+    return false;
+}
+
+unsigned KMapCellWidget::addCover(KMapCell &cell, unsigned pos)
+{
+    unsigned position = pos;
+    if (hasCoverPos(pos)) {
+        // find new pos
+        for (unsigned i = 0; i < static_cast<unsigned>(KMap::MAX_VARS); i++) {
+            if (!hasCoverPos(i)) {
+                position = i;
+                break;
+            }
+        }
+    }
+    cell.setPos(position);
+    m_covers.push_front(cell);
+    return position;
+}
+
+void KMapCellWidget::setLastCoverPos(unsigned pos)
+{
+    m_covers.front().setPos(pos);
 }
 
 void KMapCellWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
@@ -287,6 +320,42 @@ void KMapCellWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
 
     if (!m_valueStr.isEmpty())
         painter->drawText(x, y, width, height, Qt::AlignCenter, m_valueStr);
+
+    if (!m_covers.empty()) {
+        int x1, y1, x2, y2;
+        int nextPos = 2 * m_penSize;
+
+        for (list<KMapCell>::iterator it = m_covers.begin(); it != m_covers.end(); it++) {
+            KMapCell &cell = *it;
+            int pos = cell.getPos();
+            int padding = PADDING + pos * nextPos;
+
+            if (cell.hasTop()) {
+                y1 = y2 = padding + y;
+                x1 = x + (cell.hasLeft()? padding: 0);
+                x2 = width + x - (cell.hasRight()? padding: 0);
+                painter->drawLine(x1, y1, x2, y2);
+            }
+            if (cell.hasBottom()) {
+                y1 = y2 = height + y - padding;
+                x1 = x + (cell.hasLeft()? padding: 0);
+                x2 = width + x - (cell.hasRight()? padding: 0);
+                painter->drawLine(x1, y1, x2, y2);
+            }
+            if (cell.hasLeft()) {
+                x1 = x2 = padding + x;
+                y1 = y + (cell.hasTop()? padding: 0);
+                y2 = height + y - (cell.hasBottom()? padding: 0);
+                painter->drawLine(x1, y1, x2, y2);
+            }
+            if (cell.hasRight()) {
+                x1 = x2 = width + x - padding;
+                y1 = y + (cell.hasTop()? padding: 0);
+                y2 = height + y - (cell.hasBottom()? padding: 0);
+                painter->drawLine(x1, y1, x2, y2);
+            }
+        }
+    }
 }
 
 void KMapCellWidget::mousePressEvent(QGraphicsSceneMouseEvent *event)
@@ -302,6 +371,7 @@ void KMapCellWidget::mousePressEvent(QGraphicsSceneMouseEvent *event)
 KMapGridWidget::KMapGridWidget(KMap *kmap, KMapHeadWidget::Mode mode, QGraphicsItem *parent)
         : QGraphicsWidget(parent)
 {
+    m_kmap = kmap;
     m_varsCount = kmap->getVarsCount();
     m_rowsCount = kmap->getRowsCount();
     m_colsCount = kmap->getColsCount();
@@ -383,6 +453,8 @@ void KMapGridWidget::setMapData(KMap *kmap)
     if (kmap->getVarsCount() != m_varsCount)
         return;
 
+    m_kmap = kmap;
+
     // cells
     for (unsigned i = 0; i < m_rowsCount; i++) {
         for (unsigned j = 0; j < m_colsCount; j++)
@@ -393,6 +465,23 @@ void KMapGridWidget::setMapData(KMap *kmap)
     m_hVars->setVars(kmap->getTopVars());
     m_vVars->setVars(kmap->getSideVars());
     m_binVars->setVars(kmap->getTopVars(), kmap->getSideVars());
+
+    showCovers();
+}
+
+void KMapGridWidget::showCovers()
+{
+    list<KMapCover> *covers = m_kmap->getMinCovers();
+    for (list<KMapCover>::iterator itCover = covers->begin(); itCover != covers->end(); itCover++) {
+        list<KMapCell> *cells = (*itCover).getCells();
+        int pos = 0;
+        for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
+            pos = m_map[(*itCell).getRow()][(*itCell).getCol()].addCover(*itCell, pos);
+        if (pos != 0) {
+            for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
+                m_map[(*itCell).getRow()][(*itCell).getCol()].setLastCoverPos(pos);
+        }
+    }
 }
 
 void KMapGridWidget::setMode(KMapHeadWidget::Mode mode)

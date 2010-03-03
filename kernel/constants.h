@@ -35,6 +35,8 @@
     "." STRINGIFY(BMIN_VERSION_MINOR) \
     "." STRINGIFY(BMIN_VERSION_RELEASE)
 
+#define KONSOLE_ONLY 0
+
 namespace Constants {
 
     // Version string
@@ -45,9 +47,6 @@ namespace Constants {
 
     // whether Sum of Product is default representation
     const bool SOP_DEFAULT = true;
-
-    // Color in grey scale for main widget separator
-    const int SEP_COLOR_GS = 180;
 
 }
 

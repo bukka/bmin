@@ -230,9 +230,9 @@ void Kernel::showQm()
 }
 
 // show Karnaugh map
-void Kernel::showMap()
+void Kernel::showKMap()
 {
-    emitEvent(evtShowMap());
+    emitEvent(evtShowKMap(getKMap()));
 }
 
 // show Boolean n-Cube

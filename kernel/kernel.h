@@ -68,7 +68,7 @@ public:
     // show Quine-McCluskey Algorithm
     void showQm();
     // show Karnaugh map
-    void showMap();
+    void showKMap();
     // show Boolean n-Cube
     void showCube();
     // show logic function

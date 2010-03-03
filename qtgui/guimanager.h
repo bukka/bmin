@@ -47,6 +47,9 @@ class GUIManager : public QObject, public Events
     Q_OBJECT
 
 public:
+    // Color in grey scale for main widget separator
+    static const int SEP_COLOR_GS = 180;
+
     // singleton method which returns instance of GUIManager
     static GUIManager *instance();
     // destroy instance

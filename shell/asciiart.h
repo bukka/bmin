@@ -27,18 +27,22 @@
 #include <list>
 
 class QuineMcCluskeyData;
+class KMap;
 
 class AsciiArt
 {
 public:
-    static const int MAX_VARS_QM   = 9;
-    static const int MAX_VARS_MAP  = 4;
-    static const int MAX_VARS_CUBE = 3;
-    static const int CELL_SIZE     = 3;
+    static const int MAX_VARS_QM        = 9;
+    static const int MAX_VARS_CUBE      = 3;
+    static const int CELL_SIZE          = 3;
+    static const unsigned MAX_KMAP_TOP_VARS  = 3;
+    static const unsigned MAX_KMAP_SIDE_VARS = 3;
 
-    static const char EMPTY   = ' ';
-    static const char SEP_COL = '|';
-    static const char SEP_ROW = '-';
+    static const char EMPTY     = ' ';
+    static const char SEP_COL   = '|';
+    static const char SEP_ROW   = '-';
+    static const char SEP_UNDER = '_';
+    static const char SEP_CROSS = '\\';
 
     AsciiArt(std::ostream *s) : os(s) {}
 
@@ -46,7 +50,10 @@ public:
     void showQmImpls(QuineMcCluskeyData *data);
     void showQmCover(QuineMcCluskeyData *data);
 
+    void showKMap(KMap *kmap);
+
 private:
+    void decToBin(unsigned dec, char *buff, unsigned vc);
     void maxError(std::ostream *os, const char *msg, int max);
 
     std::ostream *os;
@@ -81,7 +88,7 @@ private:
     char empty;
 };
 
-static const char * const MSG_NO_DATA           = "No formula for Quine-McCluskey algorithm";
+static const char * const MSG_NO_DATA           = "No formula was set";
 static const char * const MSG_P_IMPLS_FINDING   = "Finding Prime Implicants";
 static const char * const MSG_P_IMPLS_COVERING  = "Prime Implicants Covering Table";
 static const char * const MSG_FINDING_IMPLS     = "Finding Prime Implicants";
@@ -91,7 +98,10 @@ static const char * const MSG_NUMBER_OF_0S      = "Number of 0s";
 static const char * const MSG_MINTERM           = "Minterm";
 static const char * const MSG_MAXTERM           = "Maxterm";
 static const char * const MSG_CUBE              = "%d-Cube";
+static const char * const MSG_KMAP              = "Karnaugh Map";
 static const char * const MSG_MAX_VARS_QM       = "Too many variables for QM algorithm (max %d)";
+static const char * const MSG_MAX_VARS_KMAP     = "Too many variables for K-map (max %d)";
+static const char * const MSG_INVALID_KMAP      = "Invalid K-map format";
 
 
 #endif // ASCIIART_H

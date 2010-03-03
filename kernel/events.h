@@ -28,6 +28,7 @@
 class Kernel;
 class Formula;
 class QuineMcCluskeyData;
+class KMap;
 
 class MinimizeEvent
 {
@@ -64,7 +65,7 @@ protected:
     virtual void evtExit() {}
     virtual void evtHelp() {}
     virtual void evtShowQm(QuineMcCluskeyData *) {}
-    virtual void evtShowMap() {}
+    virtual void evtShowKMap(KMap *) {}
     virtual void evtShowCube() {}
     virtual void evtShowFce(Formula *, Formula *) {}
 

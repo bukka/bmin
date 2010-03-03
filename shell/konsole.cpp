@@ -2,6 +2,7 @@
 #include "parser.h"
 #include "asciiart.h"
 // kernel
+#include "constants.h"
 #include "kernel.h"
 #include "formula.h"
 
@@ -13,6 +14,7 @@ Konsole::Konsole(istream &i, ostream &o, ostream &e)
         : in(i), out(o), err(e)
 {
     running = true;
+    isSoP = Constants::SOP_DEFAULT;
     parser = new Parser;
     art = new AsciiArt(&o);
 }
@@ -39,8 +41,12 @@ void Konsole::run()
 
 }
 
-void Konsole::evtFormulaChanged(Formula *)
+void Konsole::evtFormulaChanged(Formula *f)
 {
+    if (isSoP ^ (f->getRepre() == Formula::REP_SOP)) {
+        isSoP = f->getRepre() == Formula::REP_SOP;
+        out << MSG_REPRE_CHANGED << (isSoP? MSG_SOP: MSG_POS) << endl;
+    }
     out << MSG_SETTING << endl;
 }
 
@@ -93,9 +99,9 @@ void Konsole::evtShowQm(QuineMcCluskeyData *data)
     art->showQm(data);
 }
 
-void Konsole::evtShowMap()
+void Konsole::evtShowKMap(KMap *kmap)
 {
-    out << "map" << endl;
+    art->showKMap(kmap);
 }
 
 void Konsole::evtShowCube()
@@ -106,9 +112,19 @@ void Konsole::evtShowCube()
 void Konsole::evtShowFce(Formula *f, Formula *mf)
 {
     if (f) {
-        out << MSG_FCE << parser->formulaToString(Parser::PF_SUM, f) << endl;
+        Parser::PrintForm pf, pfMin;
+        if (isSoP) {
+            pf = Parser::PF_SUM;
+            pfMin = Parser::PF_SOP;
+        }
+        else {
+            pf = Parser::PF_PROD;
+            pfMin = Parser::PF_POS;
+        }
+
+        out << MSG_FCE << parser->formulaToString(pf, f) << endl;
         if (mf) // temporary for one function
-            out << MSG_MINIMIZED_FORM << parser->formulaToString(Parser::PF_SOP, mf) << endl;
+            out << MSG_MINIMIZED_FORM << parser->formulaToString(pfMin, mf) << endl;
     }
     else if (Kernel::instance()->hasFormula())
         out << MSG_NO_SUCH_FCE << endl;

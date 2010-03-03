@@ -23,6 +23,7 @@
 #include "asciiart.h"
 // kernel
 #include "quinemccluskey.h"
+#include "kmap.h"
 #include "term.h"
 
 #include <iostream>
@@ -294,6 +295,126 @@ void AsciiArt::showQm(QuineMcCluskeyData *data)
 
 }
 
+void AsciiArt::showKMap(KMap *kmap)
+{
+    if (!kmap->isValid()) {
+        if (kmap->getError() == KMap::NO_FORMULA)
+            maxError(os, MSG_MAX_VARS_KMAP, KMap::MAX_VARS);
+        else
+            *os << MSG_NO_DATA << endl;
+        return;
+    }
+    if (kmap->getColsVarsCount() > MAX_KMAP_TOP_VARS || kmap->getRowsVarsCount() > MAX_KMAP_SIDE_VARS) {
+        *os << MSG_INVALID_KMAP << endl;
+        return;
+    }
+
+    string offset = " ";
+    int mapOffset = offset.size() + MAX_KMAP_SIDE_VARS + 2;
+    int maxVars = (MAX_KMAP_TOP_VARS > MAX_KMAP_SIDE_VARS)? MAX_KMAP_TOP_VARS: MAX_KMAP_SIDE_VARS;
+    char *buff = new char[maxVars + 1];
+    vector<char> *topVars = kmap->getTopVars();
+    vector<char> *sideVars = kmap->getSideVars();
+
+    // adjust to right
+    os->setf(ios_base::right, ios_base::adjustfield);
+    // fill with EMPTY (spaces)
+    os->fill(EMPTY);
+
+    // first line
+    *os << offset << EMPTY << EMPTY << SEP_CROSS;
+    if (topVars->size() < 3)
+        *os << EMPTY;
+    for (int i = topVars->size() - 1; i >= 0; i--)
+        *os << topVars->at(i);
+    *os << endl;
+    
+    // second line
+    *os << offset;
+    for (int i = KMap::MAX_VARS_IN_COL - 1; i >= 0; i--) {
+        if (i >= static_cast<int>(sideVars->size()))
+            *os << EMPTY;
+        else
+            *os << sideVars->at(i);
+    }
+    *os << SEP_CROSS;
+
+	// top head
+    for (unsigned i = 0; i < kmap->getColsCount(); i++) {
+        *os << EMPTY;
+        if (topVars->size() < 3)
+            *os << EMPTY;
+        decToBin(kmap->getTopGC(i), buff, topVars->size());
+         *os << buff;
+         if (topVars->size() == 1)
+             *os << EMPTY;
+     }
+    *os << endl;
+
+    // third line
+    os->width(mapOffset);
+    *os << SEP_CROSS;
+    os->fill(SEP_UNDER);
+    os->width(kmap->getColsCount() * 4);
+    *os << EMPTY;
+    os->fill(EMPTY);
+    os->width(1);
+    *os << endl;
+
+    // body - map
+    int cellWidth = 4;
+    for (unsigned i = 0; i < kmap->getRowsCount(); i++) {
+        // top part
+        os->width(mapOffset);
+        *os << SEP_COL;
+        for (unsigned j = 0; j < kmap->getColsCount(); j++) {
+            os->width(cellWidth);
+            *os << SEP_COL;
+        }
+        os->width(1);
+        *os << endl;
+
+        // middle part
+        *os << offset;
+        os->width(MAX_KMAP_SIDE_VARS);
+        decToBin(i, buff, sideVars->size());
+        *os << buff;
+        os->width(2);
+        *os << SEP_COL;
+        for (unsigned j = 0; j < kmap->getColsCount(); j++) {
+            os->width(2);
+            *os << kmap->getCellValue(i, j).toChar();
+            os->width(2);
+            *os << SEP_COL;
+        }
+        os->width(1);
+        *os << endl;
+
+        // bottom part
+        os->width(mapOffset);
+        *os << SEP_COL;
+        os->fill(SEP_UNDER);
+        for (unsigned j = 0; j < kmap->getColsCount(); j++) {
+            os->width(cellWidth);
+            *os << SEP_COL;
+        }
+        os->fill(EMPTY);
+        os->width(1);
+        *os << endl;
+    }
+
+    *os << endl;
+    
+
+    delete [] buff;
+}
+
+void AsciiArt::decToBin(unsigned dec, char *buff, unsigned vc)
+{
+    buff[vc] = '\0';
+    for (int i = vc - 1, pos = 1; i >= 0; i--, pos <<= 1)
+        buff[i] = (dec & pos)? '1': '0';
+}
 
 void AsciiArt::maxError(ostream *os, const char *msg, int max)
 {

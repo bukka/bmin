@@ -61,7 +61,7 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     // set colors
     setPalette(QPalette());
     setAutoFillBackground(true);
-    int sepGS = Constants::SEP_COLOR_GS;
+    int sepGS = GUIManager::SEP_COLOR_GS;
     m_sepColor = QColor(sepGS, sepGS, sepGS);
 
     m_fceLine = new QLineEdit(m_prevFce);

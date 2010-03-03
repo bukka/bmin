@@ -105,7 +105,7 @@ inline int valuesCount(const LiteralValue & value)
     return valuesCount(value.getValue());
 }
 
-// returns the new term combined (only by difference of one varible)
+// returns the new term combined (only for difference of one varible)
 // with *this and t, for example 0010 & 0000 => 00X0
 // note that it's expected that term size are the same
 Term *Term::combine(const Term & t) const
@@ -133,6 +133,32 @@ Term *Term::combine(const Term & t) const
 
     // if it's possible to combine the terms, return new Term
     return new Term(liters, diff_mask | missing, size, isDC());
+}
+
+// returns true if term t can be combined with this term, otherwise returns false
+bool Term::isCombinable(const Term & t) const
+{
+    term_t diff_mask, pos;
+    int i;
+    bool isOne = false;
+
+    if (missing != t.missing)
+        return false;
+
+    diff_mask = (t.liters ^ liters) & ~missing; // difference mask
+
+    if (!diff_mask) // no difference
+        return false;
+
+    for (i = 0, pos = 1; i < size; i++, pos <<= 1) {
+        if (pos & diff_mask) {
+            if (isOne)
+                return false;
+            else
+                isOne = true;
+        }
+    }
+    return true;
 }
 
 // replace first missing value by zero and one
@@ -295,6 +321,23 @@ void Term::expandTerm(vector<Term> &v, const Term &t)
         if (pt) {
             expandTerm(v, pt[0]);
             expandTerm(v, pt[1]);
+            delete [] pt;
+        }
+    }
+}
+
+// expands term t to all minterms
+void Term::expandTerm(list<Term> &l, const Term &t)
+{
+    Term *pt;
+
+    if (t.valuesCount(LiteralValue::MISSING) == 0)
+        l.push_back(t);
+    else {
+        pt = t.expandMissingValue();
+        if (pt) {
+            expandTerm(l, pt[0]);
+            expandTerm(l, pt[1]);
             delete [] pt;
         }
     }
