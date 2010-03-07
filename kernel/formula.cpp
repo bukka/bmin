@@ -58,6 +58,7 @@ FormulaSpec::~FormulaSpec()
 
 // default setting
 void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
+        throw(InvalidVarsExc)
 {
     varsCount = vs;
     maxIdx = (1 << vs) - 1;
@@ -69,45 +70,24 @@ void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
     minimized = false;
 }
 
-// gets terms from t array of terms
-Formula::Formula(int vs, Term *t, int n, const vector<char> *v, char fn, Repre r)
-        throw(InvalidTermExc)
-{
-    init(vs, v, fn, r);
-
-    if (n == 0) // array is emtpy
-        return;
-
-    try {
-        for (int i = 0; i < n; i++) {
-            if (t[i].getSize() != vs) // check correct size of term
-                throw InvalidTermExc(t[i].getSize(), varsCount);
-            terms->pushTerm(t[i]);
-        }
-    }
-    catch (InvalidTermExc &e) {
-        terms->clear(); // deletes all added terms
-        throw;
-    }
-}
-
 // gets terms from vector t
-Formula::Formula(int vs, vector<Term> &t, const vector<char> *v, char fn, Repre r)
-        throw(InvalidTermExc)
+Formula::Formula(unsigned vs, char fn, Repre r, const vector<char> *v, std::vector<Term> *t)
+        throw(InvalidVarsExc, InvalidTermExc)
 {
     init(vs, v, fn, r);
 
-    if (t.size() == 0) // t is empty
+    if (!t || t->size() == 0) // t is empty
         return;
 
-    for (unsigned i = 1; i < t.size(); i++) {
-        if (t[i].getSize() != vs) // check correct size of term
-            throw InvalidTermExc(t[i].getSize(), varsCount);
+    for (unsigned i = 1; i < t->size(); i++) {
+        if (t->at(i).getSize() != vs) // check correct size of term
+            throw InvalidTermExc(t->at(i).getSize(), varsCount);
     }
-    terms->setContainer(t);
+    terms->setContainer(*t);
 }
 
-Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidIndexExc)
+Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl)
+        throw(InvalidVarsExc, InvalidIndexExc)
 {
     set<int>::iterator it;
 
@@ -255,9 +235,15 @@ vector<Term> &Formula::getMaxterms(vector<Term> &maxterms) const
 }
 
 // returns number of terms
-int Formula::getSize() const
+unsigned Formula::getSize() const
 {
     return terms->getSize();
+}
+
+// returns maximal number of terms (by tautology or contradiction)
+unsigned Formula::getMaxSize() const
+{
+    return 1 << getVarsCount();
 }
 
 void Formula::itInit()
@@ -306,40 +292,58 @@ bool Formula::setRepre(Repre rep)
 }
 
 // set default names for n variables
-void Formula::setVars(int n)
+void Formula::setVars(unsigned n)
 {
-    vars.reserve(n);
+    vars.resize(n);
     char var = DEFAULT_FIRST_VAR + n - 1;
-    for (int i = 0; i < n; i++, var--)
+    for (unsigned i = 0; i < n; i++, var--)
         vars[i] = var;
 }
 
 // sets variables name by array of characters v
-void Formula::setVars(char *v, int n)
+void Formula::setVars(char *v, unsigned vs) throw(InvalidVarsExc)
 {
-    //TODO - varibles count over and under; try fce copy
-    vector<char> tmp(n);
-    for (int i = 0; i < n; i++)
+    if (vs > Formula::MAX_VARS)
+        throw InvalidVarsExc(Formula::MAX_VARS);
+
+    vector<char> tmp(vs);
+    for (unsigned i = 0; i < vs; i++)
         tmp[i] = v[i];
 
     vars = tmp;
 }
 
 // sets variables name by vector v
-void Formula::setVars(const vector<char> *v, int vs)
+void Formula::setVars(const vector<char> *v, unsigned vs) throw(InvalidVarsExc)
 {
-    //TODO - varibles count over and under
+    if (v && v->size() != vs)
+        throw InvalidVarsExc();
+    if (vs > Formula::MAX_VARS)
+        throw InvalidVarsExc(Formula::MAX_VARS);
+
     if (!v)
         setVars(vs);
-    else
+    else if (vs == v->size())
         vars = *v;
+    else {
+        vars.resize(vs);;
+        for (unsigned i = 0; i < vs; i++)
+            vars[i] = v->at(i);
+    }
 }
 
+// returns variables vector
 vector<char> Formula::getVars() const
 {
     return vars;
 }
 
+// changes variable at position pos
+void Formula::changeVar(unsigned pos, char var)
+{
+    if (pos <= varsCount)
+        vars[pos] = var;
+}
 
 // friend function to place term to ostream
 ostream & operator<<(std::ostream &os, Formula &f)

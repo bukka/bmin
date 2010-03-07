@@ -59,6 +59,7 @@ GUIManager::GUIManager()
     m_actualFce = "";
     m_isCorrect = false;
     m_isSoP =  Constants::SOP_DEFAULT;
+    m_newFormula = 0;
 }
 
 // destructor
@@ -66,6 +67,7 @@ GUIManager::~GUIManager()
 {
     Kernel::destroy();
     delete m_parser;
+    delete m_newFormula;
 }
 
 void GUIManager::evtFormulaChanged(Formula *f)
@@ -178,4 +180,32 @@ void GUIManager::setRepre(bool sop)
 {
     m_isSoP = sop;
     m_kernel->setRepre(sop? Formula::REP_SOP: Formula::REP_POS);
+}
+
+// NEW FORMULA
+
+// sets new formula
+Formula *GUIManager::setNewFormula(Formula *formula)
+{
+    delete m_newFormula;
+    return (m_newFormula = formula);
+}
+
+// return new formula
+Formula *GUIManager::getNewFormula()
+{
+    return m_newFormula;
+}
+
+// deletes new formula
+void GUIManager::deleteNewFormula()
+{
+    delete m_newFormula;
+    m_newFormula = 0;
+}
+
+// sets new formula as actual
+void GUIManager::activateNewFormula()
+{
+    m_kernel->setFormula(new Formula(*m_newFormula));
 }

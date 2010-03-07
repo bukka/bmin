@@ -16,7 +16,7 @@ OutputValue::OutputValue(char ch)
     }
 }
 
-OutputValue OutputValue::getNextValue(OutputValue ov)
+OutputValue OutputValue::getNextValue(const OutputValue &ov)
 {
     switch (ov.getValue()) {
     case ZERO:

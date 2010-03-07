@@ -15,8 +15,14 @@ const char *KernelExc::what() const throw()
 const char *InvalidVarsExc::what() const throw()
 {
     string s = "Invalid Variables: ";
-    if (invalidNames.size() == 0) // by using default contrucor
-        s += "bad variables count";
+    if (invalidNames.size() == 0) { // by using default contrucor
+        s += "invalid variables count";
+        if (maxVars != 0) {
+            ostringstream oss;
+            oss << " (max " << maxVars << " varibles)";
+            s += oss.str();
+        }
+    }
     else
     {
         // appends invalid variables names to statemnt
@@ -25,7 +31,7 @@ const char *InvalidVarsExc::what() const throw()
                 s += ", ";
             s += invalidNames[i];
         }
-        s += " (You have to use only lower case)";
+        s += " (You have to use only Ascii Alfa characters)";
     }
     return s.c_str();
 }

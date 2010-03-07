@@ -75,7 +75,7 @@ void TermsContainer::setTermsType(TermsType tt)
     }
 }
 
-int TermsContainer::getSize() const
+unsigned TermsContainer::getSize() const
 {
     return termsVector->size();
 }

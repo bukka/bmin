@@ -2,7 +2,7 @@
 
 #include <string>
 
-LiteralValue LiteralValue::getNextValue(LiteralValue lv)
+LiteralValue LiteralValue::getNextValue(const LiteralValue &lv)
 {
     switch (lv.getValue()) {
     case ZERO:

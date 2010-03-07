@@ -22,7 +22,7 @@ class InvalidVarsExc : public KernelExc
 {
 public:
     // default constructor (used by bad count of variables)
-    InvalidVarsExc() {}
+    InvalidVarsExc(int max = 0) : maxVars(max) {}
     // constructor (used by invalid varibles name)
     InvalidVarsExc(const std::vector<char> & names) : KernelExc(), invalidNames(names) {}
     ~InvalidVarsExc() throw() {}
@@ -32,6 +32,7 @@ public:
 
 private:
     std::vector<char> invalidNames;
+    int maxVars;
 };
 
 // invalid position in term

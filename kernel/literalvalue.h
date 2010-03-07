@@ -10,7 +10,7 @@ public:
     static const int ONE = 1;
     static const int MISSING = 2;
 
-    static LiteralValue getNextValue(LiteralValue lv);
+    static LiteralValue getNextValue(const LiteralValue &lv);
 
     LiteralValue(int v) : value(v) {}
 

@@ -196,7 +196,7 @@ CubeGLDrawer::~CubeGLDrawer()
 void CubeGLDrawer::setFormula(Formula *f)
 {
     stopMin();
-    if (f->getVarsCount() > MAX_N) {
+    if (f->getVarsCount() > static_cast<unsigned>(MAX_N)) {
         actualCube = -1;
         paintedMsg = MSG_OVER;
     }

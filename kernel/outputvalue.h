@@ -11,7 +11,7 @@ public:
     static const int DC = 2;
     static const int UNDEFINED = 3;
 
-    static OutputValue getNextValue(OutputValue ov);
+    static OutputValue getNextValue(const OutputValue &ov);
 
     OutputValue(int v = UNDEFINED) : value(v) {}
     OutputValue(char ch);

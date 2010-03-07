@@ -67,16 +67,15 @@ public:
 
     static const char DEFAULT_NAME      = 'f';
     static const char DEFAULT_FIRST_VAR = 'a';
-    static const Repre  DEFAULT_REP       = REP_SOP;
+    static const Repre DEFAULT_REP      = REP_SOP;
+    static const unsigned MAX_VARS           = 16;
 
     // Constructors
-    Formula(int vc, Term *t = 0, int n = 0, const std::vector<char> *v = 0,
-            char fn = DEFAULT_NAME, Repre r = DEFAULT_REP)
-            throw(InvalidTermExc);
-    Formula(int vc, std::vector<Term> &t, const std::vector<char> *v = 0,
-            char fn = DEFAULT_NAME, Repre r = DEFAULT_REP)
-            throw(InvalidTermExc);
-    Formula(const FormulaSpec *spec, const FormulaDecl *decl) throw(InvalidIndexExc);
+    Formula(unsigned vc, char fn = DEFAULT_NAME, Repre r = DEFAULT_REP,
+            const std::vector<char> *v = 0, std::vector<Term> *t = 0)
+            throw(InvalidVarsExc, InvalidTermExc);
+    Formula(const FormulaSpec *spec, const FormulaDecl *decl)
+            throw(InvalidVarsExc, InvalidIndexExc);
     // Copy Construtor
     Formula(const Formula &f, bool toMinterms = false);
 
@@ -106,7 +105,10 @@ public:
     // returns actual maxterms (without creating new vector)
     std::vector<Term> &getMaxterms(std::vector<Term> &maxterms) const;
     // returns number of terms
-    int getSize() const;
+    unsigned getSize() const;
+    // returns maximal number of terms (by tautology or contradiction)
+    unsigned getMaxSize() const;
+
 
     // iterating
     void itInit();
@@ -133,7 +135,9 @@ public:
     // returns variables
     std::vector<char> getVars() const;
     // returns number of varibles
-    inline int getVarsCount() const { return varsCount; }
+    inline unsigned getVarsCount() const { return varsCount; }
+    // changes variable at position pos
+    void changeVar(unsigned pos, char var);
 
     // friend function to place term to ostream (to debugging)
     friend std::ostream &operator<<(std::ostream &os, Formula &t);
@@ -142,7 +146,8 @@ public:
     friend class Kernel;
 
 private:
-    void init(int vs, const std::vector<char> *v, char fn, Repre r = DEFAULT_REP);
+    void init(int vs, const std::vector<char> *v, char fn, Repre r = DEFAULT_REP)
+            throw (InvalidVarsExc);
     inline void setMinimized(bool m) { minimized = m; }
 
     // adds new term to formula
@@ -150,11 +155,11 @@ private:
     // removes term with idx
     void removeTerm(int idx) throw(InvalidIndexExc);
     // set default names for n variables
-    void setVars(int n);
+    void setVars(unsigned vc);
     // sets variables name by array of characters v
-    void setVars(char * v, int n);
+    void setVars(char * v, unsigned vc) throw(InvalidVarsExc);
     // sets variables name by vector v
-    void setVars(const std::vector<char> *v, int vs = 0);
+    void setVars(const std::vector<char> *v, unsigned vc = 0) throw(InvalidVarsExc);
 
     // container for terms
     TermsContainer *terms;
@@ -165,7 +170,7 @@ private:
     // names of variables
     std::vector<char> vars;
 
-    int varsCount;
+    unsigned varsCount;
     bool minimized;
     int maxIdx;
 };

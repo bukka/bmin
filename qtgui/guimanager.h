@@ -25,19 +25,16 @@
 
 // kernel
 #include "events.h"
-#include "formula.h"
 
 #include <QObject>
 
 class Kernel;
+class Formula;
 class OutputValue;
 class Parser;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
-
-namespace std {
-    class exception;
-}
+class KMap;
 
 class QString;
 
@@ -60,8 +57,22 @@ public:
     inline bool isCorrectFormula() const { return m_isCorrect; }
     // whether formula has Sum of Products representation
     bool isSoP() const { return m_isSoP; }
-    // return data for Quine-McCluskey algorithm
+
+    // NEW FORMULA
+    // sets new formula
+    Formula *setNewFormula(Formula *formula);
+    // return new formula
+    Formula *getNewFormula();
+    // deletes new formula
+    void deleteNewFormula();
+    // sets new formula as actual
+    void activateNewFormula();
+
+    // DATA
+    // returns data for Quine-McCluskey algorithm
     QuineMcCluskeyData *getQmData();
+    // returns K-map data
+    KMap *getKMap();
 
 protected:
     virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
@@ -84,6 +95,8 @@ private:
     Parser *m_parser;
     // string with actual formula
     QString m_actualFce;
+    // formula for creating
+    Formula *m_newFormula;
     // whether formula is correct
     bool m_isCorrect;
     // whether formula has Sum of Product form

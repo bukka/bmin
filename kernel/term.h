@@ -53,11 +53,11 @@ public:
     enum StringForm { SF_BIN, SF_SET };
 
     // constructor - the term of size s with all variables setted to missing value
-    Term(int s = 0, bool isDC = false);
+    Term(unsigned s = 0, bool isDC = false);
     // constructor - makes the variables array with size s by index idx
-    Term(int idx, int s, bool isDC = false);
+    Term(int idx, unsigned s, bool isDC = false);
     // constructor - internal usage
-    Term(term_t lit, term_t miss, int size, bool isDC = false);
+    Term(term_t lit, term_t miss, unsigned size, bool isDC = false);
 
     // sets certain flag
     void setFlag(int flag, bool is);
@@ -74,7 +74,7 @@ public:
     // sets whether this term is prime implicant
     inline void setPrime(bool isPrime)  { setFlag(PRIME, isPrime); }
     // returns size of term, if all is false returns size reduced of dont cares
-    int getSize(bool all = true) const;
+    unsigned getSize(bool all = true) const;
     // returns terms index of boolean function
     int getIdx() const;
     // returns the count of values in term
@@ -98,8 +98,8 @@ public:
 
     // index operator
     LiteralValue operator[](int position) const;
-    LiteralValue at(int position) const throw(InvalidPositionExc);
-    int getValueAt(int position) const;
+    LiteralValue at(unsigned position) const throw(InvalidPositionExc);
+    int getValueAt(unsigned position) const;
     
     // term to string
     std::string toString(StringForm sf = SF_BIN) const;
@@ -112,11 +112,11 @@ public:
 
 private:
     // term initialization
-    void init(term_t lit, term_t mis, int s, bool isDC);
+    void init(term_t lit, term_t mis, unsigned s, bool isDC);
 
     term_t liters;     // literals value
     term_t missing;    // which literals are missing literals
-    int size;		   // number of literals
+    unsigned size;		   // number of literals
     int flags;		   // flags
 };
 

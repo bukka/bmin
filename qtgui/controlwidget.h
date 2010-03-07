@@ -25,7 +25,6 @@
 
 #include <QWidget>
 
-class QComboBox;
 class QLineEdit;
 class QPushButton;
 class QString;

@@ -26,6 +26,7 @@
 #include "guimanager.h"
 #include "constants.h"
 #include "aboutdialog.h"
+#include "creatordialog.h"
 
 #include <QtCore/QSettings>
 #include <QtGui/QMenu>
@@ -39,6 +40,8 @@
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
+    setWindowTitle(tr("Bmin"));
+
     // menu
     createActions();
     createMenus();
@@ -142,6 +145,8 @@ void MainWindow::showMsg(const QString &msg, const QString &title,
 void MainWindow::newFormula()
 {
     m_gm->updateFormula("");
+    CreatorDialog cd(this);
+    cd.exec();
 }
 
 // load from settings

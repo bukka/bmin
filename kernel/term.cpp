@@ -34,7 +34,7 @@ using namespace std;
 
 
 // term initialization
-void Term::init(term_t lit, term_t mis, int s, bool isDC)
+void Term::init(term_t lit, term_t mis, unsigned s, bool isDC)
 {
     liters = lit;
     missing = mis;
@@ -44,14 +44,14 @@ void Term::init(term_t lit, term_t mis, int s, bool isDC)
 }
 
 // default constructor - the term of size s with all variables setted to dont care
-Term::Term(int s, bool isDC)
+Term::Term(unsigned s, bool isDC)
 {
     init(0, 0, s, isDC);
 }
 
 
 // constructor - makes the variables array with size s by idx (index of boolean function)
-Term::Term(int idx, int s, bool isDC)
+Term::Term(int idx, unsigned s, bool isDC)
 {
     if (idx == MISSING_ALL)
         init(idx, (1 << s) - 1, s, isDC);
@@ -60,7 +60,7 @@ Term::Term(int idx, int s, bool isDC)
 }
 
 // constructor - internal usage
-Term::Term(term_t lit, term_t miss, int size, bool isDC)
+Term::Term(term_t lit, term_t miss, unsigned size, bool isDC)
 {
     init(lit, miss, size, isDC);
 }
@@ -78,8 +78,7 @@ void Term::setFlag(int flag, bool is)
 int Term::valuesCount(int value) const
 {
     term_t mask, pos;
-    int i, count;
-    count = 0;
+    unsigned i;
 
     switch (value) {
     case LiteralValue::ONE:
@@ -92,6 +91,7 @@ int Term::valuesCount(int value) const
         mask = missing;
     }
 
+    int count = 0;
     for(i = 0, pos = 1; i < size; i++, pos <<= 1) {
          if (pos & mask)
              count++;
@@ -111,7 +111,7 @@ inline int valuesCount(const LiteralValue & value)
 Term *Term::combine(const Term & t) const
 {
     term_t diff_mask, pos;
-    int i;
+    unsigned i;
     bool isOne = false;
 
     if (missing != t.missing)
@@ -139,7 +139,7 @@ Term *Term::combine(const Term & t) const
 bool Term::isCombinable(const Term & t) const
 {
     term_t diff_mask, pos;
-    int i;
+    unsigned i;
     bool isOne = false;
 
     if (missing != t.missing)
@@ -168,7 +168,7 @@ Term *Term::expandMissingValue() const
         return 0;
 
     term_t pos = 1;
-    for (int i = 0; i < size; i++, pos <<= 1) {
+    for (unsigned i = 0; i < size; i++, pos <<= 1) {
         if (missing & pos) {
             term_t newMissing = missing & ~pos;
             Term *t = new Term[2];
@@ -187,7 +187,7 @@ bool Term::implies(Term & t) const
 }
 
 // size of term. when all is false, than without missing values
-int Term::getSize(bool all) const
+unsigned Term::getSize(bool all) const
 {
     return all? size: size - valuesCount(LiteralValue::MISSING);
 }
@@ -250,16 +250,16 @@ LiteralValue Term::operator[](int position) const
 }
 
 // get literal value at position
-LiteralValue Term::at(int position) const throw(InvalidPositionExc)
+LiteralValue Term::at(unsigned position) const throw(InvalidPositionExc)
 {
-    if (position < 0 || position >= size)
+    if (position >= size)
         throw InvalidPositionExc(position);
 
     return operator[](position);
 }
 
 // get int value at position
-int Term::getValueAt(int position) const
+int Term::getValueAt(unsigned position) const
 {
     term_t pos = 1 << position;
     if (missing & pos)

@@ -21,7 +21,7 @@ public:
     void setContainer(std::vector<Term> &v);
     void setTermsType(TermsType tt);
 
-    int getSize() const;
+    unsigned getSize() const;
 
     // sets changing
     void touch() { changed = true; }
@@ -76,7 +76,7 @@ private:
 
     TermsType ttype;
     ContainerType ctype;
-    int termVarsCount;
+    unsigned termVarsCount;
     bool changed;
 
     unsigned itPos;

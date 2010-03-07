@@ -29,7 +29,7 @@ string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
     ostringstream oss;
     bool allMissing = true;
     if (form == PF_SOP || form == PF_PROD) {
-        for (int i = 0; i < term.getSize(); i++) {
+        for (unsigned i = 0; i < term.getSize(); i++) {
             if (!term[i].isMissing()) {
                 allMissing = false;
                 oss << vars[i];
@@ -45,7 +45,7 @@ string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
         bool first = true;
         if (brackets)
             oss << '(';
-        for (int i = 0; i < term.getSize(); i++) {
+        for (unsigned i = 0; i < term.getSize(); i++) {
             if (!term[i].isMissing()) {
                 allMissing = false;
                 if (first)

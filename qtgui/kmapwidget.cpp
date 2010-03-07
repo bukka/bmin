@@ -435,7 +435,7 @@ KMapGridWidget::KMapGridWidget(KMap *kmap, KMapHeadWidget::Mode mode, QGraphicsI
 
 KMapGridWidget::~KMapGridWidget()
 {
-    for (int i = 0; i < KMap::MAX_ROWS; i++)
+    for (unsigned i = 0; i < KMap::MAX_ROWS; i++)
         delete [] m_map[i];
     delete [] m_map;
 
@@ -514,7 +514,7 @@ KMapWidget::KMapWidget(const QString &name, int pos)
 
     // grid widget array
     m_gridWidgets = new KMapGridWidget *[KMap::MAX_VARS + 1];
-    for (int i = 0; i <= KMap::MAX_VARS; i++)
+    for (unsigned i = 0; i <= KMap::MAX_VARS; i++)
         m_gridWidgets[i] = 0;
     m_mainItem = 0;
 

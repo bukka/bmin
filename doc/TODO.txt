@@ -3,11 +3,11 @@
 	
 # FEATURES ----------------------------------------------------------
 
-rewrite K-map
-ASCII art - map, cube
-correct work with variables
-improving appearance - more icons and images...
 creating formula wizard
+rewrite K-map
+rewrite Cube (Qt 4.6 OpenGL framework)
+ASCII art - cube
+improving appearance - more icons and images...
 algorithm testing interface - measure time
 more containers - comparing, testing
 optimize Quine-McCluskey algorithm
@@ -16,6 +16,7 @@ espresso
 improve 3D cube - new dimension
 better error (exception) information
 better behavior of parsing fce - idx precedence (diff to old formula)
+vars redundant name checking
 Quine-McCluskey widget improvement - Model & View
 more formulas
 inlining short functions
@@ -28,7 +29,7 @@ shell programming language - special bytecode
 -- Completed
    kernel events ._/
    Quine-McCluskey debugging info ._/
-   ASCII art - QM
+   ASCII art - Quine-McCluskey, K-map
    treating products of sums ._/
 
 
@@ -39,7 +40,6 @@ shell programming language - special bytecode
   exception handling in parse function
 			
 - formula.cpp
-  setVars - varibles count over and under
   iterator
 
 - quinemccluskey.h
@@ -54,6 +54,9 @@ shell programming language - special bytecode
 
 - asciiart.cpp
   iterator
+
+- creatordialog.cpp
+  better handling of variables names (changing, completing)
 
 ## ------------------------------------------------------------------
 # TESTING FCE -------------------------------------------------------

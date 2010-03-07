@@ -108,11 +108,11 @@ class KMap
 {
 public:
     enum Error { OK, NO_FORMULA, TOO_MANY_VARS };
-    static const int MAX_VARS = 6;
-    static const int MAX_VARS_IN_ROW = 3;
-    static const int MAX_VARS_IN_COL = 3;
-    static const int MAX_ROWS = 1 << MAX_VARS_IN_ROW;
-    static const int MAX_COLS = 1 << MAX_VARS_IN_COL;
+    static const unsigned MAX_VARS = 6;
+    static const unsigned MAX_VARS_IN_ROW = 3;
+    static const unsigned MAX_VARS_IN_COL = 3;
+    static const unsigned MAX_ROWS = 1 << MAX_VARS_IN_ROW;
+    static const unsigned MAX_COLS = 1 << MAX_VARS_IN_COL;
 
     KMap();
 
