@@ -21,6 +21,8 @@
  */
 
 #include "truthtabledelegate.h"
+// kernel
+#include "outputvalue.h"
 
 #include <QComboBox>
 
@@ -31,28 +33,27 @@ QWidget *TruthTableDelegate::createEditor(QWidget *parent, const QStyleOptionVie
     Q_UNUSED(index);
 
     QComboBox *editor = new QComboBox(parent);
-    editor->addItem(QString("0"));
-    editor->addItem(QString("1"));
-    editor->addItem(QString("X"));
+    editor->addItem(QString(OutputValue(OutputValue::ZERO).toChar()));
+    editor->addItem(QString(OutputValue(OutputValue::ONE).toChar()));
+    editor->addItem(QString(OutputValue(OutputValue::DC).toChar()));
 
     return editor;
 }
 
 void TruthTableDelegate::setEditorData(QWidget *editor, const QModelIndex &index) const
 {
-    int value = index.model()->data(index, Qt::EditRole).toInt();
-
-    QComboBox *comboBox = static_cast<QComboBox*>(editor);
-    comboBox->setCurrentIndex(value);
+    QString value = index.model()->data(index, Qt::EditRole).toString();
+    if (!value.isEmpty()) {
+        QComboBox *comboBox = static_cast<QComboBox*>(editor);
+        comboBox->setCurrentIndex(OutputValue(value.at(0).toAscii()).getValue());
+    }
 }
 
 void TruthTableDelegate::setModelData(QWidget *editor, QAbstractItemModel *model,
                                       const QModelIndex &index) const
 {
     QComboBox *comboBox = static_cast<QComboBox*>(editor);
-    int value = comboBox->currentIndex();
-
-    model->setData(index, value, Qt::EditRole);
+    model->setData(index, comboBox->currentText(), Qt::EditRole);
 }
 
 void TruthTableDelegate::updateEditorGeometry(QWidget *editor, const QStyleOptionViewItem &option,

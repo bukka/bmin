@@ -55,6 +55,9 @@ shell programming language - special bytecode
 - asciiart.cpp
   iterator
 
+- qmwidget.cpp
+  contradiction
+
 - creatordialog.cpp
   better handling of variables names (changing, completing)
 

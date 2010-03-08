@@ -51,7 +51,7 @@ int TruthTableModel::columnCount(const QModelIndex &parent) const
 
 QVariant TruthTableModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_formula || !index.isValid() || (role != Qt::DisplayRole)
+    if (!m_formula || !index.isValid() || (role != Qt::DisplayRole && role != Qt::EditRole)
         || index.row() > static_cast<int>(m_formula->getMaxSize())
         || index.column() > static_cast<int>(m_formula->getVarsCount() + 2))
         return QVariant();
@@ -59,7 +59,7 @@ QVariant TruthTableModel::data(const QModelIndex &index, int role) const
    if (index.column() == 0)
        return index.row();
    else if (index.column() == static_cast<int>(m_formula->getVarsCount() + 1))
-        return m_formula->getTermValue(index.row()).getValue();
+        return QString(m_formula->getTermValue(index.row()).toChar());
    else
        return (1 << (m_formula->getVarsCount() - index.column()) & index.row())? 1: 0;
 
@@ -94,7 +94,11 @@ Qt::ItemFlags TruthTableModel::flags(const QModelIndex &index) const
 bool TruthTableModel::setData(const QModelIndex &index, const QVariant &value, int role)
 {
     if (index.isValid() && role == Qt::EditRole && m_formula) {
-        m_formula->setTermValue(index.row(), OutputValue(value.toInt()));
+        QString strValue = value.toString();
+        if (strValue.isEmpty())
+            return false;
+
+        m_formula->setTermValue(index.row(), OutputValue(strValue.at(0).toAscii()));
         emit dataChanged(index, index);
         return true;
     }

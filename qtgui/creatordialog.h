@@ -31,18 +31,17 @@
 
 class GUIManager;
 class TruthTableModel;
+class TruthTableView;
 
 class QLineEdit;
-class QPushButton;
 class QComboBox;
-class QTableView;
 
 class CreatorDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    CreatorDialog(QWidget *parent);
+    CreatorDialog(bool edit, QWidget *parent = 0);
 
 private:
     static const int SOP_IDX = 0;
@@ -58,13 +57,16 @@ private:
     QLineEdit *m_varsLine;
     QComboBox *m_vcCombo;
     QComboBox *m_repreCombo;
-    QTableView *m_ttView;
+    TruthTableView *m_ttView;
     TruthTableModel *m_ttModel;
 
     char m_name;
     Formula::Repre m_repre;
     unsigned m_varsCount;
     std::vector<char> m_vars;
+
+public slots:
+    virtual void accept();
 
 private slots:
     void setName();

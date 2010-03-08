@@ -68,7 +68,7 @@ public:
     static const char DEFAULT_NAME      = 'f';
     static const char DEFAULT_FIRST_VAR = 'a';
     static const Repre DEFAULT_REP      = REP_SOP;
-    static const unsigned MAX_VARS           = 16;
+    static const unsigned MAX_VARS      = 10;
 
     // Constructors
     Formula(unsigned vc, char fn = DEFAULT_NAME, Repre r = DEFAULT_REP,

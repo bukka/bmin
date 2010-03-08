@@ -28,8 +28,9 @@
 class QLineEdit;
 class QPushButton;
 class QString;
-class QLabel;
 class QComboBox;
+
+class GUIManager;
 
 class ControlWidget : public QWidget
 {
@@ -49,19 +50,26 @@ private:
 
     // line input
     QLineEdit *m_fceLine;
+    // editing / creating button
+    QPushButton *m_createBtn;
     // minimize button
     QPushButton *m_minBtn;
     // label with minimized function
-    QLabel *m_minFceLabel;
+    QLineEdit *m_minFceLine;
     // combo box for choosing fce representation
     QComboBox *m_repreCombo;
 
     // previous function
     QString m_prevFce;
-    // prefix for minimized function
-    QString m_minFcePrefix;
+    // new button text
+    QString m_newText;
+    // edit button text
+    QString m_editText;
     // separator color
     QColor m_sepColor;
+
+    // GUI manager
+    GUIManager *m_gm;
 
 public slots:
     // sets fceLine to new value
@@ -76,6 +84,8 @@ private slots:
     void sendFce();
     // called when rep combo is changed
     void sendRepre(int idx);
+    // called by creating function
+    void createFce();
 
 signals:
     // emitted by changing boolean function

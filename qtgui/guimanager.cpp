@@ -113,6 +113,14 @@ QString GUIManager::getActualFce()
     return m_actualFce;
 }
 
+Formula *GUIManager::getFormula()
+{
+    if (m_kernel->hasFormula())
+        return new Formula(*m_kernel->getFormula());
+    else
+        return 0;
+}
+
 QuineMcCluskeyData *GUIManager::getQmData()
 {
     return m_kernel->getQmData();
@@ -187,8 +195,11 @@ void GUIManager::setRepre(bool sop)
 // sets new formula
 Formula *GUIManager::setNewFormula(Formula *formula)
 {
-    delete m_newFormula;
-    return (m_newFormula = formula);
+    if (formula != m_newFormula) {
+        delete m_newFormula;
+        m_newFormula = formula;
+    }
+    return formula;
 }
 
 // return new formula
@@ -207,5 +218,9 @@ void GUIManager::deleteNewFormula()
 // sets new formula as actual
 void GUIManager::activateNewFormula()
 {
-    m_kernel->setFormula(new Formula(*m_newFormula));
+    if (m_newFormula) {
+        Formula *f = new Formula(*m_newFormula);
+        m_kernel->deleteFomula();
+        m_kernel->setFormula(f);
+    }
 }

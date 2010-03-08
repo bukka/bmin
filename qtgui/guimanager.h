@@ -53,6 +53,8 @@ public:
     static void destroy();
     // actualize function and return function string
     QString getActualFce();
+    // returns copy of actual formula (it should be deallocated)
+    Formula *getFormula();
     // whether formula is correct
     inline bool isCorrectFormula() const { return m_isCorrect; }
     // whether formula has Sum of Products representation
@@ -130,6 +132,8 @@ signals:
     void formulaInvalidated();
     // emitted when representation is changed
     void repreChanged(bool);
+    // emitted when status msg is set
+    void statusSet(const QString &, int);
     // emitted when error message is required
     void errorInvoked(const QString &);
     // emmited by exiting

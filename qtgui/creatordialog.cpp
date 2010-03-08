@@ -22,6 +22,7 @@
 
 #include "creatordialog.h"
 #include "guimanager.h"
+#include "truthtableview.h"
 #include "truthtablemodel.h"
 #include "truthtabledelegate.h"
 // kernel
@@ -30,7 +31,6 @@
 #include <QLineEdit>
 #include <QComboBox>
 #include <QLabel>
-#include <QTableView>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include <QMessageBox>
@@ -39,14 +39,19 @@
 #include <vector>
 using namespace std;
 
-CreatorDialog::CreatorDialog(QWidget *parent)
+
+CreatorDialog::CreatorDialog(bool edit, QWidget *parent)
     : QDialog(parent)
 {
     setWindowTitle(tr("New logic function..."));
 
     m_gm = GUIManager::instance();
+    Formula *formula = (edit? m_gm->getFormula(): 0);
 
-    m_name = Formula::DEFAULT_NAME;
+    if (formula)
+        m_name = formula->getName();
+    else
+        m_name = Formula::DEFAULT_NAME;
 
     m_nameLine = new QLineEdit(QString(m_name));
     m_nameLine->setMinimumWidth(20);
@@ -62,7 +67,7 @@ CreatorDialog::CreatorDialog(QWidget *parent)
     m_repreCombo = new QComboBox;
     m_repreCombo->insertItem(SOP_IDX, tr("Sum of Products"));
     m_repreCombo->insertItem(POS_IDX, tr("Product of Sums"));
-    if (m_gm->isSoP()) {
+    if ((formula && formula->getRepre() == Formula::REP_SOP) || m_gm->isSoP()) {
         setRepre(Formula::REP_SOP);
         m_repreCombo->setCurrentIndex(SOP_IDX);
     }
@@ -70,6 +75,7 @@ CreatorDialog::CreatorDialog(QWidget *parent)
         setRepre(Formula::REP_POS);
         m_repreCombo->setCurrentIndex(POS_IDX);
     }
+    connect(m_repreCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(setRepre(int)));
     QLabel *repreLabel = new QLabel(tr("&Representation: "));
     repreLabel->setBuddy(m_repreCombo);
     QHBoxLayout *repreLayout = new QHBoxLayout;
@@ -97,7 +103,7 @@ CreatorDialog::CreatorDialog(QWidget *parent)
     varsLayout->addWidget(m_varsLine);
 
     m_ttModel = new TruthTableModel;
-    m_ttView = new QTableView;
+    m_ttView = new TruthTableView;
     m_ttView->setModel(m_ttModel);
     m_ttView->setItemDelegate(new TruthTableDelegate);
     m_ttView->setMinimumSize(400, 300);
@@ -119,6 +125,26 @@ CreatorDialog::CreatorDialog(QWidget *parent)
     mainLayout->addWidget(buttonBox, 3, 0, 1, 2);
 
     setLayout(mainLayout);
+
+    if (formula) {
+        m_gm->setNewFormula(formula);
+        m_vcCombo->setCurrentIndex((m_varsCount = formula->getVarsCount()));
+        m_vars = formula->getVars();
+        printVars();
+        m_ttModel->setFormula(formula);
+        m_ttView->resizeColumnsToContents();
+    }
+}
+
+void CreatorDialog::accept()
+{
+    Formula *f = m_gm->getNewFormula();
+    if (f) {
+        f->setRepre(m_repre);
+        f->setName(m_name);
+    }
+
+    QDialog::accept();
 }
 
 void CreatorDialog::setName()

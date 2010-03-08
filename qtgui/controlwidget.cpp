@@ -33,28 +33,29 @@
 #include <QPainter>
 
 #include "controlwidget.h"
+#include "creatordialog.h"
 #include "constants.h"
 #include "guimanager.h"
 
 ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 {
-    GUIManager *gm = GUIManager::instance();
+    m_gm = GUIManager::instance();
 
     // change fce Min Label
-    connect(gm, SIGNAL(minFceChanged(const QString &)),
+    connect(m_gm, SIGNAL(minFceChanged(const QString &)),
             this, SLOT(setMinFce(const QString &)));
     // change fce Line Edit
-    connect(gm, SIGNAL(fceChanged(const QString &)),
+    connect(m_gm, SIGNAL(fceChanged(const QString &)),
             this, SLOT(setFce(const QString &)));
     // sending fce when it is read
-    connect(gm, SIGNAL(fceRead()), this, SLOT(sendFce()));
+    connect(m_gm, SIGNAL(fceRead()), this, SLOT(sendFce()));
     // change repre
-    connect(gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
+    connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
     // emitte by changing fce
     connect(this, SIGNAL(fceChanged(const QString &)),
-            gm, SLOT(setFormula(const QString &)));
+            m_gm, SLOT(setFormula(const QString &)));
     // emitted by changing rep combo box
-    connect(this, SIGNAL(repreChanged(bool)), gm, SLOT(setRepre(bool)));
+    connect(this, SIGNAL(repreChanged(bool)), m_gm, SLOT(setRepre(bool)));
 
     m_prevFce = "";
 
@@ -66,20 +67,31 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 
     m_fceLine = new QLineEdit(m_prevFce);
     connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
-    QLabel *fceLabel = new QLabel(tr("&Normal form: "));
+    QLabel *fceLabel = new QLabel(tr("Normal &form:"));
     fceLabel->setBuddy(m_fceLine);
 
-    m_minFcePrefix = tr("Minimal form: ");
-    m_minFceLabel = new QLabel(m_minFcePrefix);
+    m_newText = tr("&New...");
+    m_editText = tr("&Edit...");
+    m_createBtn = new QPushButton(m_newText);
+    connect(m_createBtn, SIGNAL(clicked()), this, SLOT(createFce()));
+    
+    m_minFceLine = new QLineEdit(m_prevFce);
+    m_minFceLine->setReadOnly(true);
+    QLabel *minFceLabel = new QLabel(tr("Minima&l form:"));
+    minFceLabel->setBuddy(m_minFceLine);
 
-    QHBoxLayout *fceLayout = new QHBoxLayout;
-    fceLayout->addWidget(fceLabel);
-    fceLayout->addWidget(m_fceLine);
+    QGridLayout *fceLayout = new QGridLayout;
+    fceLayout->addWidget(fceLabel, 0, 0);
+    fceLayout->addWidget(m_fceLine, 0, 1);
+    fceLayout->addWidget(m_createBtn, 0, 2);
+    fceLayout->addWidget(minFceLabel, 1, 0);
+    fceLayout->addWidget(m_minFceLine, 1, 1, 1, 2);
+
 
     m_repreCombo = new QComboBox;
     m_repreCombo->insertItem(SOP_REP_IDX, tr("Sum of Products"));
     m_repreCombo->insertItem(POS_REP_IDX, tr("Product of Sums"));
-    setRepre(gm->isSoP());
+    setRepre(m_gm->isSoP());
     connect(m_repreCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(sendRepre(int)));
     QLabel *repreLabel = new QLabel(tr("&Representation of logic function: "));
     repreLabel->setBuddy(m_repreCombo);
@@ -89,17 +101,16 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     repreLayout->addWidget(m_repreCombo);
 
     m_minBtn = new QPushButton(tr("&Minimize"), this);
-    connect(m_minBtn, SIGNAL(clicked()), gm, SLOT(minimizeFormula()));
+    connect(m_minBtn, SIGNAL(clicked()), m_gm, SLOT(minimizeFormula()));
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->setVerticalSpacing(5);
     mainLayout->addLayout(fceLayout, 0, 0, 1, 3);
-    mainLayout->addWidget(m_minFceLabel, 1, 0, 1, 3);
     mainLayout->addLayout(repreLayout, 2, 0);
     mainLayout->addWidget(m_minBtn, 2, 2);
     mainLayout->setColumnStretch(1, 10);
-    setLayout(mainLayout);
 
+    setLayout(mainLayout);
 }
 
 // paint event
@@ -126,17 +137,30 @@ void ControlWidget::sendFce()
     }
 }
 
+// called by creating (editing) function
+void ControlWidget::createFce()
+{
+    CreatorDialog cd(m_gm->isCorrectFormula(), this);
+    if (cd.exec() == QDialog::Accepted)
+        m_gm->activateNewFormula();
+}
+
 // sets fceLine to new value
 void ControlWidget::setFce(const QString &fceStr)
 {
     m_prevFce = fceStr;
     m_fceLine->setText(fceStr);
+    if (m_gm->isCorrectFormula())
+        m_createBtn->setText(m_editText);
+    else
+        m_createBtn->setText(m_newText);
+
 }
 
 // sets minFceLabel to new value
 void ControlWidget::setMinFce(const QString &minFceStr)
 {
-    m_minFceLabel->setText(m_minFcePrefix + minFceStr);
+    m_minFceLine->setText(minFceStr);
 }
 
 // called when rep combo is changed

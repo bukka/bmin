@@ -16,7 +16,8 @@ SOURCES += mainwindow.cpp \
     kmapwidget.cpp \
     creatordialog.cpp \
     truthtablemodel.cpp \
-    truthtabledelegate.cpp
+    truthtabledelegate.cpp \
+    truthtableview.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -32,5 +33,6 @@ HEADERS += mainwindow.h \
     kmapwidget.h \
     creatordialog.h \
     truthtablemodel.h \
-    truthtabledelegate.h
+    truthtabledelegate.h \
+    truthtableview.h
 RESOURCES += resources.qrc

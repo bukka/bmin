@@ -28,19 +28,28 @@
 #include "aboutdialog.h"
 #include "creatordialog.h"
 
-#include <QtCore/QSettings>
-#include <QtGui/QMenu>
-#include <QtGui/QMenuBar>
-#include <QtGui/QVBoxLayout>
-#include <QtGui/QAction>
-#include <QtGui/QMessageBox>
-#include <QtGui/QStyle>
+#include <QSettings>
+#include <QMenu>
+#include <QMenuBar>
+#include <QVBoxLayout>
+#include <QAction>
+#include <QMessageBox>
+#include <QStyle>
+#include <QStatusBar>
 
 // main window class
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("Bmin"));
+    statusBar()->showMessage(tr("Welcome to Bmin"), MSG_TIMEOUT);;
+
+    // connection with guimanager
+    m_gm = GUIManager::instance();
+    connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(enableEditAct()));
+    connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
+    connect(m_gm, SIGNAL(statusSet(QString,int)), this, SLOT(setStatusMsg(QString,int)));
+    connect(m_gm, SIGNAL(exit()), this, SLOT(close()));
 
     // menu
     createActions();
@@ -61,11 +70,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setCentralWidget(mainWidget);
 
-    // connection with guimanager
-    m_gm = GUIManager::instance();
-    connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
-    connect(m_gm, SIGNAL(exit()), this, SLOT(close()));
-
     // set default formula
     if (Constants::DEFAULT_FORMULA) {
         m_gm->updateFormula("f(c,b,a) = sum m(1,2,6)");
@@ -80,10 +84,16 @@ MainWindow::~MainWindow()
 // creates menu actions
 void MainWindow::createActions()
 {
-    m_newAction = new QAction(tr("&New"), this);
+    m_newAction = new QAction(tr("&New..."), this);
     m_newAction->setShortcut(tr("Ctrl+N"));
-    m_newAction->setStatusTip(tr("Create a new formula"));
+    m_newAction->setStatusTip(tr("Create new formula"));
     connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFormula()));
+
+    m_editAction = new QAction(tr("&Edit..."), this);
+    m_editAction->setShortcut(tr("Ctrl+E"));
+    m_editAction->setStatusTip(tr("Create new formula"));
+    m_editAction->setEnabled(m_gm->isCorrectFormula());
+    connect(m_editAction, SIGNAL(triggered()), this, SLOT(editFormula()));
 
     m_loadAction = new QAction(tr("&Load"), this);
     m_loadAction->setShortcut(tr("Ctrl+L"));
@@ -107,7 +117,7 @@ void MainWindow::createActions()
 
     /*
     m_helpAction = new QAction(tr("Bmin &Help"), this);
-    m_helpAction->setShortcut(tr("Ctrl+A"));
+    m_helpAction->setShortcut(tr("Ctrl+H"));
     m_helpAction->setStatusTip(tr("Show the Bmin Help"));
     connect(m_helpAction, SIGNAL(triggered()), this, SLOT(help()));
     */
@@ -118,6 +128,7 @@ void MainWindow::createMenus()
 {
     m_fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileMenu->addAction(m_newAction);
+    m_fileMenu->addAction(m_editAction);
     m_fileMenu->addAction(m_loadAction);
     m_fileMenu->addAction(m_saveAction);
     m_fileMenu->addSeparator();
@@ -128,9 +139,14 @@ void MainWindow::createMenus()
     m_helpMenu->addAction(m_aboutAction);
 }
 
+// shows status bar msg
+void MainWindow::setStatusMsg(const QString &msg, int timeout)
+{
+    statusBar()->showMessage(msg, timeout);
+}
+
 // show errord message dialog
-void MainWindow::showMsg(const QString &msg, const QString &title,
-                         QMessageBox::Icon iconType) const
+void MainWindow::showMsg(const QString &msg, const QString &title, QMessageBox::Icon iconType)
 {
     Q_UNUSED(iconType);
 
@@ -141,12 +157,39 @@ void MainWindow::showMsg(const QString &msg, const QString &title,
     msgBox.exec();
 }
 
-// clear formula
+// error msg
+void MainWindow::showError(const QString &msg)
+{
+    showMsg(msg, tr("error"), QMessageBox::Critical);
+}
+
+// warning msg
+void MainWindow::showWarning(const QString &msg)
+{
+    showMsg(msg, tr("warning"), QMessageBox::Warning);
+}
+
+// info msg
+void MainWindow::showInfo(const QString &msg)
+{
+    MainWindow::showMsg(msg, tr("information"), QMessageBox::Information);
+}
+
+// new formula dialog
 void MainWindow::newFormula()
 {
     m_gm->updateFormula("");
-    CreatorDialog cd(this);
-    cd.exec();
+    CreatorDialog cd(false, this);
+    if (cd.exec() == QDialog::Accepted)
+        m_gm->activateNewFormula();
+}
+
+// new formula dialog
+void MainWindow::editFormula()
+{
+    CreatorDialog cd(true, this);
+    if (cd.exec() == QDialog::Accepted)
+        m_gm->activateNewFormula();
 }
 
 // load from settings
@@ -157,7 +200,7 @@ void MainWindow::loadFormula()
         showWarning(tr("No formula was saved."));
     else {
         m_gm->updateFormula(value);
-        showInfo(tr("Formula was loaded"));
+        statusBar()->showMessage(tr("Formula was loaded."), MSG_TIMEOUT);
     }
 }
 
@@ -166,7 +209,7 @@ void MainWindow::saveFormula()
 {
     if (m_gm->isCorrectFormula()) {
         m_settings.setValue("formula", m_gm->getActualFce());
-        showInfo(tr("Formula was saved"));
+        statusBar()->showMessage(tr("Formula was saved."), MSG_TIMEOUT);
     }
     else
         showError(tr("Formula is invalid!"));
@@ -184,4 +227,10 @@ void MainWindow::about()
 {
     AboutDialog *dialog = new AboutDialog(this);
     dialog->show();
+}
+
+// enabling or disabling edit action
+void MainWindow::enableEditAct()
+{
+    m_editAction->setEnabled(m_gm->isCorrectFormula());
 }
