@@ -115,10 +115,12 @@ QString GUIManager::getActualFce()
 
 Formula *GUIManager::getFormula()
 {
-    if (m_kernel->hasFormula())
-        return new Formula(*m_kernel->getFormula());
-    else
-        return 0;
+    return m_kernel->getFormula();
+}
+
+Formula *GUIManager::getMinimizedFormula()
+{
+    return m_kernel->getMinimizedFormula();
 }
 
 QuineMcCluskeyData *GUIManager::getQmData()

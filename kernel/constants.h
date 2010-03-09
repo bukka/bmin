@@ -46,8 +46,13 @@ namespace Constants {
     const bool DEFAULT_FORMULA = false;
 
     // whether Sum of Product is default representation
-    const bool SOP_DEFAULT = true;
+    const bool SOP_DEFAULT = true;    
 
+    // whether show covers in kmap implicitly
+    const bool KMAP_COVERS_DEFAULT = false;
+
+    // whether line mode in kmap head is default
+    const bool KMAP_LINES_DEFAULT = false;
 }
 
 #endif // CONSTANTS_H

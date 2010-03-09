@@ -24,7 +24,7 @@ Parser::Parser()
     kernel = Kernel::instance();
 }
 
-string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
+string Parser::termToString(const Term &term, const vector<char> &vars, PrintForm form)
 {
     ostringstream oss;
     bool allMissing = true;
@@ -68,12 +68,8 @@ string Parser::termToString(Term &term, vector<char> vars, PrintForm form)
 
 string Parser::formulaToString(PrintForm form, Formula *f)
 {
-    if (!f) {
-        f = (form == PF_SUM || form == PF_PROD)?
-            kernel->getFormula(): kernel->getMinimizedFormula();
-        if (!f)
-            return "";
-    }
+    if (!f)
+        return "";
 
     ostringstream oss;
     // variables

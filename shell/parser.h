@@ -30,12 +30,12 @@ public:
         PF_POS   // product of sums
     };
 
+    static std::string termToString(const Term &term, const std::vector<char> &vars, PrintForm form);
+    static std::string formulaToString(PrintForm form, Formula *formula);
+
     Parser();
 
     void parse(std::string str);
-
-    std::string termToString(Term &term, std::vector<char> vars, PrintForm form = PF_PROD);
-    std::string formulaToString(PrintForm form = PF_SUM, Formula *formula = 0);
 
 private:
     Kernel *kernel;

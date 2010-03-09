@@ -56,12 +56,12 @@ QVariant TruthTableModel::data(const QModelIndex &index, int role) const
         || index.column() > static_cast<int>(m_formula->getVarsCount() + 2))
         return QVariant();
 
-   if (index.column() == 0)
-       return index.row();
-   else if (index.column() == static_cast<int>(m_formula->getVarsCount() + 1))
+    if (index.column() == 0)
+        return index.row();
+    else if (index.column() == static_cast<int>(m_formula->getVarsCount() + 1))
         return QString(m_formula->getTermValue(index.row()).toChar());
-   else
-       return (1 << (m_formula->getVarsCount() - index.column()) & index.row())? 1: 0;
+    else
+        return (1 << (m_formula->getVarsCount() - index.column()) & index.row())? 1: 0;
 
 }
 

@@ -276,10 +276,9 @@ void CubeGLDrawer::bindTermsTextures()
     GLuint texId;
     termsTextures.clear();
 
-    Parser parser;
     for (unsigned i = 0; i < terms.size(); i++) {
         texId = bindTextTextures(
-                QString::fromStdString(parser.termToString(terms[i], formula->getVars())),
+                QString::fromStdString(Parser::termToString(terms[i], formula->getVars(), Parser::PF_PROD)),
                 getI(TERM_IMG_W), getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
         termsTextures.push_back(texId);
     }

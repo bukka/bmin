@@ -76,8 +76,10 @@ Formula::Formula(unsigned vs, char fn, Repre r, const vector<char> *v, std::vect
 {
     init(vs, v, fn, r);
 
-    if (!t || t->size() == 0) // t is empty
+    if (!t || t->size() == 0) {// t is empty
+        terms->touch();
         return;
+    }
 
     for (unsigned i = 1; i < t->size(); i++) {
         if (t->at(i).getSize() != vs) // check correct size of term
@@ -234,6 +236,15 @@ vector<Term> &Formula::getMaxterms(vector<Term> &maxterms) const
     return terms->getMaxterms(maxterms);
 }
 
+// returns term at position pos
+Term Formula::getTermAt(unsigned pos) const
+{
+    if (pos >= terms->getSize())
+        throw InvalidPositionExc(pos);
+
+    return terms->at(pos);
+}
+
 // returns number of terms
 unsigned Formula::getSize() const
 {
@@ -295,8 +306,8 @@ bool Formula::setRepre(Repre rep)
 void Formula::setVars(unsigned n)
 {
     vars.resize(n);
-    char var = DEFAULT_FIRST_VAR + n - 1;
-    for (unsigned i = 0; i < n; i++, var--)
+    char var = DEFAULT_FIRST_VAR;
+    for (unsigned i = 0; i < n; i++, var++)
         vars[i] = var;
 }
 

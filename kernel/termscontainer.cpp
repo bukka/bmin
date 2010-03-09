@@ -161,6 +161,11 @@ OutputValue TermsContainer::getTermValue(int idx) const
         return OutputValue::ONE;
 }
 
+Term TermsContainer::at(unsigned pos) const
+{
+    return termsVector->at(pos);
+}
+
 vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms)
 {
     minterms.clear();

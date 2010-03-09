@@ -53,8 +53,10 @@ public:
     static void destroy();
     // actualize function and return function string
     QString getActualFce();
-    // returns copy of actual formula (it should be deallocated)
+    // returns actual formula
     Formula *getFormula();
+    // returns minimized formula
+    Formula *getMinimizedFormula();
     // whether formula is correct
     inline bool isCorrectFormula() const { return m_isCorrect; }
     // whether formula has Sum of Products representation

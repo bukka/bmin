@@ -21,484 +21,28 @@
  */
 
 #include "kmapwidget.h"
+#include "kmapgridwidget.h"
 #include "guimanager.h"
+#include "termsmodel.h"
+#include "coversmodel.h"
 // kernel
 #include "kernel.h"
+#include "constants.h"
 #include "kmap.h"
 
 #include <vector>
 using namespace std;
 
-#include <QPainter>
-#include <QHBoxLayout>
-#include <QMenu>
+#include <QLabel>
+#include <QCheckBox>
+#include <QListView>
+#include <QTableView>
+#include <QHeaderView>
+#include <QBoxLayout>
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QGraphicsWidget>
-#include <QGraphicsGridLayout>
-#include <QGraphicsSceneContextMenuEvent>
 
-
-// HEAD
-
-KMapHeadWidget::KMapHeadWidget(Mode m, Direction d, QGraphicsItem *parent)
-        : QGraphicsWidget(parent)
-{
-    m_direction = d;
-    setOwnedByLayout(false);
-
-    // make actions
-    QActionGroup *group = new QActionGroup(this);
-    group->setExclusive(true);
-    m_linesAction = new QAction(tr("Lines Mode"), group);
-    m_linesAction->setCheckable(true);
-    connect(m_linesAction, SIGNAL(triggered()), this, SLOT(setLinesMode()));
-    m_binaryAction = new QAction(tr("Binary Mode"), group);
-    m_binaryAction->setCheckable(true);
-    connect(m_binaryAction, SIGNAL(triggered()), this, SLOT(setBinaryMode()));
-
-    setMode(m);
-}
-
-void KMapHeadWidget::setMode(Mode m)
-{
-    m_mode = m;
-    if (m == LINES)
-        m_linesAction->setChecked(true);
-    else // binary
-        m_binaryAction->setChecked(true);
-    update();
-}
-
-void KMapHeadWidget::contextMenuEvent(QGraphicsSceneContextMenuEvent *event)
-{
-    QMenu menu;
-    menu.addAction(m_linesAction);
-    menu.addAction(m_binaryAction);
-    menu.exec(event->screenPos());
-}
-
-void KMapHeadWidget::setLinesMode()
-{
-    emit modeChanged(LINES);
-}
-
-void KMapHeadWidget::setBinaryMode()
-{
-    emit modeChanged(BINARY);
-}
-
-
-// Vars - lines
-
-KMapLineVarsWidget::KMapLineVarsWidget(vector<char> *vars, Direction d, QGraphicsItem *parent)
-        : KMapHeadWidget(LINES, d, parent)
-{
-    m_vars = vars;
-    m_varsCount = vars->size();
-    m_font = QFont("Monospace", FONT_SIZE, QFont::Normal);
-
-    if (d == HORIZONTAL) {
-        m_width = KMapCellWidget::SIZE;
-        m_height = SIZE;
-    }
-    else {
-        m_width = SIZE;
-        m_height = KMapCellWidget::SIZE;
-    }
-
-    setMinimumSize(m_width, m_height);
-    setMaximumSize(minimumSize());
-}
-
-void KMapLineVarsWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-    painter->setFont(m_font);
-
-    int charShift = (FONT_SIZE / 2);
-    int linePos = SIZE - LINE_SPACING;
-    for (unsigned i = 0; i < m_varsCount; i++, linePos -= LINE_SPACING) {
-        if (m_direction == HORIZONTAL)
-            painter->drawText(charShift, linePos + charShift, QString(m_vars->at(i)));
-        else
-            painter->drawText(linePos - charShift, FONT_SIZE + charShift, QString(m_vars->at(i)));
-    }
-}
-
-// Vars - binary
-
-KMapBinaryVarsWidget::KMapBinaryVarsWidget(vector<char> *hVars, vector<char> *vVars, QGraphicsItem *parent)
-        : KMapHeadWidget(BINARY, HORIZONTAL, parent)
-{
-    setVars(hVars, vVars);
-    m_hVarsPoint = QPoint(2 * FONT_SIZE, FONT_SIZE);
-    m_vVarsPoint = QPoint(0, SIZE);
-
-    m_font = QFont("Monospace", FONT_SIZE, QFont::Bold);
-
-    setMinimumSize(SIZE, SIZE);
-    setMaximumSize(minimumSize());
-}
-
-void KMapBinaryVarsWidget::setVars(std::vector<char> *hVars, std::vector<char> *vVars)
-{
-    m_hVars = hVars;
-    m_hVars = vVars;
-    m_varsCount = hVars->size() + vVars->size();
-
-    m_hVarsStr.clear();
-    m_vVarsStr.clear();
-    for (unsigned i = 0; i < hVars->size(); i++)
-        m_hVarsStr.insert(0, hVars->at(i));
-    for (unsigned i = 0; i < vVars->size(); i++)
-        m_vVarsStr.insert(0, vVars->at(i));
-}
-
-void KMapBinaryVarsWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-    painter->setFont(m_font);
-    painter->setPen(QPen(Qt::black, LINE_SIZE));
-    painter->drawLine(0, 0, SIZE, SIZE);
-
-    painter->drawText(m_hVarsPoint, m_hVarsStr);
-    painter->drawText(m_vVarsPoint, m_vVarsStr);
-}
-
-
-
-// Desc
-
-KMapDescWidget::KMapDescWidget(int code, unsigned vc, qreal size, Mode m, Direction d, QGraphicsItem *parent)
-        : KMapHeadWidget(m, d, parent)
-{
-    m_varsCount = vc;
-    m_code = code;
-    m_font = QFont("Times", FONT_SIZE, QFont::Normal);
-
-    if (d == HORIZONTAL) {
-        m_width = size;
-        m_height = SIZE;
-    }
-    else {
-        m_width = SIZE;
-        m_height = size;
-    }
-
-    m_codeStr = QString("%1").arg(code, vc, 2, QChar('0'));
-
-    setMinimumSize(m_width, m_height);
-    setMaximumSize(minimumSize());
-}
-
-void KMapDescWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-
-    if (m_mode == LINES) {
-        painter->setPen(QPen(Qt::black, LINE_SIZE));
-
-        int linePos = SIZE - LINE_SPACING;
-        for (unsigned i = 0; i < m_varsCount; i++, linePos -= LINE_SPACING) {
-            if (m_code & (1 << i)) {
-                if (m_direction == HORIZONTAL)
-                    painter->drawLine(0, linePos, m_width, linePos);
-                else
-                    painter->drawLine(linePos, 0, linePos, m_height);
-            }
-        }
-    }
-    else { // BINARY
-        painter->setFont(m_font);
-        if (m_direction == HORIZONTAL) {
-            painter->drawText(QRectF(0, 0, m_width, m_height),
-                              Qt::AlignHCenter | Qt::AlignBottom, m_codeStr);
-        }
-        else {
-            painter->drawText(QRectF(0, 0, m_width - 4, m_height),
-                              Qt::AlignVCenter | Qt::AlignRight, m_codeStr);
-        }
-    }
-}
-
-// CELL
-
-KMapCellWidget::KMapCellWidget(QGraphicsItem *parent)
-        : QGraphicsWidget(parent)
-{
-    m_cellWidth = m_cellHeight = SIZE;
-    m_penSize = BORDER / 2;
-    m_cellSize = static_cast<int>(SIZE);
-    m_wallSize = static_cast<int>(BORDER);
-    m_font = QFont("Times", FONT_SIZE, QFont::Normal);
-}
-
-void KMapCellWidget::setWalls(bool top, bool bottom, bool left, bool right)
-{
-    if ((m_topWall = top))
-        m_cellHeight += BORDER;
-    if ((m_bottomWall = bottom))
-        m_cellHeight += BORDER;
-    if ((m_leftWall = left))
-        m_cellWidth += BORDER;
-    if ((m_rightWall = right))
-        m_cellWidth += BORDER;
-
-    setMinimumSize(m_cellWidth, m_cellHeight);
-    setMaximumSize(minimumSize());
-}
-
-void KMapCellWidget::setValue(char value)
-{
-    m_value = value;
-    m_valueStr = QString(QChar(value));
-
-    m_covers.clear();
-}
-
-bool KMapCellWidget::hasCoverPos(unsigned pos)
-{
-    for (list<KMapCell>::iterator it = m_covers.begin(); it != m_covers.end(); it++) {
-        if (pos == (*it).getPos())
-            return true;
-    }
-    return false;
-}
-
-unsigned KMapCellWidget::addCover(KMapCell &cell, unsigned pos)
-{
-    unsigned position = pos;
-    if (hasCoverPos(pos)) {
-        // find new pos
-        for (unsigned i = 0; i < static_cast<unsigned>(KMap::MAX_VARS); i++) {
-            if (!hasCoverPos(i)) {
-                position = i;
-                break;
-            }
-        }
-    }
-    cell.setPos(position);
-    m_covers.push_front(cell);
-    return position;
-}
-
-void KMapCellWidget::setLastCoverPos(unsigned pos)
-{
-    m_covers.front().setPos(pos);
-}
-
-void KMapCellWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
-{
-    Q_UNUSED(option);
-    Q_UNUSED(widget);
-
-    painter->setFont(m_font);
-    painter->setPen(QPen(Qt::black, m_penSize));
-
-    unsigned x = (m_leftWall? m_wallSize: 0);
-    unsigned y = (m_topWall? m_wallSize: 0);
-    int width = m_cellSize - m_penSize;
-    int height = m_cellSize - m_penSize;
-
-    painter->drawRect(x, y, width, height);
-
-    if (m_topWall)
-        painter->drawLine(x - 1, y - m_penSize, x + 1 + width, y - m_penSize);
-    if (m_bottomWall)
-        painter->drawLine(x, y + height + m_penSize, x + 1 + width, y + height + m_penSize);
-    if (m_leftWall)
-        painter->drawLine(x - m_penSize, y - 1, x - m_penSize, y + 1 + height);
-    if (m_rightWall)
-        painter->drawLine(x + height + m_penSize, y - 1, x + height + m_penSize, y + 1 + height);
-
-    if (!m_valueStr.isEmpty())
-        painter->drawText(x, y, width, height, Qt::AlignCenter, m_valueStr);
-
-    if (!m_covers.empty()) {
-        int x1, y1, x2, y2;
-        int nextPos = 2 * m_penSize;
-
-        for (list<KMapCell>::iterator it = m_covers.begin(); it != m_covers.end(); it++) {
-            KMapCell &cell = *it;
-            int pos = cell.getPos();
-            int padding = PADDING + pos * nextPos;
-
-            if (cell.hasTop()) {
-                y1 = y2 = padding + y;
-                x1 = x + (cell.hasLeft()? padding: 0);
-                x2 = width + x - (cell.hasRight()? padding: 0);
-                painter->drawLine(x1, y1, x2, y2);
-            }
-            if (cell.hasBottom()) {
-                y1 = y2 = height + y - padding;
-                x1 = x + (cell.hasLeft()? padding: 0);
-                x2 = width + x - (cell.hasRight()? padding: 0);
-                painter->drawLine(x1, y1, x2, y2);
-            }
-            if (cell.hasLeft()) {
-                x1 = x2 = padding + x;
-                y1 = y + (cell.hasTop()? padding: 0);
-                y2 = height + y - (cell.hasBottom()? padding: 0);
-                painter->drawLine(x1, y1, x2, y2);
-            }
-            if (cell.hasRight()) {
-                x1 = x2 = width + x - padding;
-                y1 = y + (cell.hasTop()? padding: 0);
-                y2 = height + y - (cell.hasBottom()? padding: 0);
-                painter->drawLine(x1, y1, x2, y2);
-            }
-        }
-    }
-}
-
-void KMapCellWidget::mousePressEvent(QGraphicsSceneMouseEvent *event)
-{
-    if (event->button() == Qt::LeftButton) {
-        OutputValue value = OutputValue::getNextValue(OutputValue(m_value));
-        emit cellValueChanged(m_idx, value);
-    }
-}
-
-// GRID
-
-KMapGridWidget::KMapGridWidget(KMap *kmap, KMapHeadWidget::Mode mode, QGraphicsItem *parent)
-        : QGraphicsWidget(parent)
-{
-    m_kmap = kmap;
-    m_varsCount = kmap->getVarsCount();
-    m_rowsCount = kmap->getRowsCount();
-    m_colsCount = kmap->getColsCount();
-
-    m_map = new KMapCellWidget *[m_rowsCount];
-    for (unsigned i = 0; i < m_rowsCount; i++)
-        m_map[i] = new KMapCellWidget[m_colsCount];
-
-    m_layout = new QGraphicsGridLayout;
-    m_layout->setSpacing(0);
-
-    // head desc
-    m_hDesc = new KMapDescWidget *[m_rowsCount];
-    m_vDesc = new KMapDescWidget *[m_colsCount];
-
-    for (unsigned i = 0; i < m_rowsCount; i++) {
-        for (unsigned j = 0; j < m_colsCount; j++) {
-            m_map[i][j].setWalls(i == 0 || i == 4, i == m_rowsCount - 1 || i == 3,
-                                 j == 0 || j == 4, j == m_colsCount - 1 || j == 3);
-            m_map[i][j].setIdx(kmap->getIdx(i, j));
-            connect(&m_map[i][j], SIGNAL(cellValueChanged(int, OutputValue &)),
-                    GUIManager::instance(), SLOT(setTerm(int, OutputValue&)));
-            m_layout->addItem(&m_map[i][j], i + 1, j + 1);
-        }
-        m_hDesc[i] = new KMapDescWidget(kmap->getSideGC(i), kmap->getRowsVarsCount(),
-                                          m_map[i][0].getCellHeight(), mode,
-                                          KMapHeadWidget::VERTICAL);
-        connect(m_hDesc[i], SIGNAL(modeChanged(KMapHeadWidget::Mode)),
-                this, SLOT(setMode(KMapHeadWidget::Mode)));
-        m_layout->addItem(m_hDesc[i], i + 1, 0);
-    }
-    
-    for (unsigned j = 0; j < m_colsCount; j++) {
-        m_vDesc[j] = new KMapDescWidget(kmap->getTopGC(j), kmap->getColsVarsCount(),
-                                        m_map[0][j].getCellWidth(), mode,
-                                        KMapHeadWidget::HORIZONTAL);
-        connect(m_vDesc[j], SIGNAL(modeChanged(KMapHeadWidget::Mode)),
-                this, SLOT(setMode(KMapHeadWidget::Mode)));
-        m_layout->addItem(m_vDesc[j], 0, j + 1);
-    }
-
-    // head vars
-    m_binVars = new KMapBinaryVarsWidget(kmap->getTopVars(), kmap->getSideVars());
-    m_hVars = new KMapLineVarsWidget(kmap->getTopVars(), KMapHeadWidget::HORIZONTAL);
-    m_vVars = new KMapLineVarsWidget(kmap->getSideVars(), KMapHeadWidget::VERTICAL);
-
-    connect(m_binVars, SIGNAL(modeChanged(KMapHeadWidget::Mode)),
-            this, SLOT(setMode(KMapHeadWidget::Mode)));
-    connect(m_hVars, SIGNAL(modeChanged(KMapHeadWidget::Mode)),
-            this, SLOT(setMode(KMapHeadWidget::Mode)));
-    connect(m_vVars, SIGNAL(modeChanged(KMapHeadWidget::Mode)),
-            this, SLOT(setMode(KMapHeadWidget::Mode)));
-
-    m_layout->addItem(m_binVars, 0, 0);
-    m_layout->addItem(m_hVars, 0, m_colsCount + 1);
-    m_layout->addItem(m_vVars, m_rowsCount + 1, 0);
-
-    setLayout(m_layout);
-    setMode(mode);
-}
-
-KMapGridWidget::~KMapGridWidget()
-{
-    for (unsigned i = 0; i < KMap::MAX_ROWS; i++)
-        delete [] m_map[i];
-    delete [] m_map;
-
-    delete [] m_vDesc;
-    delete [] m_hDesc;
-
-    delete m_binVars;
-    delete m_hVars;
-    delete m_vVars;
-}
-
-
-void KMapGridWidget::setMapData(KMap *kmap)
-{
-    if (kmap->getVarsCount() != m_varsCount)
-        return;
-
-    m_kmap = kmap;
-
-    // cells
-    for (unsigned i = 0; i < m_rowsCount; i++) {
-        for (unsigned j = 0; j < m_colsCount; j++)
-            m_map[i][j].setValue(kmap->getCellValue(i, j).toChar());
-    }
-
-    // vars
-    m_hVars->setVars(kmap->getTopVars());
-    m_vVars->setVars(kmap->getSideVars());
-    m_binVars->setVars(kmap->getTopVars(), kmap->getSideVars());
-
-    showCovers();
-}
-
-void KMapGridWidget::showCovers()
-{
-    list<KMapCover> *covers = m_kmap->getMinCovers();
-    for (list<KMapCover>::iterator itCover = covers->begin(); itCover != covers->end(); itCover++) {
-        list<KMapCell> *cells = (*itCover).getCells();
-        int pos = 0;
-        for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
-            pos = m_map[(*itCell).getRow()][(*itCell).getCol()].addCover(*itCell, pos);
-        if (pos != 0) {
-            for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
-                m_map[(*itCell).getRow()][(*itCell).getCol()].setLastCoverPos(pos);
-        }
-    }
-}
-
-void KMapGridWidget::setMode(KMapHeadWidget::Mode mode)
-{
-    m_mode = mode;
-    for (unsigned i = 0; i < m_rowsCount; i++)
-        m_hDesc[i]->setMode(mode);
-    for (unsigned i = 0; i < m_colsCount; i++)
-        m_vDesc[i]->setMode(mode);
-
-    m_hVars->setVisible(mode == KMapHeadWidget::LINES);
-    m_vVars->setVisible(mode == KMapHeadWidget::LINES);
-    m_binVars->setVisible(mode == KMapHeadWidget::BINARY);
-
-}
-
-// MAP
 
 KMapWidget::KMapWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
@@ -510,7 +54,6 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_active = false;
     m_varsCount = 0;
     m_kmap = 0;
-    m_mode = DEFAULT_MODE;
 
     // grid widget array
     m_gridWidgets = new KMapGridWidget *[KMap::MAX_VARS + 1];
@@ -522,11 +65,46 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_scene = new QGraphicsScene;
     // view
     m_view = new QGraphicsView(m_scene);
-    QHBoxLayout *layout = new QHBoxLayout;
-    layout->setMargin(0);
-    layout->addWidget(m_view);
 
-    setLayout(layout);
+
+    // terms
+    m_termsModel = new TermsModel;
+    m_termsView = new QTableView;
+    m_termsView->setModel(m_termsModel);
+    m_termsView->setShowGrid(false);
+    m_termsView->horizontalHeader()->hide();
+    m_termsView->setMaximumWidth(220);
+    m_termsStr = tr("Terms");
+    m_mintermsStr = tr("Minterms");
+    m_maxtermsStr = tr("Maxterms");
+    m_termsLabel = new QLabel(m_termsStr);
+    m_termsLabel->setContentsMargins(3, 5, 5, 0);
+    m_termsLabel->setBuddy(m_termsView);
+
+    // covers
+    m_coversModel = new CoversModel;
+    m_coversView = new QTableView;
+    m_coversView->setModel(m_coversModel);
+    m_coversView->setShowGrid(false);
+    m_coversView->horizontalHeader()->hide();
+    m_coversView->verticalHeader()->hide();
+    m_coversView->setMaximumWidth(220);
+    m_coversCheckBox = new QCheckBox(tr("Show covers"));
+    m_coversCheckBox->setChecked(Constants::KMAP_COVERS_DEFAULT);
+    connect(m_coversCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableCovers(bool)));
+
+    QVBoxLayout *sideLayout = new QVBoxLayout;
+    sideLayout->addWidget(m_termsLabel);
+    sideLayout->addWidget(m_termsView);
+    sideLayout->addWidget(m_coversCheckBox);
+    sideLayout->addWidget(m_coversView);
+
+    QHBoxLayout *mainLayout = new QHBoxLayout;
+    mainLayout->setMargin(0);
+    mainLayout->addWidget(m_view);
+    mainLayout->addLayout(sideLayout);
+
+    setLayout(mainLayout);
 }
 
 KMapWidget::~KMapWidget()
@@ -548,7 +126,10 @@ void KMapWidget::updateData()
         if (m_varsCount != m_kmap->getVarsCount()) {
             m_varsCount = m_kmap->getVarsCount();
             if (!m_gridWidgets[m_varsCount]) {
-                m_gridWidgets[m_varsCount] = new KMapGridWidget(m_kmap, m_mode);
+                m_gridWidgets[m_varsCount] = new KMapGridWidget(
+                        m_kmap, m_coversCheckBox->isChecked());
+                connect(m_coversCheckBox, SIGNAL(toggled(bool)),
+                        m_gridWidgets[m_varsCount], SLOT(enableCovers(bool)));
             }
             m_gridWidgets[m_varsCount]->setMapData(m_kmap);
 
@@ -557,11 +138,29 @@ void KMapWidget::updateData()
             m_mainItem = m_gridWidgets[m_varsCount];
             m_scene->addItem(m_mainItem);
             m_view->update();
+
         }
         else if (m_gridWidgets[m_varsCount]) {
             m_gridWidgets[m_varsCount]->setMapData(m_kmap);
             m_gridWidgets[m_varsCount]->update();
         }
+        enableCovers(m_coversCheckBox->isChecked());
+
+        m_termsModel->setFormula(m_gm->getFormula());
+        m_termsView->resizeRowsToContents();
+        m_termsView->setColumnWidth(0, m_termsView->width());
     }
 
+}
+
+void KMapWidget::enableCovers(bool show)
+{
+    if (show) {
+        m_gm->minimizeFormula(false);
+        m_coversModel->setFormula(m_gm->getMinimizedFormula());
+        m_coversView->resizeRowsToContents();
+        m_coversView->setColumnWidth(0, m_coversView->width());
+    }
+    else
+        m_coversModel->clearFormula();
 }

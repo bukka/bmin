@@ -46,7 +46,7 @@ CreatorDialog::CreatorDialog(bool edit, QWidget *parent)
     setWindowTitle(tr("New logic function..."));
 
     m_gm = GUIManager::instance();
-    Formula *formula = (edit? m_gm->getFormula(): 0);
+    Formula *formula = (edit? new Formula(*m_gm->getFormula()): 0);
 
     if (formula)
         m_name = formula->getName();
@@ -196,10 +196,11 @@ void CreatorDialog::setVars()
             ok = false;
         }
     }
+
     if (ok) {
         m_vars.resize(list.size());
-        for (int i = 0; i < list.length(); i++)
-            m_vars[i] = list[i].at(0).toAscii();
+        for (int i = 0; i < list.size(); i++)
+            m_vars[i] = list[list.size() - i - 1].at(0).toAscii();
 
         m_varsCount = m_vars.size();
 
@@ -229,7 +230,7 @@ void CreatorDialog::printVars()
     // print vars
     QStringList list;
     for (unsigned i = 0; i < m_varsCount; i++)
-        list.append(QString(m_vars[i]));
+        list.insert(0, QString(m_vars[i]));
     m_varsLine->setText(list.join(","));
 }
 
