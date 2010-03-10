@@ -21,9 +21,11 @@
  */
 
 #include "kmapcellwidget.h"
+#include "kmapgridwidget.h"
 
 #include <vector>
 #include <list>
+#include <algorithm>
 using namespace std;
 
 #include <QPainter>
@@ -36,6 +38,9 @@ KMapCellWidget::KMapCellWidget(QGraphicsItem *parent)
     m_penSize = BORDER / 2;
     m_cellSize = static_cast<int>(SIZE);
     m_wallSize = static_cast<int>(BORDER);
+    m_coverCorrection = (COVER_PEN % 2)? 0: 1;
+    m_selection = false;
+    m_selectionBrush = QBrush(QColor(220, 220, 220));
     m_font = QFont("Monospace", FONT_SIZE, QFont::Normal);
 }
 
@@ -93,20 +98,31 @@ void KMapCellWidget::setLastCoverPos(unsigned pos)
     m_covers.front().setPos(pos);
 }
 
+void KMapCellWidget::selectCover(const KMapCell &cell, bool selected)
+{
+    list<KMapCell>::iterator it = find(m_covers.begin(), m_covers.end(), cell);
+    if (it != m_covers.end())
+        (*it).setSelection(selected);
+}
+
 void KMapCellWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget)
 {
     Q_UNUSED(option);
     Q_UNUSED(widget);
 
-    painter->setFont(m_font);
-    painter->setPen(QPen(Qt::black, m_penSize));
 
     unsigned x = (m_leftWall? m_wallSize: 0);
     unsigned y = (m_topWall? m_wallSize: 0);
     int width = m_cellSize - m_penSize;
     int height = m_cellSize - m_penSize;
 
+
+    painter->setFont(m_font);
+    painter->setPen(QPen(Qt::black, m_penSize));
+    if (m_selection)
+        painter->setBrush(m_selectionBrush);
     painter->drawRect(x, y, width, height);
+    painter->setBrush(Qt::NoBrush);
 
     if (m_topWall)
         painter->drawLine(x - 1, y - m_penSize, x + 1 + width, y - m_penSize);
@@ -117,43 +133,55 @@ void KMapCellWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
     if (m_rightWall)
         painter->drawLine(x + height + m_penSize, y - 1, x + height + m_penSize, y + 1 + height);
 
-    if (!m_valueStr.isEmpty())
-        painter->drawText(x, y, width, height, Qt::AlignCenter, m_valueStr);
 
     if (!m_covers.empty()) {
         int x1, y1, x2, y2;
         int nextPos = 2 * m_penSize;
 
-        for (list<KMapCell>::iterator it = m_covers.begin(); it != m_covers.end(); it++) {
+        for (list<KMapCell>::reverse_iterator it = m_covers.rbegin(); it != m_covers.rend(); it++) {
             KMapCell &cell = *it;
             int pos = cell.getPos();
-            int padding = PADDING + pos * nextPos;
+            int padding = PADDING + pos * nextPos - 1;
+
+            if (cell.isSelected()) {
+                painter->setPen(QPen(Qt::black, m_penSize));
+                painter->setBrush(QBrush(m_grid->getColor(cell.getColor(), true)));
+                painter->drawRect(x, y, width, height);
+                painter->setBrush(Qt::NoBrush);
+            }
+
+            painter->setPen(QPen(QBrush(m_grid->getColor(cell.getColor())), COVER_PEN));
 
             if (cell.hasTop()) {
                 y1 = y2 = padding + y;
                 x1 = x + (cell.hasLeft()? padding: 0);
-                x2 = width + x - (cell.hasRight()? padding: 0);
+                x2 = width + x - (cell.hasRight()? padding: 0) + m_coverCorrection;
                 painter->drawLine(x1, y1, x2, y2);
             }
             if (cell.hasBottom()) {
-                y1 = y2 = height + y - padding;
+                y1 = y2 = height + y - padding + m_coverCorrection;
                 x1 = x + (cell.hasLeft()? padding: 0);
-                x2 = width + x - (cell.hasRight()? padding: 0);
+                x2 = width + x - (cell.hasRight()? padding: 0) + m_coverCorrection;
                 painter->drawLine(x1, y1, x2, y2);
             }
             if (cell.hasLeft()) {
                 x1 = x2 = padding + x;
                 y1 = y + (cell.hasTop()? padding: 0);
-                y2 = height + y - (cell.hasBottom()? padding: 0);
+                y2 = height + y - (cell.hasBottom()? padding: 0) + m_coverCorrection;
                 painter->drawLine(x1, y1, x2, y2);
             }
             if (cell.hasRight()) {
-                x1 = x2 = width + x - padding;
+                x1 = x2 = width + x - padding + m_coverCorrection;
                 y1 = y + (cell.hasTop()? padding: 0);
-                y2 = height + y - (cell.hasBottom()? padding: 0);
+                y2 = height + y - (cell.hasBottom()? padding: 0) + m_coverCorrection;
                 painter->drawLine(x1, y1, x2, y2);
             }
         }
+    }
+
+    if (!m_valueStr.isEmpty()) {
+        painter->setPen(QPen(Qt::black, m_penSize));
+        painter->drawText(x, y, width, height, Qt::AlignCenter, m_valueStr);
     }
 }
 

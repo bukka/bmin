@@ -70,7 +70,7 @@ Formula *Kernel::getFormula() const
 // returns minimized formula
 Formula *Kernel::getMinimizedFormula() const
 {
-    return formula->isMinimized()? minFormula: 0;
+    return (formula && formula->isMinimized())? minFormula: 0;
 }
 
 // whether formula was set

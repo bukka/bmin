@@ -30,6 +30,7 @@
 
 class KMap;
 class KMapCellWidget;
+class Colors;
 class QGraphicsItem;
 class QGraphicsGridLayout;
 
@@ -44,8 +45,12 @@ public:
 
     void setMapData(KMap *data);
     void showCovers();
+    
+    const QColor &getColor(int pos, bool withAplpha = false);
 
 private:
+    void selectCover(const QModelIndexList &items, bool selected);
+
     bool m_showCovers;
     unsigned m_varsCount;
     unsigned m_rowsCount;
@@ -67,11 +72,14 @@ private:
     KMapLineVarsWidget *m_hVars;
     KMapBinaryVarsWidget *m_binVars;
 
+    Colors *m_colors;
+    Colors *m_colorsAlpha;
+
 public slots:
-    //void selectTerms(const QItemSelection &selected, const QItemSelection &deselected);
-    //void selectCovers(const QItemSelection &selected, const QItemSelection &deselected);
     void setMode(KMapHeadWidget::Mode mode);
     void enableCovers(bool show);
+    void selectTerms(const QItemSelection &selected, const QItemSelection &deselected);
+    void selectCovers(const QItemSelection &selected, const QItemSelection &deselected);
 
 };
 

@@ -22,12 +22,14 @@
 
 #include "kmapgridwidget.h"
 #include "kmapcellwidget.h"
+#include "colors.h"
 #include "guimanager.h"
 // kernel
 #include "kmap.h"
 #include "constants.h"
 
 #include <list>
+#include <algorithm>
 using namespace std;
 
 #include <QGraphicsGridLayout>
@@ -45,6 +47,9 @@ KMapGridWidget::KMapGridWidget(KMap *kmap, bool showCovers, QGraphicsItem *paren
     else
         m_mode = KMapHeadWidget::BINARY;
 
+    m_colors = new Colors(m_kmap->getCellsCount() / 2);
+    m_colorsAlpha = new Colors(m_kmap->getCellsCount() / 2, 50);
+
 
     m_map = new KMapCellWidget *[m_rowsCount];
     for (unsigned i = 0; i < m_rowsCount; i++)
@@ -59,6 +64,7 @@ KMapGridWidget::KMapGridWidget(KMap *kmap, bool showCovers, QGraphicsItem *paren
 
     for (unsigned i = 0; i < m_rowsCount; i++) {
         for (unsigned j = 0; j < m_colsCount; j++) {
+            m_map[i][j].setGrid(this);
             m_map[i][j].setWalls(i == 0 || i == 4, i == m_rowsCount - 1 || i == 3,
                                  j == 0 || j == 4, j == m_colsCount - 1 || j == 3);
             m_map[i][j].setIdx(kmap->getIdx(i, j));
@@ -105,6 +111,9 @@ KMapGridWidget::KMapGridWidget(KMap *kmap, bool showCovers, QGraphicsItem *paren
 
 KMapGridWidget::~KMapGridWidget()
 {
+    delete m_colors;
+    delete m_colorsAlpha;
+
     for (unsigned i = 0; i < KMap::MAX_ROWS; i++)
         delete [] m_map[i];
     delete [] m_map;
@@ -147,18 +156,27 @@ void KMapGridWidget::showCovers()
     list<KMapCover> *covers = m_kmap->getMinCovers();
     if (!covers)
         return;
-    else {
-        for (list<KMapCover>::iterator itCover = covers->begin(); itCover != covers->end(); itCover++) {
-            list<KMapCell> *cells = (*itCover).getCells();
-            int pos = 0;
-            for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
-                pos = m_map[(*itCell).getRow()][(*itCell).getCol()].addCover(*itCell, pos);
-            if (pos != 0) {
-                for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
-                    m_map[(*itCell).getRow()][(*itCell).getCol()].setLastCoverPos(pos);
-            }
+
+    int i = 0;
+    for (list<KMapCover>::iterator itCover = covers->begin(); itCover != covers->end(); itCover++) {
+        list<KMapCell> *cells = (*itCover).getCells();
+        int pos = 0;
+        for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++) {
+            (*itCell).setColor(i);
+            pos = m_map[(*itCell).getRow()][(*itCell).getCol()].addCover(*itCell, pos);
         }
+        if (pos != 0) {
+            for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++)
+                m_map[(*itCell).getRow()][(*itCell).getCol()].setLastCoverPos(pos);
+        }
+        i++; // next color
     }
+
+}
+
+const QColor &KMapGridWidget::getColor(int pos, bool withAlpha)
+{
+    return withAlpha? (*m_colorsAlpha)[pos]: (*m_colors)[pos];
 }
 
 void KMapGridWidget::setMode(KMapHeadWidget::Mode mode)
@@ -178,4 +196,52 @@ void KMapGridWidget::enableCovers(bool show)
 {
     m_showCovers = show;
     setMapData(m_kmap);
+}
+
+void KMapGridWidget::selectTerms(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    unsigned row, col;
+    QModelIndex index;
+
+    QModelIndexList items = selected.indexes();
+    foreach (index, items) {
+        m_kmap->getRowCol(index.model()->data(index, Qt::UserRole).toInt(), row, col);
+        m_map[row][col].setSelection(true);
+    }
+
+    items = deselected.indexes();
+    foreach (index, items) {
+        m_kmap->getRowCol(index.model()->data(index, Qt::UserRole).toInt(), row, col);
+        m_map[row][col].setSelection(false);
+    }
+    update();
+}
+
+void KMapGridWidget::selectCover(const QModelIndexList &items, bool selected)
+{
+    list<KMapCover> *covers = m_kmap->getMinCovers();
+    if (!covers)
+        return;
+
+    QModelIndex index;
+    foreach (index, items) {
+        KMapCover foundCover(index.model()->data(index, Qt::UserRole).toInt());
+        list<KMapCover>::iterator it = find(covers->begin(), covers->end(), foundCover);
+        if (it == covers->end())
+            return;
+        list<KMapCell> *cells = (*it).getCells();
+        for (list<KMapCell>::iterator itCell = cells->begin(); itCell != cells->end(); itCell++) {
+            unsigned row = (*itCell).getRow();
+            unsigned col = (*itCell).getCol();
+            m_map[row][col].selectCover(*itCell, selected);
+        }
+    }
+}
+
+void KMapGridWidget::selectCovers(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    selectCover(selected.indexes(), true);
+    selectCover(deselected.indexes(), false);
+
+    update();
 }

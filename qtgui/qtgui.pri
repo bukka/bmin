@@ -22,7 +22,8 @@ SOURCES += mainwindow.cpp \
     kmapgridwidget.cpp \
     kmapcellwidget.cpp \
     kmapheadwidget.cpp \
-    coversmodel.cpp
+    coversmodel.cpp \
+    colors.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -44,5 +45,6 @@ HEADERS += mainwindow.h \
     kmapgridwidget.h \
     kmapcellwidget.h \
     kmapheadwidget.h \
-    coversmodel.h
+    coversmodel.h \
+    colors.h
 RESOURCES += resources.qrc

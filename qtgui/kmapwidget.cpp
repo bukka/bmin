@@ -130,6 +130,10 @@ void KMapWidget::updateData()
                         m_kmap, m_coversCheckBox->isChecked());
                 connect(m_coversCheckBox, SIGNAL(toggled(bool)),
                         m_gridWidgets[m_varsCount], SLOT(enableCovers(bool)));
+                connect(m_termsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+                        m_gridWidgets[m_varsCount], SLOT(selectTerms(QItemSelection,QItemSelection)));
+                connect(m_coversView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+                        m_gridWidgets[m_varsCount], SLOT(selectCovers(QItemSelection,QItemSelection)));
             }
             m_gridWidgets[m_varsCount]->setMapData(m_kmap);
 

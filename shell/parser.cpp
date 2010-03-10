@@ -41,10 +41,7 @@ string Parser::termToString(const Term &term, const vector<char> &vars, PrintFor
             oss << '1';
     }
     else if (form == PF_POS || form == PF_SUM) {
-        bool brackets = term.getSize(false) > 1;
         bool first = true;
-        if (brackets)
-            oss << '(';
         for (unsigned i = 0; i < term.getSize(); i++) {
             if (!term[i].isMissing()) {
                 allMissing = false;
@@ -57,9 +54,7 @@ string Parser::termToString(const Term &term, const vector<char> &vars, PrintFor
                     oss << '\''; // negation
             }
         }
-        if (brackets)
-            oss << ')';
-        else if (allMissing)
+        if (allMissing)
             oss << '0';
     }
 
@@ -132,7 +127,14 @@ string Parser::formulaToString(PrintForm form, Formula *f)
                 first = false;
             else if (form == PF_SOP)
                 oss << ' ' << SYM_PLUS << ' ';
-            oss << termToString(f->itNext(), vars, form);
+
+            Term t = f->itNext();
+            bool bracket = (form == PF_POS && t.getSize(false) > 1);
+            if (bracket)
+                oss << '(';
+            oss << termToString(t, vars, form);
+            if (bracket)
+                oss << ')';
         }
     }
     

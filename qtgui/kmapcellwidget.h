@@ -27,6 +27,8 @@
 
 #include <QGraphicsWidget>
 
+class KMapGridWidget;
+
 // Class for cell in k-map
 class KMapCellWidget : public QGraphicsWidget
 {
@@ -37,13 +39,17 @@ public:
     static const qreal BORDER  = 2.0;
     static const int FONT_SIZE = 10;
     static const int PADDING   = 4;
+    static const int COVER_PEN = 2;
 
     KMapCellWidget(QGraphicsItem *parent = 0);
     void setWalls(bool top, bool bottom, bool left, bool right);
     void setValue(char value);
+    void setGrid(KMapGridWidget *grid) { m_grid = grid; }
+    void setSelection(bool selection) { m_selection = selection; }
     bool hasCoverPos(unsigned pos);
     unsigned addCover(KMapCell &cell, unsigned pos = 0);
     void setLastCoverPos(unsigned pos);
+    void selectCover(const KMapCell &cell, bool selected);
     void clearCover();
     inline void setIdx(int idx) { m_idx = idx; }
 
@@ -56,6 +62,8 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent *event);
 
 private:
+    KMapGridWidget *m_grid;
+
     // walls
     bool m_topWall;
     bool m_bottomWall;
@@ -67,6 +75,7 @@ private:
     int m_penSize;
     int m_wallSize;
     int m_cellSize;
+    int m_coverCorrection;
 
     std::list<KMapCell> m_covers;
 
@@ -78,6 +87,10 @@ private:
     QFont m_font;
     // cell index
     int m_idx;
+    // whether term is selected
+    bool m_selection;
+    // selection color
+    QBrush m_selectionBrush;
 
 signals:
     void cellValueChanged(int, OutputValue &);

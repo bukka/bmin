@@ -56,13 +56,14 @@ class KMapCover;
 class KMapCell
 {
 public:
-    static const int TOP     = 0x01;
-    static const int BOTTOM  = 0x02;
-    static const int LEFT    = 0x04;
-    static const int RIGHT   = 0x08;
-    static const int VISITED = 0x10;
+    static const int TOP      = 0x01;
+    static const int BOTTOM   = 0x02;
+    static const int LEFT     = 0x04;
+    static const int RIGHT    = 0x08;
+    static const int VISITED  = 0x10;
+    static const int SELECTED = 0x20;
 
-    KMapCell(unsigned row,  unsigned col, Term &t);
+    KMapCell(unsigned row,  unsigned col, unsigned idx, Term &t);
 
     Term getTerm() const { return term; }
     inline unsigned getRow() const { return mapRow; }
@@ -70,19 +71,25 @@ public:
 
     inline void setPos(unsigned pos) { position = pos; }
     inline unsigned getPos() const { return position; }
+    inline void setColor(int c) { color = c; }
+    inline unsigned getColor() const { return color; }
 
     inline bool hasFlag(int flag) const { return flags & flag; }
     inline bool hasTop() const { return hasFlag(TOP); }
     inline bool hasBottom() const { return hasFlag(BOTTOM); }
     inline bool hasLeft() const { return hasFlag(LEFT); }
     inline bool hasRight() const { return hasFlag(RIGHT); }
+    inline bool isSelected() const { return hasFlag(SELECTED); }
+    void setSelection(bool sel);
 
     bool operator<(const KMapCell &cell) const;
+    bool operator==(const KMapCell &cell) const;
 
     friend class KMapCover;
 
 private:
     inline void enableFlag(int flag) { flags |= flag; }
+    inline void disableFlag(int flag) { flags &= ~flag; }
     inline void visited() { return enableFlag(VISITED); }
     inline bool isVisited() const { return hasFlag(VISITED); }
 
@@ -92,16 +99,23 @@ private:
     unsigned mapRow;
     unsigned mapCol;
     unsigned position;
+    unsigned coverIndex;
+    int color;
 };
 
 class KMapCover
 {
 public:
-    KMapCover(Term &t, KMap *kmap);
+    KMapCover(unsigned idx) : index(idx) {}
+    KMapCover(unsigned idx, const Term &t, KMap *kmap);
 
     std::list<KMapCell> *getCells() { return &cells; }
+    inline unsigned getIndex() const { return index; }
+
+    bool operator==(const KMapCover &cover) { return cover.index == index; }
 private:
     std::list<KMapCell> cells;
+    unsigned index;
 };
 
 class KMap

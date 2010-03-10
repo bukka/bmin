@@ -57,23 +57,29 @@ int TermsModel::columnCount(const QModelIndex &parent) const
 
 QVariant TermsModel::data(const QModelIndex &index, int role) const
 {
-    if (!m_formula || !index.isValid() || role != Qt::DisplayRole)
+    if (!m_formula || !index.isValid())
         return QVariant();
 
-    try {
-        Parser::PrintForm form;
-        if (m_formula->getRepre() == Formula::REP_SOP)
-            form = Parser::PF_PROD;
-        else
-            form = Parser::PF_SUM;
+    if (role == Qt::DisplayRole) {
+        try {
+            Parser::PrintForm form;
+            if (m_formula->getRepre() == Formula::REP_SOP)
+                form = Parser::PF_PROD;
+            else
+                form = Parser::PF_SUM;
 
-        return QString::fromStdString(Parser::termToString(
-                Term(index.row(), m_formula->getVarsCount()), m_formula->getVars(), form));
+            return QString::fromStdString(Parser::termToString(
+                    Term(index.row(), m_formula->getVarsCount()), m_formula->getVars(), form));
 
+        }
+        catch (std::exception &) {
+            return QVariant();
+        }
     }
-    catch (std::exception &) {
+    else if (role == Qt::UserRole)
+        return index.row();
+    else
         return QVariant();
-    }
 
 }
 

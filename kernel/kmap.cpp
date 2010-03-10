@@ -59,11 +59,12 @@ int GreyCode::getIdx(int gc)
 
 
 // KMap CELL
-KMapCell::KMapCell(unsigned row,  unsigned col, Term &t)
+KMapCell::KMapCell(unsigned row,  unsigned col, unsigned idx, Term &t)
 {
     term = t;
     mapRow = row;
     mapCol = col;
+    coverIndex = idx;
     flags = 0;
     sortValue = (mapRow << 3) | mapCol;
 }
@@ -73,18 +74,33 @@ bool KMapCell::operator<(const KMapCell &cell) const
     return sortValue < cell.sortValue;
 }
 
+bool KMapCell::operator==(const KMapCell &cell) const
+{
+    return coverIndex == cell.coverIndex;
+}
+
+void KMapCell::setSelection(bool sel)
+{
+    if (sel)
+        enableFlag(SELECTED);
+    else
+        disableFlag(SELECTED);
+}
+
 
 // KMap COVER
 
-KMapCover::KMapCover(Term &t, KMap *kmap)
+KMapCover::KMapCover(unsigned idx, const Term &t, KMap *kmap)
 {
+    index = idx;
     list<Term> terms;
     Term::expandTerm(terms, t);
+
 
     unsigned row, col;
     for (list<Term>::iterator it = terms.begin(); it != terms.end(); it++) {
         kmap->getRowCol((*it).getIdx(), row, col);
-        cells.push_back(KMapCell(row, col, *it));
+        cells.push_back(KMapCell(row, col, index, *it));
     }
 
     cells.sort();
@@ -251,9 +267,8 @@ list<KMapCover> *KMap::getMinCovers()
         return 0;
 
     covers.clear();
-    minFormula->itInit();
-    while (minFormula->itHasNext())
-        covers.push_back(KMapCover(minFormula->itNext(), this));
+    for (unsigned i = 0; i < minFormula->getSize(); i++)
+        covers.push_back(KMapCover(i, minFormula->getTermAt(i), this));
 
     return &covers;
 }
