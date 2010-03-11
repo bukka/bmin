@@ -93,11 +93,23 @@ void Kernel::setFormula(Formula *f)
 {
     delete formula;
     formula = f;
-    emitEvent(evtFormulaChanged(f));
     if (minFormula) {
         delete minFormula;
         minFormula = 0;
     }
+    emitEvent(evtFormulaChanged(f));
+}
+
+// deletes formula and emits event
+void Kernel::removeFormula()
+{
+    delete formula;
+    formula = 0;
+    if (minFormula) {
+        delete minFormula;
+        minFormula = 0;
+    }
+    emitEvent(evtFormulaRemoved());
 }
 
 // minimizes actual formula - debug arg for qm

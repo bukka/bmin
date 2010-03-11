@@ -126,6 +126,14 @@ KMapGridWidget::~KMapGridWidget()
     delete m_vVars;
 }
 
+QRectF KMapGridWidget::boundingRect() const
+{
+    qreal width = m_colsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE;
+    qreal height = m_rowsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE;
+
+    return QRectF(0, 0, width, height);
+}
+
 
 void KMapGridWidget::setMapData(KMap *kmap)
 {

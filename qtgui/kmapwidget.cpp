@@ -50,6 +50,7 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_kernel = Kernel::instance();
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(invalidKMap()));
 
     m_active = false;
     m_varsCount = 0;
@@ -59,7 +60,8 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_gridWidgets = new KMapGridWidget *[KMap::MAX_VARS + 1];
     for (unsigned i = 0; i <= KMap::MAX_VARS; i++)
         m_gridWidgets[i] = 0;
-    m_mainItem = 0;
+    m_mainWidget = 0;
+    m_errorItem = 0;
 
     // scene
     m_scene = new QGraphicsScene;
@@ -119,52 +121,112 @@ void KMapWidget::setActivity(bool active)
         updateData();
 }
 
+void KMapWidget::invalidKMap(bool noFormula)
+{
+    m_varsCount = 0;
+
+    m_termsModel->clearFormula();
+    m_coversModel->clearFormula();
+
+    if (m_mainWidget) {
+        m_scene->removeItem(m_mainWidget);
+        disconnect(m_coversCheckBox, 0, m_mainWidget, 0);
+        disconnect(m_termsView->selectionModel(), 0, m_mainWidget, 0);
+        disconnect(m_coversView->selectionModel(), 0, m_mainWidget, 0);
+        m_mainWidget = 0;
+    }
+
+    QString msg;
+    if (noFormula)
+        msg = tr("No logic function for K-map.");
+    else {
+        msg = QString(tr("Too many varieble (max %1 variables).")).arg(
+                KMap::MAX_VARS);
+    }
+    m_errorItem = m_scene->addText(msg, QFont("monspace", 18));
+    m_scene->setSceneRect(m_errorItem->boundingRect());
+}
+
 void KMapWidget::updateData()
 {
     if (m_active) {
         m_kmap = m_kernel->getKMap();
+        if (!m_kmap->isValid()) {
+            invalidKMap(m_kmap->getError() == KMap::NO_FORMULA);
+            return;
+        }
+
+        m_termsModel->setFormula(m_gm->getFormula());
+        m_termsView->resizeRowsToContents();
+        m_termsView->setColumnWidth(0, m_termsView->width());
+
+        enableCovers(m_coversCheckBox->isChecked());
+
+        if (m_errorItem) {
+            m_scene->removeItem(m_errorItem);
+            m_errorItem = 0;
+        }
+
         if (m_varsCount != m_kmap->getVarsCount()) {
             m_varsCount = m_kmap->getVarsCount();
             if (!m_gridWidgets[m_varsCount]) {
                 m_gridWidgets[m_varsCount] = new KMapGridWidget(
                         m_kmap, m_coversCheckBox->isChecked());
-                connect(m_coversCheckBox, SIGNAL(toggled(bool)),
-                        m_gridWidgets[m_varsCount], SLOT(enableCovers(bool)));
-                connect(m_termsView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-                        m_gridWidgets[m_varsCount], SLOT(selectTerms(QItemSelection,QItemSelection)));
-                connect(m_coversView->selectionModel(), SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
-                        m_gridWidgets[m_varsCount], SLOT(selectCovers(QItemSelection,QItemSelection)));
+
             }
             m_gridWidgets[m_varsCount]->setMapData(m_kmap);
 
-            if (m_mainItem)
-                m_scene->removeItem(m_mainItem);
-            m_mainItem = m_gridWidgets[m_varsCount];
-            m_scene->addItem(m_mainItem);
+            if (m_mainWidget) {
+                m_scene->removeItem(m_mainWidget);
+                disconnect(m_coversCheckBox, 0, m_mainWidget, 0);
+                disconnect(m_termsView->selectionModel(), 0, m_mainWidget, 0);
+                disconnect(m_coversView->selectionModel(), 0, m_mainWidget, 0);
+            }
+            m_mainWidget = m_gridWidgets[m_varsCount];
+            m_scene->addItem(m_mainWidget);
+            m_scene->setSceneRect(m_mainWidget->boundingRect());
             m_view->update();
 
+            connect(m_coversCheckBox, SIGNAL(toggled(bool)),
+                    m_mainWidget, SLOT(enableCovers(bool)));
+            connect(m_termsView->selectionModel(),
+                    SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+                    m_mainWidget, SLOT(selectTerms(QItemSelection,QItemSelection)));
+            connect(m_coversView->selectionModel(),
+                    SIGNAL(selectionChanged(QItemSelection,QItemSelection)),
+                    m_mainWidget, SLOT(selectCovers(QItemSelection,QItemSelection)));
+
+            deselectAll(m_termsView, m_termsModel);
         }
         else if (m_gridWidgets[m_varsCount]) {
             m_gridWidgets[m_varsCount]->setMapData(m_kmap);
             m_gridWidgets[m_varsCount]->update();
         }
-        enableCovers(m_coversCheckBox->isChecked());
-
-        m_termsModel->setFormula(m_gm->getFormula());
-        m_termsView->resizeRowsToContents();
-        m_termsView->setColumnWidth(0, m_termsView->width());
     }
 
 }
 
 void KMapWidget::enableCovers(bool show)
 {
-    if (show) {
+    if (show && m_gm->isCorrectFormula()) {
         m_gm->minimizeFormula(false);
         m_coversModel->setFormula(m_gm->getMinimizedFormula());
         m_coversView->resizeRowsToContents();
         m_coversView->setColumnWidth(0, m_coversView->width());
+        deselectAll(m_coversView, m_coversModel);
     }
     else
         m_coversModel->clearFormula();
+}
+
+void KMapWidget::deselectAll(QTableView *view, const QAbstractItemModel *model)
+{
+    QModelIndex topIndex;
+    QModelIndex bottomIndex;
+
+    topIndex = model->index(0, 0, QModelIndex());
+    bottomIndex = model->index(model->rowCount() - 1, 0, QModelIndex());
+
+    QItemSelection selection(topIndex, bottomIndex);
+    view->selectionModel()->select(selection, QItemSelectionModel::Deselect);
 }

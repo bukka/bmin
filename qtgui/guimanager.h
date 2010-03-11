@@ -81,6 +81,7 @@ public:
 protected:
     virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
     virtual void evtFormulaChanged(Formula *f);
+    virtual void evtFormulaRemoved();
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
 

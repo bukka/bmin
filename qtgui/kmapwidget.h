@@ -37,6 +37,7 @@ class QLabel;
 class QCheckBox;
 class QListView;
 class QTableView;
+class QAbstractItemModel;
 class QGraphicsScene;
 class QGraphicsView;
 class QGraphicsGridLayout;
@@ -53,6 +54,8 @@ public:
     ~KMapWidget();
 
 private:
+    void deselectAll(QTableView *view, const QAbstractItemModel *model);
+
     GUIManager *m_gm;
     Kernel *m_kernel;
     KMap *m_kmap;
@@ -72,7 +75,9 @@ private:
 
     // MAIN
     // actual widget in scene
-    QGraphicsItem *m_mainItem;
+    KMapGridWidget *m_mainWidget;
+    //
+    QGraphicsItem *m_errorItem;
     // scene
     QGraphicsScene *m_scene;
     // view
@@ -84,6 +89,7 @@ private:
 public slots:
     void setActivity(bool active);
     void updateData();
+    void invalidKMap(bool noFormula = true);
 
 private slots:
     void enableCovers(bool show);

@@ -37,6 +37,8 @@ public:
     bool hasMinimizedFormula() const;
     // sets new actual formula
     void setFormula(Formula *f);
+    // clear formula
+    void removeFormula();
     // minimizes actual formula - debug arg for qm
     void minimizeFormula(bool debug = false);
     // deletes actual formula

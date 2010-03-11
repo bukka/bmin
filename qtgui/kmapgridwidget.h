@@ -47,6 +47,7 @@ public:
     void showCovers();
     
     const QColor &getColor(int pos, bool withAplpha = false);
+    QRectF boundingRect() const;
 
 private:
     void selectCover(const QModelIndexList &items, bool selected);

@@ -86,6 +86,13 @@ void GUIManager::evtFormulaChanged(Formula *f)
     emit formulaChanged();
 }
 
+void GUIManager::evtFormulaRemoved()
+{
+    m_isCorrect = false;
+    emit formulaInvalidated();
+    emit minFceChanged("");
+}
+
 void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
 {
     if (evt.isRun()) {
@@ -130,9 +137,7 @@ QuineMcCluskeyData *GUIManager::getQmData()
 
 void GUIManager::invalidate()
 {
-    emit formulaInvalidated();
-    emit minFceChanged("");
-    m_isCorrect = false;
+    m_kernel->removeFormula();
 }
 
 // by changing formula
