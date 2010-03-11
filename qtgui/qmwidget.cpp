@@ -104,8 +104,8 @@ void QmWidget::showHeader()
 
 void QmWidget::showNothing()
 {
-    m_textArea->insertHtml(QString("<br><h3 align=\"left\">%1</h3>").arg(
-            tr("The formula is unknown.")));
+    m_textArea->insertHtml(QString("<br><h3 align=\"center\">%1</h3>").arg(
+            tr("No logic function.")));
 }
 
 
@@ -118,7 +118,14 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
 
 void QmWidget::showData()
 {
-    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2>").arg(
+    if (m_data->isEmpty()) {
+        m_textArea->insertHtml(QString("<br><h3 align=\"center\">%1</h3><br>").arg(
+                QString(tr("Function is %1 (no terms for Quine-McCluskey algorithm).")).arg(
+                        m_data->isSoP()? tr("contradiction"): tr("tautology"))));
+        return;
+    }
+
+    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2><br>").arg(
             tr("Finding Prime Implicants ")));
 
     int columns = (m_data->getMaxMissings() * 2) + 3;

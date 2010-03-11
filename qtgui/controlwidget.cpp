@@ -41,16 +41,17 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 {
     m_gm = GUIManager::instance();
 
-    // change fce Min Label
+    // changing fce Min Label
     connect(m_gm, SIGNAL(minFceChanged(const QString &)),
             this, SLOT(setMinFce(const QString &)));
-    // change fce Line Edit
+    // changing fce Line Edit
     connect(m_gm, SIGNAL(fceChanged(const QString &)),
             this, SLOT(setFce(const QString &)));
     // sending fce when it is read
     connect(m_gm, SIGNAL(fceRead()), this, SLOT(sendFce()));
-    // change repre
+    // changing repre
     connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
+
     // emitte by changing fce
     connect(this, SIGNAL(fceChanged(const QString &)),
             m_gm, SLOT(setFormula(const QString &)));

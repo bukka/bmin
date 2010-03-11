@@ -47,6 +47,7 @@ MainWindow::MainWindow(QWidget *parent)
     // connection with guimanager
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(enableEditAct()));
+    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(enableEditAct()));
     connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
     connect(m_gm, SIGNAL(statusSet(QString,int)), this, SLOT(setStatusMsg(QString,int)));
     connect(m_gm, SIGNAL(exit()), this, SLOT(close()));

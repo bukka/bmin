@@ -76,7 +76,7 @@ QVariant TruthTableModel::headerData(int section, Qt::Orientation orientation, i
     else if (section == static_cast<int>(m_formula->getVarsCount() + 1))
         return QString(tr("Output"));
     else
-        return QString(m_formula->getVars()[section - 1]);
+        return QString(m_formula->getVars()[m_formula->getVarsCount() - section]);
 }
 
 

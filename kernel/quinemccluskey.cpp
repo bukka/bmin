@@ -22,6 +22,7 @@ QuineMcCluskeyData::QuineMcCluskeyData() : varsCount(0)
 
 void QuineMcCluskeyData::initImpls(int vars, bool sp)
 {
+    empty = false;
     varsCount = vars;
     maxMissings = 0;
     impls = vector<list<Term> >((vars + 1) * (vars + 1));
@@ -125,9 +126,13 @@ Formula *QuineMcCluskey::minimize(Formula *f, bool dbg)
     delete of;
     of = new Formula(*f, true);
     mf = new Formula(*of);
-    
-    findPrimeImplicants();
-    findFinalImplicants();
+
+    if (of->getSize() > 1 || (of->getSize() == 1 && dbg)) {
+        findPrimeImplicants();
+        findFinalImplicants();
+    }
+    else if (dbg)
+        data.setEmpty(of->getRepre() == Formula::REP_SOP);
 
     mf->setMinimized(true);
     f->setMinimized(true);

@@ -18,6 +18,8 @@ public:
     void initImpls(int vars, bool sp);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
 
+    void setEmpty(bool sp) { empty = true; sop = sp; }
+    bool isEmpty() { return empty; }
     bool isSoP() { return sop; }
     bool isCovered(int row, int col);
     void setCover(int row, int col);
@@ -38,6 +40,7 @@ private:
     inline int getImplsIdx(int missings, int explicits);
     inline int getCoverIdx(int row, int col);
 
+    bool empty;
     bool sop;
     int varsCount;
     int maxMissings;

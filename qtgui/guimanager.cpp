@@ -90,6 +90,7 @@ void GUIManager::evtFormulaRemoved()
 {
     m_isCorrect = false;
     emit formulaInvalidated();
+    emit fceChanged("");
     emit minFceChanged("");
 }
 
