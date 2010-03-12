@@ -128,8 +128,8 @@ KMapGridWidget::~KMapGridWidget()
 
 QRectF KMapGridWidget::boundingRect() const
 {
-    qreal width = m_colsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE;
-    qreal height = m_rowsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE;
+    qreal width = m_colsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE + 10;
+    qreal height = m_rowsCount * KMapCellWidget::SIZE + KMapHeadWidget::SIZE + 10;
 
     return QRectF(0, 0, width, height);
 }

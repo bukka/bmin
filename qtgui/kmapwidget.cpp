@@ -187,6 +187,7 @@ void KMapWidget::updateData()
             m_scene->setSceneRect(m_mainWidget->boundingRect());
             m_view->update();
 
+
             connect(m_coversCheckBox, SIGNAL(toggled(bool)),
                     m_mainWidget, SLOT(enableCovers(bool)));
             connect(m_termsView->selectionModel(),
@@ -198,9 +199,9 @@ void KMapWidget::updateData()
 
             deselectAll(m_termsView, m_termsModel);
         }
-        else if (m_gridWidgets[m_varsCount]) {
-            m_gridWidgets[m_varsCount]->setMapData(m_kmap);
-            m_gridWidgets[m_varsCount]->update();
+        else if (m_mainWidget) {
+            m_mainWidget->setMapData(m_kmap);
+            m_mainWidget->update();
         }
     }
 
