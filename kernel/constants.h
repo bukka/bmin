@@ -37,6 +37,8 @@
 
 #define KONSOLE_ONLY 0
 
+#define CUBE3D 0
+
 namespace Constants {
 
     // Version string

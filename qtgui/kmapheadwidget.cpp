@@ -199,9 +199,9 @@ void KMapDescWidget::paint(QPainter *painter, const QStyleOptionGraphicsItem *op
         for (unsigned i = 0; i < m_varsCount; i++, linePos -= LINE_SPACING) {
             if (m_code & (1 << i)) {
                 if (m_direction == HORIZONTAL)
-                    painter->drawLine(0, linePos, m_width, linePos);
+                    painter->drawLine(0, linePos, static_cast<int>(m_width), linePos);
                 else
-                    painter->drawLine(linePos, 0, linePos, m_height);
+                    painter->drawLine(linePos, 0, linePos, static_cast<int>(m_height));
             }
         }
     }

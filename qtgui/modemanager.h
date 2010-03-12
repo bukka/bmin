@@ -23,6 +23,8 @@
 #ifndef MODEMANAGER_H
 #define MODEMANAGER_H
 
+#include "constants.h"
+
 #include <QObject>
 #include <QList>
 
@@ -47,7 +49,7 @@ public:
     static const int ID_WELCOME = 0;
     static const int ID_KMAP    = 1;
     static const int ID_QM      = 2;
-#ifdef Q_WS_WIN
+#if CUBE3D
     static const int ID_CUBE    = 3;
 #endif
 
@@ -64,7 +66,7 @@ private:
     WelcomeWidget *m_welcome;
     KMapWidget *m_kmap;
     QmWidget *m_qm;
-#ifdef Q_WS_WIN
+#if CUBE3D
     CubeWidget *m_cube;
 #endif
     QList<ModuleWidget *> m_modules;
@@ -77,7 +79,7 @@ signals:
     void modeChanged(int);
     void kmapActivated(bool);
     void qmActivated(bool);
-#ifdef Q_WS_WIN
+#if CUBE3D
     void cubeActivated(bool);
 #endif
 };

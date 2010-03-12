@@ -35,7 +35,7 @@ KMapCellWidget::KMapCellWidget(QGraphicsItem *parent)
         : QGraphicsWidget(parent)
 {
     m_cellWidth = m_cellHeight = SIZE;
-    m_penSize = BORDER / 2;
+    m_penSize = static_cast<int>(BORDER / 2);
     m_cellSize = static_cast<int>(SIZE);
     m_wallSize = static_cast<int>(BORDER);
     m_coverCorrection = (COVER_PEN % 2)? 0: 1;

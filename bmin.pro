@@ -2,7 +2,7 @@
 
 TEMPLATE = app
 CONFIG += qt warn_on
-QT += opengl
+#QT += opengl
 
 TARGET = bmin
 SOURCES += main.cpp

@@ -48,7 +48,7 @@ ModeManager::ModeManager()
     m_modules << m_qm;
     connect(this, SIGNAL(qmActivated(bool)), m_qm, SLOT(setActivity(bool)));
 
-#ifdef Q_WS_WIN
+#if CUBE3D
     // Boolean n-cube
     m_cube = new CubeWidget(tr("Boolean n-Cube"), ID_CUBE);
     m_modules << m_cube;
@@ -77,7 +77,7 @@ void ModeManager::setMode(int modeId)
 {
     emit kmapActivated(modeId == ID_KMAP);
     emit qmActivated(modeId == ID_QM);
-#ifdef Q_WS_WIN
+#if CUBE3D
     emit cubeActivated(modeId == ID_CUBE);
 #endif
     emit modeChanged(modeId);
