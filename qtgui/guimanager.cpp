@@ -115,6 +115,11 @@ void GUIManager::evtExit()
 }
 
 
+void GUIManager::setMode(int mode)
+{
+    emit modeChanged(mode);
+}
+
 QString GUIManager::getActualFce()
 {
     emit fceRead();

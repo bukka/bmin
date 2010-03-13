@@ -3,8 +3,6 @@
 	
 # FEATURES ----------------------------------------------------------
 
-creating formula wizard
-rewrite K-map
 rewrite Cube (Qt 4.6 OpenGL framework)
 ASCII art - cube
 improving appearance - more icons and images...
@@ -31,6 +29,8 @@ shell programming language - special bytecode
    Quine-McCluskey debugging info ._/
    ASCII art - Quine-McCluskey, K-map
    treating products of sums ._/
+   creating formula dialog ._/
+   K-map rewritten ._/
 
 
 
@@ -60,6 +60,9 @@ shell programming language - special bytecode
 
 - creatordialog.cpp
   better handling of variables names (changing, completing)
+
+- welcomewidget.cpp
+  parametrized measuring
 
 ## ------------------------------------------------------------------
 # TESTING FCE -------------------------------------------------------

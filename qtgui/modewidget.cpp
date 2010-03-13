@@ -22,6 +22,7 @@
 
 #include "modewidget.h"
 #include "modemanager.h"
+#include "guimanager.h"
 #include "modulewidget.h"
 
 #include <QList>
@@ -103,18 +104,21 @@ QSize ModeTabBar::tabSizeHint(int index) const
 // ModeWidget constructor - bottom widget at main window
 ModeWidget::ModeWidget()
 {
+    GUIManager *gm = GUIManager::instance();
     ModeManager *mm = ModeManager::instance();
     QList<ModuleWidget *> modules = mm->getModules();
 
     m_tabBar = new ModeTabBar(modules.size());
     m_tabBar->setShape(QTabBar::RoundedEast);
     m_tabBar->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
-    connect(m_tabBar, SIGNAL(currentChanged(int)), mm, SLOT(setMode(int)));
+    connect(m_tabBar, SIGNAL(currentChanged(int)), gm, SLOT(setMode(int)));
 
     m_modes = new QStackedLayout;
-    connect(mm, SIGNAL(modeChanged(int)), m_modes, SLOT(setCurrentIndex(int)));
+    connect(gm, SIGNAL(modeChanged(int)), m_modes, SLOT(setCurrentIndex(int)));
+    connect(gm, SIGNAL(modeChanged(int)), m_tabBar, SLOT(setCurrentIndex(int)));
 
-    foreach (ModuleWidget *m, modules) {
+    ModuleWidget *m;
+    foreach (m, modules) {
         m_tabBar->insertTab(m->position(), m->name());
         m_modes->insertWidget(m->position(), m);
     }

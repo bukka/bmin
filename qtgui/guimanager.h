@@ -108,6 +108,8 @@ private:
     bool m_isSoP;
 
 public slots:
+    // set mode
+    void setMode(int mode);
     // minimization variables
     void minimizeFormula(bool debug = false);
     // changing formula
@@ -120,6 +122,8 @@ public slots:
     void setRepre(bool sop);
 
 signals:
+    // emitted when mode is changed
+    void modeChanged(int);
     // emitted when it is essential to change formula in the text field
     void fceChanged(const QString &);
     // emitted before formula is saved

@@ -34,6 +34,13 @@ class KMapWidget;
 class CubeWidget;
 class QmWidget;
 
+struct Mode {
+    Mode() : id(-1) {}
+    Mode(int i, const QString &n) : id(i), name(n) {}
+    int id;
+    QString name;
+};
+
 // mode manager class
 class ModeManager : public QObject
 {
@@ -44,6 +51,9 @@ public:
     static ModeManager *instance();
     // destroy instance method
     static void destroy();
+    // returns modes
+    static QList<Mode> modes();
+
 
     // modes' identifiers
     static const int ID_WELCOME = 0;
@@ -71,7 +81,7 @@ private:
 #endif
     QList<ModuleWidget *> m_modules;
 
-public slots:
+private slots:
     void setMode(int);
 
 signals:

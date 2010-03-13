@@ -24,22 +24,63 @@
 #define WELCOMEWIDGET_H
 
 #include "modulewidget.h"
+#include "QGraphicsWidget"
 
 class QPaintEvent;
+
+class WelcomeLink : public QGraphicsWidget
+{
+    Q_OBJECT
+
+public:
+    WelcomeLink(QAction *action, QGraphicsItem *parent = 0);
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+protected:
+    void mousePressEvent(QGraphicsSceneMouseEvent *event);
+    void hoverEnterEvent(QGraphicsSceneHoverEvent *event);
+    void hoverLeaveEvent(QGraphicsSceneHoverEvent *event);
+
+private:
+    bool m_isHover;
+    QAction *m_action;
+};
+
+class WelcomeBox : public QGraphicsWidget
+{
+    Q_OBJECT
+
+public:
+    // welcome box width
+    static const qreal BOX_W = 500.;
+    // welcome box height
+    static const qreal BOX_H = 300.;
+
+    static const int TEXT_BOX_H = 70;
+
+    WelcomeBox(QWidget *parentWidget, QGraphicsItem *parentItem = 0);
+
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget = 0);
+
+private:
+    QWidget *m_parentWidget;
+    int m_width;
+    int m_height;
+
+private slots:
+    void setMode();
+    void showAbout();
+
+signals:
+    void modeChanged(int);
+};
 
 class WelcomeWidget : public ModuleWidget
 {
 public:
     WelcomeWidget(const QString &name, int pos);
 
-protected:
-    void paintEvent(QPaintEvent *event);
-
-private:
-    // welcome box width
-    static const int BOX_W = 440;
-    // welcome box height
-    static const int BOX_H = 160;
 
 };
 

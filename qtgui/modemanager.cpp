@@ -21,6 +21,7 @@
  */
 
 #include "modemanager.h"
+#include "guimanager.h"
 #include "welcomewidget.h"
 #include "kmapwidget.h"
 #include "cubewidget.h"
@@ -34,6 +35,9 @@ ModeManager *ModeManager::s_instance = 0;
 // constructor - init modes
 ModeManager::ModeManager()
 {
+    GUIManager *gm = GUIManager::instance();
+    connect(gm, SIGNAL(modeChanged(int)), this, SLOT(setMode(int)));
+
     // welcome
     m_welcome = new WelcomeWidget(tr("Welcome"), ID_WELCOME);
     m_modules << m_welcome;
@@ -70,6 +74,19 @@ void ModeManager::destroy()
 {
     delete s_instance;
     s_instance = 0;
+}
+
+// returns all modes
+QList<Mode> ModeManager::modes()
+{
+    QList<Mode> modesList;
+    modesList << Mode(ID_WELCOME, tr("Welcome"));
+    modesList << Mode(ID_KMAP, tr("Karnaugh Map"));
+    modesList << Mode(ID_QM, tr("Quine-McCluskey"));
+#if CUBE3D
+    modesList << Mode(ID_CUBE, tr("Boolean n-Cube"));
+#endif
+    return modesList;
 }
 
 // set mode

@@ -124,6 +124,8 @@ void KMapWidget::setActivity(bool active)
 void KMapWidget::invalidKMap(bool noFormula)
 {
     m_varsCount = 0;
+    if (m_errorItem)
+        return;
 
     m_termsModel->clearFormula();
     m_coversModel->clearFormula();
@@ -183,6 +185,7 @@ void KMapWidget::updateData()
                 disconnect(m_coversView->selectionModel(), 0, m_mainWidget, 0);
             }
             m_mainWidget = m_gridWidgets[m_varsCount];
+            m_mainWidget->enableCovers(m_coversCheckBox->isChecked());
             m_scene->addItem(m_mainWidget);
             m_scene->setSceneRect(m_mainWidget->boundingRect());
             m_view->update();
