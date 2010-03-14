@@ -26,6 +26,10 @@
 #include <QLabel>
 #include <QPushButton>
 #include <QDialogButtonBox>
+#include <QTabWidget>
+#include <QTextEdit>
+#include <QFile>
+#include <QTextStream>
 
 // AboutDilog constructor - show dialog
 AboutDialog::AboutDialog(QWidget *parent)
@@ -34,25 +38,57 @@ AboutDialog::AboutDialog(QWidget *parent)
     setWindowTitle(tr("About Bmin"));
     setWindowFlags(windowFlags() & ~Qt::WindowContextHelpButtonHint);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    QVBoxLayout *layout = new QVBoxLayout;
     layout->setSizeConstraint(QLayout::SetFixedSize);
 
+    QTabWidget *tabs = new QTabWidget;
     // dialog text
     QString desc = tr(
-            "<h3>Bmin</h3>"
+            "<h3 align=\"center\">Bmin</h3>"
             "Boolean minimizer<br/><br/>"
             "Version: %1<br/>"
             "Copyright 2007-2010 Jakub Zelenka<br/><br/>"
             ).arg(Constants::VERSION);
 
+
     QLabel *descLabel = new QLabel(desc);
     descLabel->setWordWrap(true);
+    descLabel->setAlignment(Qt::AlignTop);
     descLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
+
+    QTextEdit *licenseEdit = new QTextEdit;
+    licenseEdit->setFont(QFont("Times", 10));
+    licenseEdit->setReadOnly(true);
+    licenseEdit->setMinimumWidth(500);
+    QFile gplFile(":/data/gpl.txt");
+    if (gplFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QTextStream in(&gplFile);
+        QString data = in.readAll();
+        licenseEdit->insertPlainText(data);
+    }
+    else
+        licenseEdit->insertPlainText(tr("No license file"));
+
+    QString licenseDesc(tr("Bmin is free software under GPL 3:"));
+    QLabel *licenseLabel = new QLabel(licenseDesc);
+    licenseLabel->setBuddy(licenseEdit);
+
+    QVBoxLayout *licenseLayout = new QVBoxLayout;
+    licenseLayout->addWidget(licenseLabel);
+    licenseLayout->addWidget(licenseEdit);
+
+    QWidget *licenseWidget = new QWidget;
+    licenseWidget->setLayout(licenseLayout);
+
+    tabs->addTab(descLabel, tr("About"));
+    tabs->addTab(licenseWidget, tr("License"));
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Close);
     connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    layout->addWidget(descLabel);
+    layout->addWidget(tabs);
     layout->addWidget(buttonBox);
     layout->setAlignment(buttonBox, Qt::AlignCenter);
+
+    setLayout(layout);
 }
