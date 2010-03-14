@@ -48,6 +48,7 @@ QmWidget::QmWidget(const QString &name, int pos)
     m_gm = GUIManager::instance();
 
     connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(setMinimizedData()));
+    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(setMinimizedData()));
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
 
     m_textArea = new QTextEdit;
@@ -55,6 +56,13 @@ QmWidget::QmWidget(const QString &name, int pos)
     m_textArea->setLineWrapMode(QTextEdit::NoWrap);
     m_textArea->setReadOnly(true);
     m_textArea->setUndoRedoEnabled(false);
+
+    QString cssStyle("h1 { font-size: xx-large; font-weight: normal;"
+                     "     margin-top: 10px; margin-left: 10px; margin-right-10px;}"
+                     "h2 { font-size: x-large; font-weight: normal;  }"
+                     "h3 { font-size: x-large; font-weight: normal;"
+                     "     margin-left: 10px; margin-right-10px;}");
+    m_textArea->document()->setDefaultStyleSheet(cssStyle);
 
     // set layout
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -98,6 +106,7 @@ void QmWidget::setMinimizedData()
 void QmWidget::showHeader()
 {
     m_textArea->clear();
+    m_textArea->setAlignment(Qt::AlignLeft);
     m_textArea->insertHtml(QString("<h1 align=\"center\">%1</h1>").arg(
             tr("Quine-McCluskey Algorithm")));
 }
@@ -125,7 +134,7 @@ void QmWidget::showData()
         return;
     }
 
-    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2><br>").arg(
+    m_textArea->insertHtml(QString("<br><h2>%1</h2>").arg(
             tr("Finding Prime Implicants ")));
 
     int columns = (m_data->getMaxMissings() * 2) + 3;
@@ -197,7 +206,7 @@ void QmWidget::showData()
 
 
     // Table
-    m_textArea->insertHtml(QString("<br><h2 align=\"center\">%1</h2>").arg(
+    m_textArea->insertHtml(QString("<br><h2>%1</h2>").arg(
             tr("Prime Implicants Table")));
 
     vector<Term> *headRow = m_data->getCoverHeadRow();
@@ -216,6 +225,7 @@ void QmWidget::showData()
                 setCell(table, i, j, "X");
         }
     }
+    m_textArea->insertHtml("<br>");
 }
 
 
