@@ -66,7 +66,7 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 
     m_fceLine = new QLineEdit(m_prevFce);
     connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
-    QLabel *fceLabel = new QLabel(tr("Normal &form:"));
+    QLabel *fceLabel = new QLabel(tr("Normal &form: "));
     fceLabel->setBuddy(m_fceLine);
 
     m_newText = tr("&New...");
@@ -76,7 +76,7 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     
     m_minFceLine = new QLineEdit(m_prevFce);
     m_minFceLine->setReadOnly(true);
-    QLabel *minFceLabel = new QLabel(tr("Minima&l form:"));
+    QLabel *minFceLabel = new QLabel(tr("Minima&l form: "));
     minFceLabel->setBuddy(m_minFceLine);
 
     QGridLayout *fceLayout = new QGridLayout;
