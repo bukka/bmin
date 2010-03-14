@@ -54,6 +54,7 @@ AboutDialog::AboutDialog(QWidget *parent)
     QLabel *descLabel = new QLabel(desc);
     descLabel->setWordWrap(true);
     descLabel->setAlignment(Qt::AlignTop);
+    descLabel->setContentsMargins(20, 5, 20, 20);
     descLabel->setTextInteractionFlags(Qt::TextSelectableByMouse);
 
     QTextEdit *licenseEdit = new QTextEdit;
