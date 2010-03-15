@@ -49,6 +49,7 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(invalidKMap()));
+    connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
 
     m_active = false;
     m_varsCount = 0;
@@ -74,10 +75,9 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_termsView->setShowGrid(false);
     m_termsView->horizontalHeader()->hide();
     m_termsView->setMaximumWidth(220);
-    m_termsStr = tr("Terms");
     m_mintermsStr = tr("Minterms");
     m_maxtermsStr = tr("Maxterms");
-    m_termsLabel = new QLabel(m_termsStr);
+    m_termsLabel = new QLabel(m_gm->isSoP()? m_mintermsStr: m_maxtermsStr);
     m_termsLabel->setContentsMargins(3, 5, 5, 0);
     m_termsLabel->setBuddy(m_termsView);
 
@@ -119,11 +119,20 @@ void KMapWidget::setActivity(bool active)
         updateData();
 }
 
+void KMapWidget::setRepre(bool isSoP)
+{
+    m_termsLabel->setText(isSoP? m_mintermsStr: m_maxtermsStr);
+}
+
 void KMapWidget::invalidKMap(bool noFormula)
 {
     m_varsCount = 0;
-    if (m_errorItem)
-        return;
+    if (m_errorItem) {
+        if (m_errorItem->data(1).toBool() == noFormula)
+            return;
+        else
+            m_scene->removeItem(m_errorItem);
+    }
 
     m_termsModel->clearFormula();
     m_coversModel->clearFormula();
@@ -140,10 +149,11 @@ void KMapWidget::invalidKMap(bool noFormula)
     if (noFormula)
         msg = tr("No logic function for K-map.");
     else {
-        msg = QString(tr("Too many varieble (max %1 variables).")).arg(
+        msg = QString(tr("Too many variebles (max %1 variables).")).arg(
                 KMap::MAX_VARS);
     }
     m_errorItem = m_scene->addText(msg, QFont("monspace", 18));
+    m_errorItem->setData(1, noFormula);
     m_scene->setSceneRect(m_errorItem->boundingRect());
 }
 

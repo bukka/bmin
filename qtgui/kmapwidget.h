@@ -86,6 +86,7 @@ private:
 
 public slots:
     void setActivity(bool active);
+    void setRepre(bool isSoP);
     void updateData();
     void invalidKMap(bool noFormula = true);
 

@@ -197,8 +197,15 @@ void GUIManager::setTerm(int idx, OutputValue &value)
 // changes representation mode
 void GUIManager::setRepre(bool sop)
 {
-    m_isSoP = sop;
-    m_kernel->setRepre(sop? Formula::REP_SOP: Formula::REP_POS);
+    if (m_isSoP == sop)
+        return;
+    if (!m_kernel->hasFormula()) {
+        m_isSoP = sop;
+        emit repreChanged(sop);
+    }
+    else
+        m_kernel->setRepre(sop? Formula::REP_SOP: Formula::REP_POS);
+
 }
 
 // NEW FORMULA
