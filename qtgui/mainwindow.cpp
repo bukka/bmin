@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
 {
     setWindowTitle(tr("Bmin"));
+    setWindowIcon(QIcon(":/icon.png"));
     statusBar()->showMessage(tr("Welcome to Bmin"), MSG_TIMEOUT);;
 
     // connection with guimanager

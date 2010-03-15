@@ -61,7 +61,7 @@ AboutDialog::AboutDialog(QWidget *parent)
     licenseEdit->setFont(QFont("Times", 10));
     licenseEdit->setReadOnly(true);
     licenseEdit->setMinimumWidth(500);
-    QFile gplFile(":/data/gpl.txt");
+    QFile gplFile(":/gpl.txt");
     if (gplFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
         QTextStream in(&gplFile);
         QString data = in.readAll();
