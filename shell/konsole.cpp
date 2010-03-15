@@ -106,16 +106,18 @@ void Konsole::evtHelp()
     out << "  NAME(VARS) = sum m(IDXS) [ sum d(IDXS) ]" << endl;
     out << "    NAME: one letter" << endl;
     out << "    VARS: one letter or sequence of more letters separated by comma" << endl;
-    out << "    NAME: one number or sequence of more numbers separated by comma" << endl;
+    out << "    IDXS: one number or sequence of more numbers separated by comma" << endl;
     out << "    Example: f(c,b,a) = sum m(1,2,4) + sum d(0)" << endl;
     out << "COMMAND: " << endl;
-    out << "  minimize    minimizing fce" << endl;
     out << "  exit        exit Bmin" << endl;
+    out << "  minimize    minimizing fce" << endl;
+    out << "  sop         set Sum of Products representation" << endl;
+    out << "  pos         set Product of Sums representation" << endl;
     out << "  show ARG" << endl;
     out << "    ARG:" << endl;
     out << "      qm      show prime and cover table of Quine-McCluskey algorithm" << endl;
-    out << "      map     show Karnaugh map" << endl;
-    out << "      cube    show Boolean n-Cube" << endl;
+    out << "      kmap    show Karnaugh map" << endl;
+    //out << "      cube    show Boolean n-Cube" << endl;
     out << "      NAME    show function which name is NAME (empty NAME means current fce)" << endl;
 }
 

@@ -297,9 +297,9 @@ void AsciiArt::showKMap(KMap *kmap)
 {
     if (!kmap->isValid()) {
         if (kmap->getError() == KMap::NO_FORMULA)
-            maxError(os, MSG_MAX_VARS_KMAP, KMap::MAX_VARS);
-        else
             *os << MSG_NO_DATA << endl;
+        else
+            maxError(os, MSG_MAX_VARS_KMAP, KMap::MAX_VARS);
         return;
     }
     if (kmap->getColsVarsCount() > MAX_KMAP_TOP_VARS || kmap->getRowsVarsCount() > MAX_KMAP_SIDE_VARS) {
