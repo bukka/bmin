@@ -34,6 +34,8 @@
 #include <QMessageBox>
 #include <QStyle>
 #include <QStatusBar>
+#include <QDir>
+#include <QFileDialog>
 
 // main window class
 MainWindow::MainWindow(QWidget *parent)
@@ -85,39 +87,49 @@ MainWindow::~MainWindow()
 void MainWindow::createActions()
 {
     m_newAction = new QAction(tr("&New..."), this);
-    m_newAction->setShortcut(tr("Ctrl+N"));
-    m_newAction->setStatusTip(tr("Create new formula"));
+    m_newAction->setShortcut(QString("Ctrl+N"));
+    m_newAction->setStatusTip(tr("Create new function"));
     connect(m_newAction, SIGNAL(triggered()), this, SLOT(newFormula()));
 
     m_editAction = new QAction(tr("&Edit..."), this);
-    m_editAction->setShortcut(tr("Ctrl+E"));
-    m_editAction->setStatusTip(tr("Create new formula"));
+    m_editAction->setShortcut(QString("Ctrl+E"));
+    m_editAction->setStatusTip(tr("Create new function"));
     m_editAction->setEnabled(m_gm->isCorrectFormula());
     connect(m_editAction, SIGNAL(triggered()), this, SLOT(editFormula()));
 
+    m_openAction = new QAction(tr("&Open..."), this);
+    m_openAction->setShortcut(QString("Ctrl+O"));
+    m_openAction->setStatusTip(tr("Open formula PLA file"));
+    connect(m_openAction, SIGNAL(triggered()), this, SLOT(openFormula()));
+
     m_loadAction = new QAction(tr("&Load"), this);
-    m_loadAction->setShortcut(tr("Ctrl+L"));
-    m_loadAction->setStatusTip(tr("Open a formula"));
+    m_loadAction->setShortcut(QString("Ctrl+L"));
+    m_loadAction->setStatusTip(tr("Load function"));
     connect(m_loadAction, SIGNAL(triggered()), this, SLOT(loadFormula()));
 
     m_saveAction = new QAction(tr("&Save"), this);
-    m_saveAction->setShortcut(tr("Ctrl+S"));
-    m_saveAction->setStatusTip(tr("Save the formula to disk"));
+    m_saveAction->setShortcut(QString("Ctrl+S"));
+    m_saveAction->setStatusTip(tr("Save function to disk"));
     connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveFormula()));
 
+    m_saveAsAction = new QAction(tr("&Save As..."), this);
+    m_saveAsAction->setShortcut(QString("Ctrl+Shift+S"));
+    m_saveAsAction->setStatusTip(tr("Save function to PLA file"));
+    connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsFormula()));
+
     m_exitAction = new QAction(tr("E&xit"), this);
-    m_exitAction->setShortcut(tr("Ctrl+Q"));
+    m_exitAction->setShortcut(QString("Ctrl+Q"));
     m_exitAction->setStatusTip(tr("Exit the Bmin"));
     connect(m_exitAction, SIGNAL(triggered()), this, SLOT(close()));
 
     m_aboutAction = new QAction(tr("&About Bmin"), this);
-    //m_aboutAction->setShortcut(tr("Ctrl+A"));
+    m_aboutAction->setShortcut(QString("Ctrl+A"));
     m_aboutAction->setStatusTip(tr("Show the Bmin About box"));
     connect(m_aboutAction, SIGNAL(triggered()), this, SLOT(about()));
 
     /*
     m_helpAction = new QAction(tr("Bmin &Help"), this);
-    m_helpAction->setShortcut(tr("Ctrl+H"));
+    m_helpAction->setShortcut(QString("Ctrl+H"));
     m_helpAction->setStatusTip(tr("Show the Bmin Help"));
     connect(m_helpAction, SIGNAL(triggered()), this, SLOT(help()));
     */
@@ -129,8 +141,10 @@ void MainWindow::createMenus()
     m_fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileMenu->addAction(m_newAction);
     m_fileMenu->addAction(m_editAction);
+    m_fileMenu->addAction(m_openAction);
     m_fileMenu->addAction(m_loadAction);
     m_fileMenu->addAction(m_saveAction);
+    m_fileMenu->addAction(m_saveAsAction);
     m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_exitAction);
 
@@ -192,6 +206,7 @@ void MainWindow::editFormula()
         m_gm->activateNewFormula();
 }
 
+
 // load from settings
 void MainWindow::loadFormula()
 {
@@ -213,6 +228,20 @@ void MainWindow::saveFormula()
     }
     else
         showError(tr("Formula is invalid!"));
+}
+
+// open from PLA file
+void MainWindow::openFormula()
+{
+    QString fileName = QFileDialog::getOpenFileName(this, tr("Open Function..."), QString(),
+                       tr("PLA format (*.pla);;All files (*.*)"));
+    showInfo(fileName);
+}
+
+// save to PLA file
+void MainWindow::saveAsFormula()
+{
+
 }
 
 /*

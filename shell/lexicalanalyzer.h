@@ -92,7 +92,7 @@ public:
 
     LexicalAnalyzer();
 
-    void analyze(std::string &str);
+    void analyze(const std::string &str);
 
     Token readToken() throw(ShellExc);
     inline Token getToken() const { return token; }

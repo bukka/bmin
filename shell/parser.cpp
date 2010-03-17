@@ -20,7 +20,9 @@
 
 #include "parser.h"
 #include "lexicalanalyzer.h"
+#include "plaformat.h"
 #include "shellexc.h"
+
 
 // kernel
 #include "kernel.h"
@@ -31,7 +33,7 @@
 #include "literalvalue.h"
 
 #include <string>
-#include <iostream>
+#include <fstream>
 #include <sstream>
 #include <list>
 #include <set>
@@ -161,8 +163,31 @@ string Parser::formulaToString(PrintForm form, Formula *f)
     return oss.str();
 }
 
+// PLA format parsing
+void Parser::parsePLA(const string &fileName)
+{
+    ifstream fin;
+    fin.open(fileName.c_str());
+    try {
+        if (fin.is_open()) {
+            PLAFormat pla(fin);
+            //kernel->setFormula(new Formula(
+             //       pla.inputs, pla.fceName, Formula::REP_SOP,
+               //     &pla.vars, &pla.onSet, &pla.offSet));
+        }
+        else
+            throw FileExc(fileName);
+    }
+    catch (exception &exc) {
+        kernel->error(exc);
+    }
+}
 
-void Parser::parse(std::string str)
+
+
+// parse command line
+
+void Parser::parse(const std::string &str)
 {
     lex.analyze(str);
 
@@ -457,4 +482,5 @@ inline CommandExc Parser::commandExc()
 {
     return CommandExc(lex.getCommandName(), CommandExc::CONTEXT, lex.getCol());
 }
+
 

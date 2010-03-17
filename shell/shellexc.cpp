@@ -112,3 +112,54 @@ const char *OptionsExc::what() const throw()
 
     return oss.str().c_str();
 }
+
+const char *PLAExc::what() const throw()
+{
+    ostringstream oss;
+    oss << "PLA file: ";
+
+    switch (error) {
+    case SYNTAX:
+        oss << "Invalid syntax at line " << line << " at position " << pos;
+        break;
+    case VAR_NAME:
+        oss << "Invalid variable name (only one character is permitted).";
+        break;
+    case VAR_COUNT:
+        oss << "Invalid variable count.";
+        break;
+    case FCE_NAME:
+        oss << "Invalid output funtion name (only one character is permitted).";
+        break;
+    case FCE_COUNT:
+        oss << "Invalid number of outputs (only single value is permitted).";
+        break;
+    case TERM_FORMAT:
+        oss << "Invalid term format.";
+        break;
+    case TERMS_COUNT:
+        oss << "Invalid terms count.";
+        break;
+    case TYPE:
+        oss << "Invalid type.";
+        break;
+    case OPTION:
+        oss << "Unknown option.";
+        break;
+    case MANDATORY:
+        oss << "One of mandatory options (.o and .i) wasn't set.";
+        break;
+    default:
+        oss << "Unknown error";
+    }
+    return oss.str().c_str();
+}
+
+const char *FileExc::what() const throw()
+{
+    string s;
+    s += "File ";
+    s += fileName;
+    s += " cannot be opened.";
+    return s.c_str();
+}

@@ -58,9 +58,33 @@ Term::Term(int idx, unsigned s, bool isDC)
 }
 
 // constructor - internal usage
-Term::Term(term_t lit, term_t miss, unsigned size, bool isDC)
+Term::Term(term_t lit, term_t miss, unsigned s, bool isDC)
 {
-    init(lit, miss, size, isDC);
+    init(lit, miss, s, isDC);
+}
+
+// constructor - from string
+Term::Term(const std::string &str, unsigned s) throw(InvalidTermExc)
+{
+    if (s && str.size() != s)
+        throw InvalidTermExc(str.size(), s);
+
+    liters = missing = 0;
+    term_t pos = 1;
+    try {
+        for (unsigned i = str.size(); i > 0; i--, pos <<= 1) {
+            LiteralValue val(str[i-1]);
+            if (val.isMissing())
+                missing |= pos;
+            else if (val.isOne())
+                liters |= pos;
+        }
+    }
+    catch (InvalidValueExc &exc) {
+        throw InvalidTermExc(str);
+    }
+
+    init(liters, missing, str.size(), false);
 }
 
 // sets certain flag

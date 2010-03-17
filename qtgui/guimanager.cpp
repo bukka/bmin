@@ -208,6 +208,19 @@ void GUIManager::setRepre(bool sop)
 
 }
 
+
+// loads fce from PLA file
+void GUIManager::loadPLAfile(const QString &fileName)
+{
+    m_parser->parsePLA(fileName.toStdString());
+}
+
+// saves fce to PLA file
+void GUIManager::savePLAfile(const QString &)
+{
+
+}
+
 // NEW FORMULA
 
 // sets new formula

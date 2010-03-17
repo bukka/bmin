@@ -21,6 +21,8 @@
 #ifndef OUTPUTVALUE_H
 #define OUTPUTVALUE_H
 
+#include "kernelexc.h"
+
 #include <string>
 
 class OutputValue
@@ -34,7 +36,7 @@ public:
     static OutputValue getNextValue(const OutputValue &ov);
 
     OutputValue(int v = UNDEFINED) : value(v) {}
-    OutputValue(char ch);
+    OutputValue(char ch) throw(InvalidValueExc);
 
     inline int getValue() const { return value; }
 

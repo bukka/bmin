@@ -49,8 +49,10 @@ private:
     // menu actions
     QAction *m_newAction;
     QAction *m_editAction;
+    QAction *m_openAction;
     QAction *m_loadAction;
     QAction *m_saveAction;
+    QAction *m_saveAsAction;
     QAction *m_exitAction;
     QAction *m_aboutAction;
     //QAction *m_helpAction;
@@ -87,8 +89,10 @@ private slots:
     // FILE
     void newFormula();
     void editFormula();
+    void openFormula();
     void loadFormula();
     void saveFormula();
+    void saveAsFormula();
     // HELP
     //void help();
     void about();

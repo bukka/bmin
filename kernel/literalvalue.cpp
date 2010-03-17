@@ -34,6 +34,35 @@ LiteralValue LiteralValue::getNextValue(const LiteralValue &lv)
     }
 }
 
+LiteralValue::LiteralValue(char c) throw(InvalidValueExc)
+{
+    switch (c) {
+    case '0':
+        value = ZERO;
+        break;
+    case '1':
+        value = ONE;
+        break;
+    case '-':
+        value = MISSING;
+        break;
+    default:
+        throw InvalidValueExc(value);
+    }
+}
+
+char LiteralValue::toChar() const
+{
+    switch (value) {
+    case ZERO:
+        return '0';
+    case ONE:
+        return '1';
+    default: // missing value
+        return '-';
+    }
+}
+
 std::string LiteralValue::toString() const
 {
     switch (value) {

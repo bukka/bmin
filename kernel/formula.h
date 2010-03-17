@@ -69,8 +69,9 @@ public:
     static const unsigned MAX_VARS      = 10;
 
     // Constructors
-    Formula(unsigned vc, char fn = DEFAULT_NAME, Repre r = DEFAULT_REP,
-            const std::vector<char> *v = 0, std::vector<Term> *t = 0)
+    Formula(unsigned vc, char fn = DEFAULT_NAME, Repre rep = DEFAULT_REP,
+            const std::vector<char> *v = 0,
+            std::vector<Term> *f = 0, std::vector<Term> *r = 0)
             throw(InvalidVarsExc, InvalidTermExc);
     Formula(const FormulaSpec *spec, const FormulaDecl *decl)
             throw(InvalidVarsExc, InvalidIndexExc);

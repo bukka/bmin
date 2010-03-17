@@ -72,8 +72,13 @@ const char *InvalidPositionExc::what() const throw()
 const char *InvalidTermExc::what() const throw()
 {
     ostringstream outstr;
-    outstr << "Invalid Term: number of variables in term: "
-            << nSet << " (required: " << nReq << ")";
+    outstr << "Invalid Term: ";
+    if (termStr.empty()) {
+        outstr << "number of variables in term: "
+                << nSet << " (required: " << nReq << ")";
+    }
+    else
+        outstr << "bad initializing string: " << termStr;
 
     return outstr.str().c_str();
 }
@@ -88,5 +93,13 @@ const char *InvalidIndexExc::what() const throw()
         oss << " (it cannot be negative number)";
     else
         oss << " (it's too big)";
+    return oss.str().c_str();
+}
+
+// statement of InvalidIndexExc
+const char *InvalidValueExc::what() const throw()
+{
+    ostringstream oss;
+    oss << "Invalid value " << value;
     return oss.str().c_str();
 }

@@ -3,18 +3,19 @@
 	
 # FEATURES ----------------------------------------------------------
 
+PLA format
 rewrite Cube (Qt 4.6 OpenGL framework)
 ASCII art - cube
+espresso
+settings: last open dir, kmap covers and lines, sop
+speed up debugging of Quine-McCluskey
+vars redundant name checking
 improving appearance - more icons and images...
 algorithm testing interface - measure time
 more containers - comparing, testing
 optimize Quine-McCluskey algorithm
-speed up debugging of Quine-McCluskey
-espresso
-improve 3D cube - new dimension
 better error (exception) information
 better behavior of parsing fce - idx precedence (diff to old formula)
-vars redundant name checking
 Quine-McCluskey widget improvement - Model & View
 more formulas
 inlining short functions

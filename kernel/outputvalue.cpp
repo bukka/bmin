@@ -22,7 +22,7 @@
 
 #include <string>
 
-OutputValue::OutputValue(char ch)
+OutputValue::OutputValue(char ch) throw(InvalidValueExc)
 {
     switch (ch) {
     case '0':
@@ -31,8 +31,11 @@ OutputValue::OutputValue(char ch)
     case '1':
         value = ONE;
         break;
-    default:
+    case 'X':
         value = DC;
+        break;
+    default:
+        throw InvalidValueExc(value);
     }
 }
 

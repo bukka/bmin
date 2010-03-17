@@ -149,7 +149,7 @@ void KMapWidget::invalidKMap(bool noFormula)
     if (noFormula)
         msg = tr("No logic function for K-map.");
     else {
-        msg = QString(tr("Too many variebles (max %1 variables).")).arg(
+        msg = QString(tr("Too many variables (max %1 variables).")).arg(
                 KMap::MAX_VARS);
     }
     m_errorItem = m_scene->addText(msg, QFont("monspace", 18));

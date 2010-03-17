@@ -69,21 +69,42 @@ void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
 }
 
 // gets terms from vector t
-Formula::Formula(unsigned vs, char fn, Repre r, const vector<char> *v, std::vector<Term> *t)
+Formula::Formula(unsigned vs, char fn, Repre rep, const vector<char> *v,
+                 vector<Term> *f, vector<Term> *r)
         throw(InvalidVarsExc, InvalidTermExc)
 {
-    init(vs, v, fn, r);
+    init(vs, v, fn, rep);
 
-    if (!t || t->size() == 0) {// t is empty
+    if (!f || !r || (f->size() == 0 && r->size() == 0)) {// t is empty
         terms->touch();
         return;
     }
 
-    for (unsigned i = 1; i < t->size(); i++) {
-        if (t->at(i).getSize() != vs) // check correct size of term
-            throw InvalidTermExc(t->at(i).getSize(), varsCount);
+    for (unsigned i = 1; i < f->size(); i++) {
+        if (f->at(i).getSize() != vs) // check correct size of term
+            throw InvalidTermExc(f->at(i).getSize(), varsCount);
     }
-    terms->setContainer(*t);
+    for (unsigned i = 0; i < r->size(); i++) {
+        if (r->at(i).getSize() != vs) // check correct size of term
+            throw InvalidTermExc(r->at(i).getSize(), varsCount);
+    }
+
+    vector<Term> complement;
+    if (rep == Formula::REP_SOP) {
+        terms->setContainer(*f);
+        terms->getMaxterms(complement);
+    }
+    else {
+        terms->setContainer(*r);
+        terms->getMinterms(complement);
+    }
+
+    for (unsigned i = 0; i < complement.size(); i++) {
+        if (find(r->begin(), r->end(), complement[i]) == r->end()) { // not in r
+            complement[i].setDC(true);
+            terms->pushTerm(complement[i]);
+        }
+    }
 }
 
 Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl)

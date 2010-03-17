@@ -55,7 +55,9 @@ public:
     // constructor - makes the variables array with size s by index idx
     Term(int idx, unsigned s, bool isDC = false);
     // constructor - internal usage
-    Term(term_t lit, term_t miss, unsigned size, bool isDC = false);
+    Term(term_t lit, term_t miss, unsigned s, bool isDC = false);
+    // constructor - from string
+    Term(const std::string &str, unsigned s = 0) throw(InvalidTermExc);
 
     // sets certain flag
     void setFlag(int flag, bool is);

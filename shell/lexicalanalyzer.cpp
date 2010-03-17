@@ -68,7 +68,7 @@ const char *LexicalAnalyzer::getCommandName(Command cmd) const
     }
 }
 
-void LexicalAnalyzer::analyze(string &str)
+void LexicalAnalyzer::analyze(const string &str)
 {
     col = 0;
     readNext = true;

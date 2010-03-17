@@ -23,12 +23,12 @@
 
 #include <exception>
 #include <vector>
-
+#include <string>
 
 class KernelExc : public std::exception
 {
 public:
-    enum Type { VARS, POSITION, TERM, INDEX };
+    enum Type { VARS, POSITION, TERM, INDEX, VALUE };
 
     KernelExc() {}
 
@@ -70,12 +70,17 @@ private:
 // invalid format of inserted term (bad count of variables)
 class InvalidTermExc : public KernelExc
 {
-    int nSet;
-    int nReq;
 public:
+    InvalidTermExc(const std::string &str) : termStr(str) {}
     InvalidTermExc(int ns, int nr) : KernelExc(), nSet(ns), nReq(nr) {}
+    virtual ~InvalidTermExc() throw() {}
     virtual Type getType() { return TERM; }
     const char * what() const throw();
+
+private:
+    int nSet;
+    int nReq;
+    std::string termStr;
 };
 
 // invalid index in formula
@@ -88,6 +93,18 @@ public:
 
 private:
     int index;
+};
+
+// invalid value (literal or output)
+class InvalidValueExc : public KernelExc
+{
+public:
+    InvalidValueExc(char val) : KernelExc(), value(val) {}
+    virtual Type getType() { return VALUE; }
+    const char *what() const throw();
+
+private:
+    char value;
 };
 
 

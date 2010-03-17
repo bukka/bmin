@@ -21,6 +21,8 @@
 #ifndef LITERALVALUE_H
 #define LITERALVALUE_H
 
+#include "kernelexc.h"
+
 #include <string>
 
 class LiteralValue
@@ -33,6 +35,7 @@ public:
     static LiteralValue getNextValue(const LiteralValue &lv);
 
     LiteralValue(int v) : value(v) {}
+    LiteralValue(char c) throw(InvalidValueExc);
 
     inline int getValue() const { return value; }
     LiteralValue getNextValue() const;
@@ -45,6 +48,7 @@ public:
 
     bool operator==(const LiteralValue & val) const { return val.getValue() == value; }
 
+    char toChar() const;
     std::string toString() const;
 
  private:

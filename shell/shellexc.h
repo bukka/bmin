@@ -22,6 +22,7 @@
 #define SHELLEXC_H
 
 #include <exception>
+#include <string>
 
 class ShellExc : public std::exception
 {
@@ -108,6 +109,43 @@ private:
     char abbr;
     char *name;
     Type type;
+};
+
+class PLAExc : public std::exception
+{
+public:
+    enum Error {
+        NO_ERROR,
+        SYNTAX,
+        VAR_NAME,
+        VAR_COUNT,
+        FCE_NAME,
+        FCE_COUNT,
+        TERM_FORMAT,
+        TERMS_COUNT,
+        TYPE,
+        OPTION,
+        MANDATORY
+    };
+
+    PLAExc(Error err, int l = -1, int p = -1) : error(err), line(l), pos(p) {}
+    const char *what() const throw();
+
+private:
+    Error error;
+    int line;
+    int pos;
+};
+
+class FileExc : public std::exception
+{
+public:
+    FileExc(const std::string &fn) : fileName(fn) {}
+    virtual ~FileExc() throw() {}
+
+    const char *what() const throw();
+private:
+    std::string fileName;
 };
 
 #endif // SHELLEXC_H

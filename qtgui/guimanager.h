@@ -60,6 +60,11 @@ public:
     // whether formula has Sum of Products representation
     bool isSoP() const { return m_isSoP; }
 
+    // loads fce from PLA file
+    void loadPLAfile(const QString &);
+    // saves fce to PLA file
+    void savePLAfile(const QString &);
+
     // NEW FORMULA
     // sets new formula
     Formula *setNewFormula(Formula *formula);
