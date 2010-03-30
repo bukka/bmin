@@ -117,15 +117,19 @@ public:
     enum Error {
         NO_ERROR,
         SYNTAX,
+        BODY,
         VAR_NAME,
         VAR_COUNT,
         FCE_NAME,
         FCE_COUNT,
         TERM_FORMAT,
         TERMS_COUNT,
+        OUTPUT_FORMAT,
+        OUTPUTS_COUNT,
         TYPE,
         OPTION,
-        MANDATORY
+        MANDATORY_OUTPUT,
+        MANDATORY_INPUT,
     };
 
     PLAExc(Error err, int l = -1, int p = -1) : error(err), line(l), pos(p) {}
@@ -140,6 +144,11 @@ private:
 class FileExc : public std::exception
 {
 public:
+    enum Error {
+        NOT_FOUND
+
+    };
+
     FileExc(const std::string &fn) : fileName(fn) {}
     virtual ~FileExc() throw() {}
 

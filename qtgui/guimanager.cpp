@@ -102,6 +102,11 @@ void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
     }
 }
 
+void GUIManager::evtFormulasSet(unsigned count)
+{
+    emit formulasSet(count);
+}
+
 void GUIManager::evtError(std::exception &exc)
 {
     emit errorInvoked(exc.what());
@@ -186,6 +191,11 @@ void GUIManager::minimizeFormula(bool debug)
         m_kernel->minimizeFormula(debug);
 }
 
+void GUIManager::selectFormula(unsigned id)
+{
+    m_kernel->selectFormula(id);
+}
+
 // changes term in formula
 void GUIManager::setTerm(int idx, OutputValue &value)
 {
@@ -216,9 +226,9 @@ void GUIManager::loadPLAfile(const QString &fileName)
 }
 
 // saves fce to PLA file
-void GUIManager::savePLAfile(const QString &)
+void GUIManager::savePLAfile(const QString &fileName)
 {
-
+    m_parser->createPLA(fileName.toStdString());
 }
 
 // NEW FORMULA
@@ -251,7 +261,7 @@ void GUIManager::activateNewFormula()
 {
     if (m_newFormula) {
         Formula *f = new Formula(*m_newFormula);
-        m_kernel->deleteFomula();
+        m_kernel->deleteFormula();
         m_kernel->setFormula(f);
     }
 }

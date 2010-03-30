@@ -57,12 +57,18 @@ public:
     bool hasMinimizedFormula() const;
     // sets new actual formula
     void setFormula(Formula *f);
+    // sets more formulas
+    void setFormulas(const std::vector<Formula *> &fs);
+    // selectes one formula from formulas and sets it as actual
+    void selectFormula(unsigned i);
     // clear formula
     void removeFormula();
     // minimizes actual formula - debug arg for qm
     void minimizeFormula(bool debug = false);
     // deletes actual formula
-    void deleteFomula();
+    void deleteFormula();
+    // deletes formulas container
+    void deleteFormulas();
 
     // sets value of term with idx in actual formula
     void setTermValue(int idx, OutputValue val);
@@ -75,6 +81,8 @@ public:
 
     // sets represatation of logic function
     void setRepre(Formula::Repre rep);
+    // returns repre
+    Formula::Repre getRepre() { return repre; }
 
     // returns debugging data from Quine-McCluskey
     QuineMcCluskeyData *getQmData();
@@ -110,6 +118,8 @@ private:
 
     Formula *formula;     // original formula
     Formula *minFormula;  // minimized formula
+
+    std::vector<Formula *> formulas; // formulas container
 
     // Quine-McCluskey algorithm class
     QuineMcCluskey *qm;

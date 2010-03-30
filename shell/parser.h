@@ -56,7 +56,9 @@ public:
     Parser();
 
     void parse(const std::string &str);
+
     void parsePLA(const std::string &fileName);
+    void createPLA(const std::string &fileName);
 
 private:
     Kernel *kernel;

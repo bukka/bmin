@@ -69,17 +69,13 @@ void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
 }
 
 // gets terms from vector t
-Formula::Formula(unsigned vs, char fn, Repre rep, const vector<char> *v,
-                 vector<Term> *f, vector<Term> *r)
+Formula::Formula(unsigned vs, char fn, Repre rep, const vector<char> *v)
         throw(InvalidVarsExc, InvalidTermExc)
 {
     init(vs, v, fn, rep);
 
-    if (!f || !r || (f->size() == 0 && r->size() == 0)) {// t is empty
         terms->touch();
-        return;
-    }
-
+/*
     for (unsigned i = 1; i < f->size(); i++) {
         if (f->at(i).getSize() != vs) // check correct size of term
             throw InvalidTermExc(f->at(i).getSize(), varsCount);
@@ -104,7 +100,7 @@ Formula::Formula(unsigned vs, char fn, Repre rep, const vector<char> *v,
             complement[i].setDC(true);
             terms->pushTerm(complement[i]);
         }
-    }
+    }*/
 }
 
 Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl)
@@ -210,6 +206,13 @@ void Formula::setTermValue(int idx, OutputValue val) throw(InvalidIndexExc)
         throw InvalidIndexExc(idx);
 
     if (terms->setTermValue(idx, val))
+        minimized = false;
+}
+
+// sets term t to value
+void Formula::setTermValue(const Term &t, OutputValue val)
+{
+    if (terms->setTermValue(t, val))
         minimized = false;
 }
 

@@ -48,8 +48,8 @@ public:
 
     bool operator==(const OutputValue & val) const { return val.getValue() == value; }
 
-    std::string toString() const;
-    char toChar() const;
+    std::string toString(bool crossDC = true) const;
+    char toChar(bool crossDC = true) const;
 
  private:
     int value;

@@ -57,6 +57,8 @@ public:
     bool hasTerm(const Term &t) const;
     // sets value of term with idx
     bool setTermValue(int idx, OutputValue val);
+    // sets value of term t
+    bool setTermValue(const Term &t, OutputValue val);
     // returns value of term with idx
     OutputValue getTermValue(int idx) const;
     // returns term at position pos

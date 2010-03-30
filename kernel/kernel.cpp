@@ -62,8 +62,8 @@ Kernel::Kernel()
 
 Kernel::~Kernel()
 {
-    delete formula;
-    delete minFormula;
+    deleteFormula();
+    deleteFormulas();
     delete kmap;
 }
 
@@ -111,24 +111,34 @@ bool Kernel::hasMinimizedFormula() const
 // sets new actual formula
 void Kernel::setFormula(Formula *f)
 {
-    delete formula;
+    deleteFormula();
     formula = f;
-    if (minFormula) {
-        delete minFormula;
-        minFormula = 0;
-    }
     emitEvent(evtFormulaChanged(f));
+}
+
+// sets more formulas
+void Kernel::setFormulas(const std::vector<Formula *> &fs)
+{
+    if (fs.size() == 1)
+        setFormula(fs[0]);
+    else if (fs.size() > 1) {
+        deleteFormulas();
+        formulas = fs;
+        emitEvent(evtFormulasSet(fs.size()));
+    }
+}
+
+// selectes one formula from formulas and sets it as actual
+void Kernel::selectFormula(unsigned i)
+{
+    if (i <= formulas.size())
+        setFormula(new Formula(*formulas[i], true));
 }
 
 // deletes formula and emits event
 void Kernel::removeFormula()
 {
-    delete formula;
-    formula = 0;
-    if (minFormula) {
-        delete minFormula;
-        minFormula = 0;
-    }
+    deleteFormula();
     emitEvent(evtFormulaRemoved());
 }
 
@@ -154,10 +164,23 @@ void Kernel::minimizeFormula(bool debug)
 }
 
 // deletes actual formula
-void Kernel::deleteFomula()
+void Kernel::deleteFormula()
 {
     delete formula;
     formula = 0;
+    if (minFormula) {
+        delete minFormula;
+        minFormula = 0;
+    }
+}
+
+
+// deletes all formulas
+void Kernel::deleteFormulas()
+{
+    for (unsigned i = 0; i < formulas.size(); i++)
+        delete formulas[i];
+    formulas.clear();
 }
 
 // returns debugging data from Quine-McCluskey

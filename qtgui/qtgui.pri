@@ -3,10 +3,9 @@ INCLUDEPATH += $$PWD
 DEPENDPATH += $$PWD
 SOURCES += mainwindow.cpp \
     guimanager.cpp \
-    controlwidget.cpp \
-#    cubewidget.cpp \
-#    cubegldrawer.cpp \
-#    cubeglconf.cpp \
+    controlwidget.cpp \ # cubewidget.cpp \
+# cubegldrawer.cpp \
+# cubeglconf.cpp \
     welcomewidget.cpp \
     modewidget.cpp \
     modulewidget.cpp \
@@ -23,13 +22,13 @@ SOURCES += mainwindow.cpp \
     kmapcellwidget.cpp \
     kmapheadwidget.cpp \
     coversmodel.cpp \
-    colors.cpp
+    colors.cpp \
+    pladialog.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
-    controlwidget.h \
-#    cubewidget.h \
-#    cubegldrawer.h \
-#    cubeglconf.h \
+    controlwidget.h \ # cubewidget.h \
+# cubegldrawer.h \
+# cubeglconf.h \
     welcomewidget.h \
     modewidget.h \
     modulewidget.h \
@@ -46,5 +45,6 @@ HEADERS += mainwindow.h \
     kmapcellwidget.h \
     kmapheadwidget.h \
     coversmodel.h \
-    colors.h
+    colors.h \
+    pladialog.h
 RESOURCES += resources.qrc

@@ -1,6 +1,9 @@
 # object files
 *.o
 
+# pla files
+*.pla
+
 # moc files
 moc_*
 

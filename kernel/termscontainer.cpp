@@ -146,7 +146,7 @@ bool TermsContainer::removeTerm(const Term &t)
     return false;
 }
 
-bool TermsContainer::hasTerm(const Term & t) const
+bool TermsContainer::hasTerm(const Term &t) const
 {
     if (termsVector->empty() || termsVector->at(0).getSize() != t.getSize())
         return false;
@@ -161,6 +161,19 @@ bool TermsContainer::setTermValue(int idx, OutputValue val)
         return pushTerm(idx, false);
     else
         return removeTerm(idx);
+}
+
+bool TermsContainer::setTermValue(const Term &t, OutputValue val)
+{
+    if (val.isDC() && !t.isDC()) {
+        Term tNew = t;
+        tNew.setDC(true);
+        return pushTerm(tNew);
+    }
+    else if (val.isDC() || (val.isOne() && ttype == MINTERMS) || (val.isZero() && ttype == MAXTERMS))
+        return pushTerm(t);
+    else
+        return removeTerm(t);
 }
 
 OutputValue TermsContainer::getTermValue(int idx) const

@@ -22,37 +22,39 @@
 #define PLAFORMAT_H
 
 #include "shellexc.h"
-// kernel
-#include "../kernel/term.h"
 
 #include <istream>
 #include <vector>
 #include <exception>
 
+class Formula;
+class Term;
 
 class PLAFormat
 {
 public:
+    static void create(std::ostream &os, Formula *formula);
+
     PLAFormat(std::istream &is) throw(PLAExc);
 
     std::vector<Term> terms;
 
     std::vector<char> inputNames;
     std::vector<char> outputNames;
+    std::vector<Formula *> formulas;
 
     int termsCount;
     int inputs;
     int outputs;
-    char fceName;
 
 private:
     // trim spaces, tabs and comments
     void trim(std::string &str);
 
-    bool isEndAfter(std::string &str, size_t pos = 0);
-    int getNextInt(std::string &str, size_t *ppos = 0,
+    bool isEndAfter(std::string &str, size_t &pos);
+    int getNextInt(std::string &str, size_t &pos,
                    PLAExc::Error err = PLAExc::SYNTAX) throw(PLAExc);
-    char getNextChar(std::string &str, size_t *ppos = 0,
+    char getNextChar(std::string &str, size_t &pos,
                      PLAExc::Error err = PLAExc::SYNTAX) throw(PLAExc);
 
     size_t offset;

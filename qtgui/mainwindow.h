@@ -50,9 +50,9 @@ private:
     QAction *m_newAction;
     QAction *m_editAction;
     QAction *m_openAction;
-    QAction *m_loadAction;
-    QAction *m_saveAction;
     QAction *m_saveAsAction;
+    QAction *m_loadAction;
+    QAction *m_storeAction;
     QAction *m_exitAction;
     QAction *m_aboutAction;
     //QAction *m_helpAction;
@@ -72,6 +72,9 @@ private:
     GUIManager *m_gm;
 
 public slots:
+    // selects formula from opened formulas
+    void selectFormula(unsigned count);
+
     // status bar msg
     void setStatusMsg(const QString &msg, int timeout);
 
@@ -91,14 +94,14 @@ private slots:
     void editFormula();
     void openFormula();
     void loadFormula();
-    void saveFormula();
+    void storeFormula();
     void saveAsFormula();
     // HELP
     //void help();
     void about();
 
     // enabling or disabling edit action
-    void enableEditAct();
+    void enableActs();
 
 };
 

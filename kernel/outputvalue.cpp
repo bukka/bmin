@@ -32,6 +32,8 @@ OutputValue::OutputValue(char ch) throw(InvalidValueExc)
         value = ONE;
         break;
     case 'X':
+    case '-':
+    case '2':
         value = DC;
         break;
     default:
@@ -51,7 +53,7 @@ OutputValue OutputValue::getNextValue(const OutputValue &ov)
     }
 }
 
-std::string OutputValue::toString() const
+std::string OutputValue::toString(bool crossDC) const
 {
     switch (value) {
     case ZERO:
@@ -59,11 +61,11 @@ std::string OutputValue::toString() const
     case ONE:
         return "1";
     default: // dont care value
-        return "X";
+        return  crossDC? "X": "-";
     }
 }
 
-char OutputValue::toChar() const
+char OutputValue::toChar(bool crossDC) const
 {
     switch (value) {
     case ZERO:
@@ -71,6 +73,6 @@ char OutputValue::toChar() const
     case ONE:
         return '1';
     default: // dont care value
-        return 'X';
+        return crossDC? 'X': '-';
     }
 }

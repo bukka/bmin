@@ -66,7 +66,7 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 
     m_fceLine = new QLineEdit(m_prevFce);
     connect(m_fceLine, SIGNAL(editingFinished()), this, SLOT(sendFce()));
-    QLabel *fceLabel = new QLabel(tr("Normal &form: "));
+    QLabel *fceLabel = new QLabel(tr("&Complete form: "));
     fceLabel->setBuddy(m_fceLine);
 
     m_newText = tr("&New...");

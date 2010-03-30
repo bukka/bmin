@@ -85,6 +85,7 @@ protected:
     virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
     virtual void evtFormulaChanged(Formula *f);
     virtual void evtFormulaRemoved();
+    virtual void evtFormulasSet(unsigned count);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
 
@@ -119,6 +120,8 @@ public slots:
     void setFormula(const QString &);
     // updating formula - the same like setFormule and fceChanged is emitted
     void updateFormula(const QString &);
+    // selects formula from formulas
+    void selectFormula(unsigned id);
     // changes term in formula
     void setTerm(int idx, OutputValue &);
     // changes representation mode
@@ -140,6 +143,8 @@ signals:
     void formulaMinimized();
     // emitted when user sets invalid formula string
     void formulaInvalidated();
+    // emitted when formulas are set
+    void formulasSet(unsigned);
     // emitted when representation is changed
     void repreChanged(bool);
     // emitted when status msg is set

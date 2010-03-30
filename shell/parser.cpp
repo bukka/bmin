@@ -163,7 +163,7 @@ string Parser::formulaToString(PrintForm form, Formula *f)
     return oss.str();
 }
 
-// PLA format parsing
+// parsing PLA file
 void Parser::parsePLA(const string &fileName)
 {
     ifstream fin;
@@ -171,9 +171,7 @@ void Parser::parsePLA(const string &fileName)
     try {
         if (fin.is_open()) {
             PLAFormat pla(fin);
-            //kernel->setFormula(new Formula(
-             //       pla.inputs, pla.fceName, Formula::REP_SOP,
-               //     &pla.vars, &pla.onSet, &pla.offSet));
+            kernel->setFormulas(pla.formulas);
         }
         else
             throw FileExc(fileName);
@@ -183,9 +181,36 @@ void Parser::parsePLA(const string &fileName)
     }
 }
 
+// creating PLA file
+void Parser::createPLA(const string &fileName)
+{
+    if (!kernel->hasFormula())
+        return;
 
+    ofstream fout;
+    fout.open(fileName.c_str());
+    try {
+        if (fout.is_open()) {
+            bool pos = kernel->getRepre() == Formula::REP_POS;
+            if (pos)
+                kernel->setRepre(Formula::REP_SOP);
 
-// parse command line
+            Formula *formula = kernel->hasMinimizedFormula()?
+                               kernel->getMinimizedFormula(): kernel->getFormula();
+            PLAFormat::create(fout, formula);
+
+            if (pos)
+                kernel->setRepre(Formula::REP_POS);
+        }
+        else
+            throw FileExc(fileName);
+    }
+    catch (exception &exc) {
+        kernel->error(exc);
+    }
+}
+
+// Parse Command Line
 
 void Parser::parse(const std::string &str)
 {

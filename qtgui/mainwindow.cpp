@@ -25,6 +25,7 @@
 #include "constants.h"
 #include "aboutdialog.h"
 #include "creatordialog.h"
+#include "pladialog.h"
 
 #include <QSettings>
 #include <QMenu>
@@ -47,8 +48,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     // connection with guimanager
     m_gm = GUIManager::instance();
-    connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(enableEditAct()));
-    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(enableEditAct()));
+    connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(enableActs()));
+    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(enableActs()));
+    connect(m_gm, SIGNAL(formulasSet(uint)), this, SLOT(selectFormula(uint)));
     connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
     connect(m_gm, SIGNAL(statusSet(QString,int)), this, SLOT(setStatusMsg(QString,int)));
     connect(m_gm, SIGNAL(exit()), this, SLOT(close()));
@@ -102,20 +104,23 @@ void MainWindow::createActions()
     m_openAction->setStatusTip(tr("Open formula PLA file"));
     connect(m_openAction, SIGNAL(triggered()), this, SLOT(openFormula()));
 
+    m_saveAsAction = new QAction(tr("&Save As..."), this);
+    m_saveAsAction->setShortcut(QString("Ctrl+S"));
+    m_saveAsAction->setStatusTip(tr("Save function to PLA file"));
+    m_saveAsAction->setEnabled(m_gm->isCorrectFormula());
+    connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsFormula()));
+
     m_loadAction = new QAction(tr("&Load"), this);
     m_loadAction->setShortcut(QString("Ctrl+L"));
     m_loadAction->setStatusTip(tr("Load function"));
+    m_loadAction->setEnabled(!m_settings.value("formula", QString()).isNull());
     connect(m_loadAction, SIGNAL(triggered()), this, SLOT(loadFormula()));
 
-    m_saveAction = new QAction(tr("&Save"), this);
-    m_saveAction->setShortcut(QString("Ctrl+S"));
-    m_saveAction->setStatusTip(tr("Save function to disk"));
-    connect(m_saveAction, SIGNAL(triggered()), this, SLOT(saveFormula()));
-
-    m_saveAsAction = new QAction(tr("&Save As..."), this);
-    m_saveAsAction->setShortcut(QString("Ctrl+Shift+S"));
-    m_saveAsAction->setStatusTip(tr("Save function to PLA file"));
-    connect(m_saveAsAction, SIGNAL(triggered()), this, SLOT(saveAsFormula()));
+    m_storeAction = new QAction(tr("S&tore"), this);
+    m_storeAction->setShortcut(QString("Ctrl+W"));
+    m_storeAction->setStatusTip(tr("Save function to disk"));
+    m_storeAction->setEnabled(m_gm->isCorrectFormula());
+    connect(m_storeAction, SIGNAL(triggered()), this, SLOT(storeFormula()));
 
     m_exitAction = new QAction(tr("E&xit"), this);
     m_exitAction->setShortcut(QString("Ctrl+Q"));
@@ -141,16 +146,26 @@ void MainWindow::createMenus()
     m_fileMenu = menuBar()->addMenu(tr("&File"));
     m_fileMenu->addAction(m_newAction);
     m_fileMenu->addAction(m_editAction);
+    m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_openAction);
-    m_fileMenu->addAction(m_loadAction);
-    m_fileMenu->addAction(m_saveAction);
     m_fileMenu->addAction(m_saveAsAction);
+    m_fileMenu->addSeparator();
+    m_fileMenu->addAction(m_loadAction);
+    m_fileMenu->addAction(m_storeAction);
     m_fileMenu->addSeparator();
     m_fileMenu->addAction(m_exitAction);
 
     m_helpMenu = menuBar()->addMenu(tr("&Help"));
     //m_helpMenu->addAction(m_helpAction);
     m_helpMenu->addAction(m_aboutAction);
+}
+
+// selects formula from opened formulas
+void MainWindow::selectFormula(unsigned count)
+{
+    PLADialog *dialog = new PLADialog(count, this);
+    connect(dialog, SIGNAL(formulaSelected(uint)), m_gm, SLOT(selectFormula(uint)));
+    dialog->show();
 }
 
 // shows status bar msg
@@ -211,8 +226,10 @@ void MainWindow::editFormula()
 void MainWindow::loadFormula()
 {
     QString value = m_settings.value("formula", QString()).toString();
-    if (value.isEmpty())
+    if (value.isEmpty()) {
+        m_loadAction->setEnabled(false);
         showWarning(tr("No formula was saved."));
+    }
     else {
         m_gm->updateFormula(value);
         statusBar()->showMessage(tr("Formula was loaded."), MSG_TIMEOUT);
@@ -220,11 +237,12 @@ void MainWindow::loadFormula()
 }
 
 // save to settings
-void MainWindow::saveFormula()
+void MainWindow::storeFormula()
 {
     if (m_gm->isCorrectFormula()) {
         m_settings.setValue("formula", m_gm->getActualFce());
-        statusBar()->showMessage(tr("Formula was saved."), MSG_TIMEOUT);
+        m_loadAction->setEnabled(true);
+        statusBar()->showMessage(tr("Formula was stored."), MSG_TIMEOUT);
     }
     else
         showError(tr("Formula is invalid!"));
@@ -235,13 +253,15 @@ void MainWindow::openFormula()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Function..."), QString(),
                        tr("PLA format (*.pla);;All files (*.*)"));
-    showInfo(fileName);
+    m_gm->loadPLAfile(fileName);
 }
 
 // save to PLA file
 void MainWindow::saveAsFormula()
 {
-
+    QString fileName = QFileDialog::getSaveFileName(this, tr("Save Function..."), QString(),
+                                tr("PLA format (*.pla)"));
+    m_gm->savePLAfile(fileName);
 }
 
 /*
@@ -259,7 +279,9 @@ void MainWindow::about()
 }
 
 // enabling or disabling edit action
-void MainWindow::enableEditAct()
+void MainWindow::enableActs()
 {
     m_editAction->setEnabled(m_gm->isCorrectFormula());
+    m_saveAsAction->setEnabled(m_gm->isCorrectFormula());
+    m_storeAction->setEnabled(m_gm->isCorrectFormula());
 }

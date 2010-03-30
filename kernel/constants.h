@@ -52,7 +52,7 @@ namespace Constants {
     const bool KMAP_COVERS_DEFAULT = false;
 
     // whether line mode in kmap head is default
-    const bool KMAP_LINES_DEFAULT = false;
+    const bool KMAP_LINES_DEFAULT = true;
 }
 
 #endif // CONSTANTS_H

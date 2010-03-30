@@ -1,8 +1,8 @@
 /*
- * aboutdialog.h - about bmin dialog
- * created date: 8/6/2009
  *
- * Copyright (C) 2009-2010 Jakub Zelenka.
+ * created date: 3/30/2010
+ *
+ * Copyright (C) 2010 Jakub Zelenka.
  *
  * Bmin is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,15 +18,28 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef ABOUTDIALOG_H
-#define ABOUTDIALOG_H
+#ifndef PLADIALOG_H
+#define PLADIALOG_H
 
 #include <QDialog>
 
-class AboutDialog : public QDialog
+class QComboBox;
+
+class PLADialog : public QDialog
 {
+    Q_OBJECT
+
 public:
-    AboutDialog(QWidget *parent);
+    PLADialog(unsigned count, QWidget *parent);
+
+private:
+    QComboBox *m_outCombo;
+
+public slots:
+    void accept();
+
+signals:
+    void formulaSelected(unsigned);
 };
 
-#endif // ABOUTDIALOG_H
+#endif // PLADIALOG_H

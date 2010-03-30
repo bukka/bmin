@@ -60,6 +60,7 @@ protected:
     virtual void evtFormulaChanged(Formula *) {}
     virtual void evtFormulaRemoved() {}
     virtual void evtFormulaMinimized(Formula *, MinimizeEvent &) {}
+    virtual void evtFormulasSet(unsigned) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}

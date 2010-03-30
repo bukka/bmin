@@ -116,23 +116,27 @@ const char *OptionsExc::what() const throw()
 const char *PLAExc::what() const throw()
 {
     ostringstream oss;
-    oss << "PLA file: ";
+    oss << "PLA file: " << line << ":" << pos  << ": ";
 
+    
     switch (error) {
     case SYNTAX:
-        oss << "Invalid syntax at line " << line << " at position " << pos;
+        oss << "Invalid syntax.";
+        break;
+    case BODY:
+        oss << "It's not possible set options in body part.";
         break;
     case VAR_NAME:
-        oss << "Invalid variable name (only one character is permitted).";
+        oss << "Invalid variable name.";
         break;
     case VAR_COUNT:
-        oss << "Invalid variable count.";
+        oss << "Invalid variables count.";
         break;
     case FCE_NAME:
-        oss << "Invalid output funtion name (only one character is permitted).";
+        oss << "Invalid output funtion name.";
         break;
     case FCE_COUNT:
-        oss << "Invalid number of outputs (only single value is permitted).";
+        oss << "Invalid number of outputs.";
         break;
     case TERM_FORMAT:
         oss << "Invalid term format.";
@@ -140,17 +144,26 @@ const char *PLAExc::what() const throw()
     case TERMS_COUNT:
         oss << "Invalid terms count.";
         break;
+    case OUTPUT_FORMAT:
+        oss << "Invalid output value.";
+        break;
+    case OUTPUTS_COUNT:
+        oss << "Invalid outputs count.";
+        break;
     case TYPE:
         oss << "Invalid type.";
         break;
     case OPTION:
         oss << "Unknown option.";
         break;
-    case MANDATORY:
-        oss << "One of mandatory options (.o and .i) wasn't set.";
+    case MANDATORY_OUTPUT:
+        oss << "No mandatory option '.o'.";
+        break;
+    case MANDATORY_INPUT:
+        oss << "No mandatory option '.i'.";
         break;
     default:
-        oss << "Unknown error";
+        oss << "Unknown error.";
     }
     return oss.str().c_str();
 }

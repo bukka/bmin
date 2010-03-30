@@ -70,8 +70,7 @@ public:
 
     // Constructors
     Formula(unsigned vc, char fn = DEFAULT_NAME, Repre rep = DEFAULT_REP,
-            const std::vector<char> *v = 0,
-            std::vector<Term> *f = 0, std::vector<Term> *r = 0)
+            const std::vector<char> *v = 0)
             throw(InvalidVarsExc, InvalidTermExc);
     Formula(const FormulaSpec *spec, const FormulaDecl *decl)
             throw(InvalidVarsExc, InvalidIndexExc);
@@ -89,6 +88,8 @@ public:
     bool hasTerm(const Term &t) const;
     // sets term with idx to value
     void setTermValue(int idx, OutputValue val) throw(InvalidIndexExc);
+    // sets term t to value
+    void setTermValue(const Term &t, OutputValue val);
     // returns value of term with idx
     OutputValue getTermValue(int idx) const;
     // returns terms id with val from original terms
