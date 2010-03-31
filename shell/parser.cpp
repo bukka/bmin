@@ -256,6 +256,14 @@ void Parser::command() throw(ShellExc)
     case LexicalAnalyzer::POS:
         kernel->setRepre(Formula::REP_POS);
         break;
+    case LexicalAnalyzer::LOAD:
+        readToken();
+        parsePLA(filePath());
+        break;
+    case LexicalAnalyzer::SAVE:
+        readToken();
+        createPLA(filePath());
+        break;
     case LexicalAnalyzer::SHOW:
         readToken();
         showArg();
@@ -290,6 +298,11 @@ void Parser::showArg() throw(ShellExc)
     }
 }
 
+string Parser::filePath() throw(ShellExc)
+{
+    cmpe(LexicalAnalyzer::STRING);
+    return lex.getWord();
+}
 
 
 void Parser::fceDef() throw(ShellExc, KernelExc)

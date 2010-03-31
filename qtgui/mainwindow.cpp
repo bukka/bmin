@@ -253,7 +253,8 @@ void MainWindow::openFormula()
 {
     QString fileName = QFileDialog::getOpenFileName(this, tr("Open Function..."), QString(),
                        tr("PLA format (*.pla);;All files (*.*)"));
-    m_gm->loadPLAfile(fileName);
+    if (!fileName.isEmpty())
+        m_gm->loadPLAfile(fileName);
 }
 
 // save to PLA file
@@ -261,7 +262,8 @@ void MainWindow::saveAsFormula()
 {
     QString fileName = QFileDialog::getSaveFileName(this, tr("Save Function..."), QString(),
                                 tr("PLA format (*.pla)"));
-    m_gm->savePLAfile(fileName);
+    if (!fileName.isEmpty())
+        m_gm->savePLAfile(fileName);
 }
 
 /*

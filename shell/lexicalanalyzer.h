@@ -36,6 +36,7 @@ static const char * const TN_MULT    = "MULT";
 static const char * const TN_ASSIGN  = "ASSIGN";
 static const char * const TN_COMMA   = "COMMA";
 static const char * const TN_CMD     = "CMD";
+static const char * const TN_STRING  = "STRING";
 static const char * const TN_END     = "END";
 
 static const char SYM_LPAR         = '(';
@@ -44,6 +45,7 @@ static const char SYM_PLUS         = '+';
 static const char SYM_MULT         = '*';
 static const char SYM_ASSIGN       = '=';
 static const char SYM_COMMA        = ',';
+static const char SYM_DQUOT        = '"';
 
 static const char FCE_MINTERM      = 'm';
 static const char FCE_DC           = 'd';
@@ -59,6 +61,8 @@ static const char * const CMD_KMAP     = "kmap";
 static const char * const CMD_CUBE     = "cube";
 static const char * const CMD_SOP      = "sop";
 static const char * const CMD_POS      = "pos";
+static const char * const CMD_LOAD     = "load";
+static const char * const CMD_SAVE     = "save";
 
 class LexicalAnalyzer
 {
@@ -73,6 +77,7 @@ public:
         ASSIGN,
         COMMA,
         CMD,
+        STRING,
         END
     };
 
@@ -87,7 +92,9 @@ public:
         KMAP,
         CUBE,
         SOP,
-        POS
+        POS,
+        LOAD,
+        SAVE
     };
 
     LexicalAnalyzer();

@@ -47,6 +47,7 @@ const char *LexicalAnalyzer::getTokenName(Token tok) const
     case ASSIGN: return TN_ASSIGN;
     case COMMA: return TN_COMMA;
     case CMD: return TN_CMD;
+    case STRING: return TN_STRING;
     default: return TN_END;
     }
 }
@@ -64,6 +65,8 @@ const char *LexicalAnalyzer::getCommandName(Command cmd) const
     case CUBE: return CMD_CUBE;
     case SOP: return CMD_SOP;
     case POS: return CMD_POS;
+    case LOAD: return CMD_LOAD;
+    case SAVE: return CMD_SAVE;
     default: return CMD_EXIT;
     }
 }
@@ -134,6 +137,10 @@ bool LexicalAnalyzer::isCommand(const string &str)
         command = SOP;
     else if (strcmpi(word, CMD_POS))
         command = POS;
+    else if (strcmpi(word, CMD_LOAD))
+        command = LOAD;
+    else if (strcmpi(word, CMD_SAVE))
+        command = SAVE;
     else
         return false;
 
@@ -180,6 +187,17 @@ LexicalAnalyzer::Token LexicalAnalyzer::readToken() throw(ShellExc)
             throw CommandExc(word.c_str(), CommandExc::UNKNOWN, col);
     default: // OTHER
         switch (inputChar) {
+        case SYM_DQUOT:
+            word.clear();
+            do {
+                if (readInput() == EOI)
+                    throw LexicalExc(col);
+                if (inputType == OTHER && inputChar == SYM_DQUOT)
+                    break;
+
+                word += inputChar;
+            } while (true);
+            return setToken(STRING);
         case SYM_LPAR:
             return setToken(LPAR);
         case SYM_RPAR:

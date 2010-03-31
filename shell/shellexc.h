@@ -49,6 +49,9 @@ public:
     LexicalExc(char ch, int c, int l = 1)
             : ShellExc(c, l), badChar(ch) {}
 
+    LexicalExc(int c, int l = 1)
+        : ShellExc(c, l), badChar(0) {}
+
     virtual Type getType() { return LEXICAL; }
 
     inline char getChar() const { return badChar; }
@@ -144,10 +147,6 @@ private:
 class FileExc : public std::exception
 {
 public:
-    enum Error {
-        NOT_FOUND
-
-    };
 
     FileExc(const std::string &fn) : fileName(fn) {}
     virtual ~FileExc() throw() {}

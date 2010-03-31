@@ -33,8 +33,12 @@ const char *ShellExc::what() const throw()
     return "Shell exception";
 }
 
+
 const char *LexicalExc::what() const throw()
 {
+    if (!badChar)
+        return "Unclosed double quotes";
+
     ostringstream oss;
     oss << "Invalid Character ";
     if (badChar >= 32) // show characters from space position
@@ -171,8 +175,8 @@ const char *PLAExc::what() const throw()
 const char *FileExc::what() const throw()
 {
     string s;
-    s += "File ";
+    s += "File '";
     s += fileName;
-    s += " cannot be opened.";
+    s += "' cannot be opened.";
     return s.c_str();
 }

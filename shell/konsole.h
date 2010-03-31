@@ -42,6 +42,7 @@ public:
 protected:
     virtual void evtFormulaChanged(Formula *f);
     virtual void evtFormulaMinimized(MinimizeEvent &evt);
+    virtual void evtFormulasSet(unsigned count);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
     virtual void evtHelp();
@@ -76,5 +77,9 @@ static const char * const MSG_NO_FCE_SET        = "No function was set";
 static const char * const MSG_REPRE_CHANGED     = "Function representation was changed to ";
 static const char * const MSG_SOP               = "Sum of Products";
 static const char * const MSG_POS               = "Product of Sums";
+static const char * const MSG_MV_INFO           = "Bmin supports only single output value";
+static const char * const MSG_MV_SELECT         = "Select output function";
+static const char * const MSG_MV_NAN            = "Only number is permitted";
+static const char * const MSG_MV_UNKNOWN        = "Unknown output function number";
 
 #endif // KONSOLE_H

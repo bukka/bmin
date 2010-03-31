@@ -88,6 +88,31 @@ void Konsole::evtFormulaMinimized(MinimizeEvent &evt)
         out << MSG_ALREADY_MINIMIZED << endl;
 }
 
+void Konsole::evtFormulasSet(unsigned count)
+{
+    out << MSG_MV_INFO << endl;
+    out << MSG_MV_SELECT << " (0-" << count - 1 << "): ";
+
+    // read number
+    string line;
+    LexicalAnalyzer lex;
+    getline(in, line);
+    lex.analyze(line);
+    try {
+        if (lex.readToken() != LexicalAnalyzer::NUMBER)
+            throw exception();
+    }
+    catch (exception &) {
+        out << MSG_MV_NAN << endl;
+        return;
+    }
+    unsigned number = lex.getNumber();
+    if (number >= count)
+        out << MSG_MV_UNKNOWN << endl;
+    else
+        Kernel::instance()->selectFormula(number);
+}
+
 void Konsole::evtError(exception &exc)
 {
     out << MSG_ERROR << exc.what() << endl;
@@ -113,6 +138,9 @@ void Konsole::evtHelp()
     out << "  minimize    minimizing fce" << endl;
     out << "  sop         set Sum of Products representation" << endl;
     out << "  pos         set Product of Sums representation" << endl;
+    out << "  load PATH   load PLA file on PATH" << endl;
+    out << "  save PATH   save actual funtion to PLA file on PATH" << endl;
+    out << "    PATH      file path enclosed in double-quotes (e.g. \"/opt/test.pla\")" << endl;
     out << "  show ARG" << endl;
     out << "    ARG:" << endl;
     out << "      qm      show prime and cover table of Quine-McCluskey algorithm" << endl;

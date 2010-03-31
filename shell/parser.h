@@ -67,6 +67,7 @@ private:
     void program() throw(ShellExc, KernelExc);
     void command() throw(ShellExc);
     void showArg() throw(ShellExc);
+    std::string filePath() throw(ShellExc);
     void fceDef() throw(ShellExc, KernelExc);
     FormulaDecl *fceDecl() throw(ShellExc);
     char fceName() throw(ShellExc);
