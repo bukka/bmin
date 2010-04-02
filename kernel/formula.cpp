@@ -246,6 +246,18 @@ vector<Term> &Formula::getMinterms(vector<Term> &minterms) const
     return terms->getMinterms(minterms);
 }
 
+// returns actual terms
+vector<Term> Formula::getTerms() const
+{
+    return terms->getTerms();
+}
+
+// returns actual terms (without creating new vector)
+vector<Term> &Formula::getTerms(vector<Term> &aterms) const
+{
+    return terms->getTerms(aterms);
+}
+
 // returns actual maxterms
 vector<Term> Formula::getMaxterms() const
 {

@@ -67,6 +67,9 @@ public:
     // returns terms id with val from original terms
     std::vector<int> getTermsIdx(int val);
     std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs);
+    // returns actual terms
+    std::vector<Term> getTerms();
+    std::vector<Term> &getTerms(std::vector<Term> &terms);
     // returns actual minterms
     std::vector<Term> getMinterms();
     std::vector<Term> &getMinterms(std::vector<Term> &minterms);

@@ -62,7 +62,7 @@ void ModeTabBar::paintTab(QPainter &p, int idx)
     QString tabText = tab.text;
     bool selected = tab.state & QStyle::State_Selected;
     QFont boldFont = font();
-    boldFont.setPixelSize(12);
+    boldFont.setPixelSize(11);
     boldFont.setBold(true);
 
     if (selected) {
@@ -81,6 +81,7 @@ void ModeTabBar::paintTab(QPainter &p, int idx)
     p.setFont(boldFont);
     p.drawText(textRect, Qt::AlignCenter, tabText);
     p.restore();
+
 
     if (idx < m_modesSize - 1) {
         QPen pen(m_winColor);

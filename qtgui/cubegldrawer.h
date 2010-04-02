@@ -61,17 +61,18 @@ public:
     CubeGLDrawer(const QGLFormat &format, QWidget *parent = 0);
     ~CubeGLDrawer();
 
+    void cubeKeyPressEvent(QKeyEvent *event);
+    void cubeKeyReleaseEvent(QKeyEvent *event);
+
 signals:
     // emmited when key M is pushed - minimizing
     void minRequested();
     // emited when it is clicked on sphere
     void cubeChanged(int idx, OutputValue &value);
-    // emmited when cube is focused
-    void cubeFocused(bool cubeFocus);
 
 public slots:
-    // gets formula
-    void setFormula(Formula *f);
+    // formula changed -> reloading cube
+    void reloadCube();
     // when formula is minimized
     void minimizeCube();
     // when formula is invalid
@@ -103,13 +104,8 @@ protected:
     void resizeGL(int width, int height);
 
     // Event's methods
-    void keyEvent(QKeyEvent *event, bool start);
-    void keyPressEvent(QKeyEvent *event);
-    void keyReleaseEvent(QKeyEvent *event);
     void mousePressEvent(QMouseEvent *event);
     void contextMenuEvent(QContextMenuEvent *event);
-    void focusInEvent(QFocusEvent * event);
-    void focusOutEvent(QFocusEvent * event);
 
 private:
     static const int MIN4_POINTS = 8;
@@ -184,6 +180,9 @@ private:
 
     // updates Cube
     void updateCube() { updateGL(); }
+
+    // key event
+    void keyEvent(QKeyEvent *event, bool start);
 
     // main formula
     Formula *formula;

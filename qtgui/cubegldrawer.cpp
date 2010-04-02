@@ -23,6 +23,7 @@
 #include "cubegldrawer.h"
 #include "cubeglconf.h"
 // kernel
+#include "kernel.h"
 #include "formula.h"
 #include "term.h"
 #include "outputvalue.h"
@@ -47,8 +48,7 @@
 #include <QGLFormat>
 #include <QDebug>
 
-static inline void setArray(GLfloat *a,
-    GLfloat r, GLfloat g, GLfloat b, GLfloat w = 1.0f)
+static inline void setArray(GLfloat *a, GLfloat r, GLfloat g, GLfloat b, GLfloat w = 1.0f)
 {
     a[0] = r;
     a[1] = g;
@@ -123,7 +123,6 @@ void CubeGLDrawer::setMin4()
 
     setParam(&p, -i, o);
     setParam(&d, v1, 0);
-
 }
 
 CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
@@ -140,9 +139,8 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     setMin2();
     setMin4();
 
-    // light definitions
+    // lights
     lightsAngle = 30.0;
-    figureLights();
     isLight[0] = false; // Reflector
     isLight[1] = true; // Light 1
     isLight[2] = true; // Light 2
@@ -174,7 +172,7 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     isActive = true;
 
     // essential for key and mouse events
-    setFocusPolicy(Qt::StrongFocus);
+    //setFocusPolicy(Qt::StrongFocus);
 
     makeActions();
     makeTimers();
@@ -189,13 +187,13 @@ CubeGLDrawer::~CubeGLDrawer()
     glDeleteLists(cylinderListId, 1);
     glDeleteLists(displayListId, 1);
     glDeleteLists(bgListId, 1);
-
 }
 
 
-void CubeGLDrawer::setFormula(Formula *f)
+void CubeGLDrawer::reloadCube()
 {
     stopMin();
+    Formula *f = Kernel::instance()->getFormula();
     if (f->getVarsCount() > static_cast<unsigned>(MAX_N)) {
         actualCube = -1;
         paintedMsg = MSG_OVER;
@@ -203,7 +201,7 @@ void CubeGLDrawer::setFormula(Formula *f)
     else {
         makeCurrent();
         formula = f;
-        actualCube = f->getVarsCount();
+        actualCube = formula->getVarsCount();
         drawCube(actualCube);
         paintedMsg = MSG_NONE;
     }
@@ -212,10 +210,12 @@ void CubeGLDrawer::setFormula(Formula *f)
 
 void CubeGLDrawer::minimizeCube()
 {
-    if (!formula->isMinimized())
+    Formula *minFormula = Kernel::instance()->getMinimizedFormula();
+    if (!minFormula)
         return;
     makeCurrent();
-    formula->getMinterms(terms);
+    minFormula->getTerms(terms);
+
     bindTermsTextures();
 
     if (isMin) {
@@ -257,16 +257,15 @@ void CubeGLDrawer::setActivity(bool active)
 }
 
 
-GLuint CubeGLDrawer::bindTextTextures(QString text,
-    int width, int height, int fontSize, const char *fontFamily,
-    Qt::GlobalColor fontColor, Qt::GlobalColor bgColor)
+GLuint CubeGLDrawer::bindTextTextures(QString text, int width, int height,
+                                      int fontSize, const char *fontFamily,
+                                      Qt::GlobalColor fontColor, Qt::GlobalColor bgColor)
 {
     QImage img(width, height, QImage::Format_ARGB32);
     QPainter painter(&img);
     painter.setFont(QFont(fontFamily, fontSize));
     painter.setPen(QColor(fontColor));
-    painter.fillRect(0, 0,
-        width, height, QBrush(bgColor));
+    painter.fillRect(0, 0, width, height, QBrush(bgColor));
     painter.drawText(0, 0, width, height, Qt::AlignCenter, text);
     return bindTexture(img);
 }
@@ -277,9 +276,10 @@ void CubeGLDrawer::bindTermsTextures()
     termsTextures.clear();
 
     for (unsigned i = 0; i < terms.size(); i++) {
-        texId = bindTextTextures(
-                QString::fromStdString(Parser::termToString(terms[i], formula->getVars(), Parser::PF_PROD)),
-                getI(TERM_IMG_W), getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
+        QString termStr = QString::fromStdString(
+                Parser::termToString(terms[i], formula->getVars(), Parser::PF_PROD));
+        texId = bindTextTextures(termStr, getI(TERM_IMG_W), getI(TERM_IMG_H),
+                                 getI(TERM_FONT_SIZE), "Arial");
         termsTextures.push_back(texId);
     }
 }
@@ -292,15 +292,12 @@ void CubeGLDrawer::genDT()
     int w = wStep;
     int h = hStep;
     for (int i = 0; i < DT_COUNT; i++) {
-        QImage img(getI(TERM_IMG_W), getI(TERM_IMG_H),
-            QImage::Format_ARGB32);
+        QImage img(getI(TERM_IMG_W), getI(TERM_IMG_H), QImage::Format_RGB32);
         QPainter painter(&img);
-        painter.fillRect(0, 0,
-            getI(TERM_IMG_W), getI(TERM_IMG_H), QBrush(Qt::black));
+        painter.fillRect(0, 0, getI(TERM_IMG_W), getI(TERM_IMG_H), QBrush(Qt::black));
         painter.setBrush(QBrush(Qt::white));
         painter.setPen(Qt::NoPen);
-        painter.drawEllipse((getI(TERM_IMG_W) - w) / 2,
-            (getI(TERM_IMG_H) - h) / 2, w, h);
+        painter.drawEllipse((getI(TERM_IMG_W) - w) / 2, (getI(TERM_IMG_H) - h) / 2, w, h);
 
         dynamicTexture[i] = bindTexture(img);
         w += wStep;
@@ -364,10 +361,14 @@ void CubeGLDrawer::initializeGL()
     glShadeModel(GL_SMOOTH);
     glMatrixMode(GL_MODELVIEW);
 
-    // lights
-    GLfloat ambient0[4]= {0.0,0.0,0.0,1.0};
-    GLfloat diffuse0[4] = {1.0,1.0,1.0,1.0};
-    GLfloat specular0[4] = {1.0,1.0,1.0,1.0};
+    // figures out lights
+    figureLights();
+
+    // Lights
+    // reflector
+    GLfloat ambient0[4] = {0.0, 0.0, 0.0, 1.0};
+    GLfloat diffuse0[4] = {1.0, 1.0, 1.0, 1.0};
+    GLfloat specular0[4] = {1.0, 1.0, 1.0, 1.0};
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient0);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse0);
     glLightfv(GL_LIGHT0, GL_SPECULAR, specular0);
@@ -375,8 +376,8 @@ void CubeGLDrawer::initializeGL()
     glLighti(GL_LIGHT0, GL_SPOT_EXPONENT, 5);
     if (isLight[0])
         glEnable(GL_LIGHT0);
-
-    GLfloat ambient1[4]= {0.0,0.0,0.0,1.0};
+    // light 1
+    GLfloat ambient1[4] = {0.0,0.0,0.0,1.0};
     GLfloat diffuse1[4] = {1.0,1.0,1.0,1.0};
     GLfloat specular1[4] = {1.0,1.0,1.0,1.0};
     glLightfv(GL_LIGHT1, GL_AMBIENT, ambient1);
@@ -384,8 +385,8 @@ void CubeGLDrawer::initializeGL()
     glLightfv(GL_LIGHT1, GL_SPECULAR, specular1);
     if (isLight[1])
         glEnable(GL_LIGHT1);
-
-    GLfloat ambient2[4]= {0.0,0.0,0.0,1.0};
+    // light 2
+    GLfloat ambient2[4] = {0.0,0.0,0.0,1.0};
     GLfloat diffuse2[4] = {1.0,1.0,1.0,1.0};
     GLfloat specular2[4] = {1.0,1.0,1.0,1.0};
     glLightfv(GL_LIGHT2, GL_AMBIENT, ambient2);
@@ -443,8 +444,7 @@ void CubeGLDrawer::resizeWin(bool fullSetting)
         glOrtho(-x, x, -y, y, -20.0, 20.0);
     }
     else
-        gluPerspective(60.0, (GLdouble) winWidth / winHeight,
-            0.01, 20.0);
+        gluPerspective(60.0, (GLdouble) winWidth / winHeight, 0.01, 20.0);
 
     if (!fullSetting)
         return;
@@ -572,13 +572,8 @@ void CubeGLDrawer::drawMin()
         return;
     }
 
-    // number of ones and zeros
-    int ozSize = terms[minPos].getSize(false);
-    if (ozSize == 0)
-        return;
 
-    GLdouble x, y, t;
-    /*
+    /* animated changing of terms label on display - uncorrect behavior
     if (termTranslated == 22) {
         termTranslated = 0;
     }
@@ -608,6 +603,12 @@ void CubeGLDrawer::drawMin()
     if (!showAnimation)
         return;
 
+    // number of ones and zeros
+    int ozSize = terms[minPos].getSize(false);
+    if (ozSize == 0)
+        return;
+
+    GLdouble x, y, t;
     if (ozSize == actualCube) {
         t = animateTime * 4 * M_PI;
         x = 2 * getD(SPHERE_R) * cos(t);
@@ -657,43 +658,51 @@ void CubeGLDrawer::drawMin()
     }
 
     glPushMatrix();
-    if (actualCube == 3) {
-        if (ozSize == 2 && !terms[minPos][2].isMissing()) {
-            if (!terms[minPos][0].isMissing()) {
-                glRotated(90.0, 0.0, 0.0, 1.0);
-                if (terms[minPos][2] == terms[minPos][0])
-                    glTranslated(x, y - shift[0], -shift[2]);
-                else
-                    glTranslated(x, y + shift[0], shift[2]);
 
-            }
-            else {
-                glRotated(90.0, 0.0, 1.0, 0.0);
-                if (terms[minPos][2] == terms[minPos][1])
-                    glTranslated(x, y + shift[2], shift[1]);
-                else
-                    glTranslated(x, y - shift[2], -shift[1]);
-            }
-        }
-        else if (ozSize == 1 && !terms[minPos][1].isMissing()) {
-            glRotated(90.0, 1.0, 0.0, 0.0);
-            glTranslated(x, y, -shift[1]);
-        }
-        else if (ozSize == 1 && !terms[minPos][2].isMissing()) {
-            glRotated(90.0, 0.0, 1.0, 0.0);
-            glTranslated(x, y, shift[2]);
-        }
-        else
-            glTranslated(x + shift[2], y + shift[1], -shift[0]);
-    }
-    else if (actualCube == 2) {
-        if (ozSize == 1 && !terms[minPos][1].isMissing()) {
+
+    switch (actualCube) {
+    case 2:
+        if (ozSize == 1 && terms[minPos][1].isMissing()) {
             glRotated(90, 0.0, 0.0, 1.0);
-            glTranslated(x + shift[0], y - shift[1], 0.0);
+            glTranslated(x + shift[1], y - shift[0], 0.0);
         }
         else
-            glTranslated(x + shift[1], y + shift[0], 0.0);
+            glTranslated(x + shift[0], y + shift[1], 0.0);
+        break;
+
+    case 3:
+        switch (ozSize) {
+        case 1:
+            if (!terms[minPos][0].isMissing()) {
+                glRotated(90.0, 0.0, 1.0, 0.0);
+                glTranslated(x, y, shift[0]);
+            }
+            else if (!terms[minPos][1].isMissing()) {
+                glRotated(90.0, 1.0, 0.0, 0.0);
+                glTranslated(x, y, -shift[1]);
+            }
+            else
+                glTranslated(x, y, -shift[2]);
+
+            break;
+        case 2:
+            if (terms[minPos][2].isMissing()) {
+                glRotated(-90.0, 0.0, 1.0, 0.0);
+                glTranslated(x, y + shift[1], -shift[0]);
+            }
+            else if (terms[minPos][1].isMissing()) {
+                glRotated(-90.0, 0.0, 0.0, 1.0);
+                glTranslated(x, y + shift[0], -shift[2]);
+            }
+            else
+                glTranslated(x, y + shift[1], -shift[2]);
+
+            break;
+        case 3:
+            glTranslated(x + shift[0], y + shift[1], -shift[2]);
+        }
     }
+
 
     glCallList(minSphereListId);
     glPopMatrix();
@@ -871,13 +880,12 @@ void CubeGLDrawer::makeSpheres()
 {
     quadric = gluNewQuadric();
     gluQuadricNormals(quadric, GLU_SMOOTH);
-//	gluQuadricTexture(quadric, GLU_TRUE);
+    //	gluQuadricTexture(quadric, GLU_TRUE);
 
     // vertex sphere
     glNewList(sphereListId, GL_COMPILE);
     glPushMatrix();
-    gluSphere(quadric, getD(SPHERE_R), getI(SPHERE_STRIPS),
-        getI(SPHERE_STACKS));
+    gluSphere(quadric, getD(SPHERE_R), getI(SPHERE_STRIPS), getI(SPHERE_STACKS));
     glPopMatrix();
     glEndList();
 
@@ -885,8 +893,7 @@ void CubeGLDrawer::makeSpheres()
     glNewList(minSphereListId, GL_COMPILE);
     GLfloat diffuse[4] = {1.0, 1.0, 0.0, 1.0};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
-    gluSphere(quadric, getD(MIN_SPHERE_R), getI(MIN_SPHERE_STRIPS),
-        getI(MIN_SPHERE_STACKS));
+    gluSphere(quadric, getD(MIN_SPHERE_R), getI(MIN_SPHERE_STRIPS), getI(MIN_SPHERE_STACKS));
     glEndList();
 }
 
@@ -918,7 +925,6 @@ void CubeGLDrawer::makeCylinder(int list)
         x2 = getD(CYLINDER_R) * cos(a);
         y2 = getD(CYLINDER_R) * sin(a);
 
-
         glBegin(GL_QUAD_STRIP);
         for (int j = 0; j <= getI(CYLINDER_STACKS); j++, z += length) {
             glVertex3d(x1, y1, z);
@@ -928,7 +934,6 @@ void CubeGLDrawer::makeCylinder(int list)
 
         x1 = x2;
         y1 = y2;
-
     }
     glEndList();
 }
@@ -1020,7 +1025,7 @@ void CubeGLDrawer::makeMsg()
     for (int i = 0; i < 2; i++) {
         glNewList(msgListId + i, GL_COMPILE);
         glEnable(GL_TEXTURE_2D);
-//		glDisable(GL_LIGHTING);
+        // glDisable(GL_LIGHTING);
 
         glTexParameterf(GL_TEXTURE_2D,
             GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -1041,7 +1046,7 @@ void CubeGLDrawer::makeMsg()
         glEnd();
 
         glDisable(GL_TEXTURE_2D);
-//		glEnable(GL_LIGHTING);
+        // glEnable(GL_LIGHTING);
 
         glEndList();
     }
@@ -1057,8 +1062,7 @@ void CubeGLDrawer::makeBackground()
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    glBindTexture(GL_TEXTURE_2D,
-        bgTexture[(background == BG_COMPLETE)? 0: 1]);
+    glBindTexture(GL_TEXTURE_2D, bgTexture[(background == BG_COMPLETE)? 0: 1]);
 
     double rp1 = 10.0;
     double rp2 = 2 * rp1;
@@ -1326,7 +1330,7 @@ void CubeGLDrawer::keyEvent(QKeyEvent *event, bool start)
     }
 }
 
-void CubeGLDrawer::keyPressEvent(QKeyEvent *event)
+void CubeGLDrawer::cubeKeyPressEvent(QKeyEvent *event)
 {
     if (actualCube < 0)
         return;
@@ -1344,7 +1348,7 @@ void CubeGLDrawer::keyPressEvent(QKeyEvent *event)
             return;
         case Qt::Key_I:
             lightsTimer->isActive()? lightsTimer->stop():
-                lightsTimer->start(getI(TIMER_CLOCK));
+                    lightsTimer->start(getI(TIMER_CLOCK));
             return;
         case Qt::Key_M:
             if (isMin) {
@@ -1396,7 +1400,7 @@ void CubeGLDrawer::keyPressEvent(QKeyEvent *event)
     updateCube();
 }
 
-void CubeGLDrawer::keyReleaseEvent(QKeyEvent *event)
+void CubeGLDrawer::cubeKeyReleaseEvent(QKeyEvent *event)
 {
     keyEvent(event, false);
 }
@@ -1614,14 +1618,3 @@ void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
     }
 
 }
-
-void CubeGLDrawer::focusInEvent(QFocusEvent * /* event */)
-{
-    emit cubeFocused(true);
-}
-
-void CubeGLDrawer::focusOutEvent(QFocusEvent * /* event */)
-{
-    emit cubeFocused(false);
-}
-

@@ -80,7 +80,6 @@ void GUIManager::evtFormulaChanged(Formula *f)
             sop? Parser::PF_SUM: Parser::PF_PROD, f));
     emit fceChanged(m_actualFce);
     emit minFceChanged("");
-    emit formulaChanged(f);
     emit formulaChanged();
 }
 

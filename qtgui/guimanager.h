@@ -137,7 +137,6 @@ signals:
     // emitted when it is essential to change minimized formula label
     void minFceChanged(const QString &);
     // emitted when it is essential to change the formula's term
-    void formulaChanged(Formula *);
     void formulaChanged();
     // emitted when formula is minimized
     void formulaMinimized();

@@ -96,6 +96,10 @@ public:
     std::vector<int> getTermsIdx(int val) const;
     // returns terms id with val from original terms (without creating new vector)
     std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs) const;
+    // returns actual terms
+    std::vector<Term> getTerms() const;
+    // returns actual terms (without creating new vector)
+    std::vector<Term> &getTerms(std::vector<Term> &aterms) const;
     // returns actual minterms
     std::vector<Term> getMinterms() const;
     // returns actual minterms (without creating new vector)

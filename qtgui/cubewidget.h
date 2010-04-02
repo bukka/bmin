@@ -24,10 +24,8 @@
 #define CUBEWIDGET_H
 
 #include "modulewidget.h"
-#include "term.h"
 
-// predefined classes for faster compilation
-class Formula;
+class CubeGLDrawer;
 
 // BooleanCube class - superstructure for cube drawer
 class CubeWidget : public ModuleWidget
@@ -38,12 +36,15 @@ public:
     // CubeWidget constructor
     CubeWidget(const QString &name, int pos);
 
+protected:
+    void keyPressEvent(QKeyEvent *event);
+    void keyReleaseEvent(QKeyEvent *event);
+
+private:
+    CubeGLDrawer *m_drawer;
+
 signals:
     void activated(bool); // activity of cube was changed
-
-public slots:
-    // make or remove new border symbolized the focus of drawer widget
-    void showFocus(bool isFocused);
 
 };
 

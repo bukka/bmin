@@ -199,6 +199,17 @@ Term TermsContainer::at(unsigned pos) const
     return termsVector->at(pos);
 }
 
+std::vector<Term> TermsContainer::getTerms()
+{
+    return *termsVector;
+}
+
+std::vector<Term> &TermsContainer::getTerms(std::vector<Term> &terms)
+{
+    terms = *termsVector;
+    return terms;
+}
+
 vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms)
 {
     minterms.clear();

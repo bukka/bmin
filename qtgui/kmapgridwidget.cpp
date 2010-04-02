@@ -67,7 +67,7 @@ KMapGridWidget::KMapGridWidget(KMap *kmap, bool showCovers, QGraphicsItem *paren
                                  j == 0 || j == 4, j == m_colsCount - 1 || j == 3);
             m_map[i][j].setIdx(kmap->getIdx(i, j));
             connect(&m_map[i][j], SIGNAL(cellValueChanged(int, OutputValue &)),
-                    GUIManager::instance(), SLOT(setTerm(int, OutputValue&)));
+                    GUIManager::instance(), SLOT(setTerm(int, OutputValue &)));
             m_layout->addItem(&m_map[i][j], i + 1, j + 1);
         }
         m_hDesc[i] = new KMapDescWidget(kmap->getSideGC(i), kmap->getRowsVarsCount(),

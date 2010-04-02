@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
             // Main window class
             MainWindow w;
-            w.setGeometry(50, 50, 800, 600);
+            w.setGeometry(50, 50, 860, 640);
             w.show();
             return a.exec();
         }
