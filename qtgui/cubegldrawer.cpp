@@ -214,7 +214,11 @@ void CubeGLDrawer::minimizeCube()
     if (!minFormula)
         return;
     makeCurrent();
-    minFormula->getTerms(terms);
+
+    if ((tautology = minFormula->isTautology()))
+        contradiction = false;
+    else if (!(contradiction = minFormula->isContradiction()))
+        minFormula->getTerms(terms);
 
     bindTermsTextures();
 
@@ -257,7 +261,7 @@ void CubeGLDrawer::setActivity(bool active)
 }
 
 
-GLuint CubeGLDrawer::bindTextTextures(QString text, int width, int height,
+GLuint CubeGLDrawer::bindTextTextures(const QString &text, int width, int height,
                                       int fontSize, const char *fontFamily,
                                       Qt::GlobalColor fontColor, Qt::GlobalColor bgColor)
 {
@@ -275,12 +279,19 @@ void CubeGLDrawer::bindTermsTextures()
     GLuint texId;
     termsTextures.clear();
 
-    for (unsigned i = 0; i < terms.size(); i++) {
-        QString termStr = QString::fromStdString(
-                Parser::termToString(terms[i], formula->getVars(), Parser::PF_PROD));
-        texId = bindTextTextures(termStr, getI(TERM_IMG_W), getI(TERM_IMG_H),
-                                 getI(TERM_FONT_SIZE), "Arial");
+    if (tautology || contradiction) {
+        texId = bindTextTextures(QString(tautology? "1": "0"), getI(TERM_IMG_W),
+                                 getI(TERM_IMG_H), getI(TERM_FONT_SIZE), "Arial");
         termsTextures.push_back(texId);
+    }
+    else {
+        for (unsigned i = 0; i < terms.size(); i++) {
+            QString termStr = QString::fromStdString(
+                    Parser::termToString(terms[i], formula->getVars(), Parser::PF_PROD));
+            texId = bindTextTextures(termStr, getI(TERM_IMG_W), getI(TERM_IMG_H),
+                                     getI(TERM_FONT_SIZE), "Arial");
+            termsTextures.push_back(texId);
+        }
     }
 }
 
@@ -600,7 +611,7 @@ void CubeGLDrawer::drawMin()
     glBindTexture(GL_TEXTURE_2D, termsTextures[minPos]);
     glCallList(displayListId);
 
-    if (!showAnimation)
+    if (!showAnimation || contradiction || tautology)
         return;
 
     // number of ones and zeros
@@ -642,6 +653,8 @@ void CubeGLDrawer::drawMin()
         y =  p1[1] * hcF1(t) + p2[1] * hcF2(t)
             + d1[1] * hcF3(t) + d2[1] * hcF4(t);
     }
+
+
     GLdouble shift[3];
     GLdouble a = getD(CUBE_A) / 2.0;
     for (int i = 0; i < actualCube; i++) {
@@ -659,8 +672,10 @@ void CubeGLDrawer::drawMin()
 
     glPushMatrix();
 
-
     switch (actualCube) {
+    case 1:
+         glTranslated(x + shift[0], y, 0.0);
+         break;
     case 2:
         if (ozSize == 1 && terms[minPos][1].isMissing()) {
             glRotated(90, 0.0, 0.0, 1.0);
@@ -702,7 +717,6 @@ void CubeGLDrawer::drawMin()
             glTranslated(x + shift[0], y + shift[1], -shift[2]);
         }
     }
-
 
     glCallList(minSphereListId);
     glPopMatrix();

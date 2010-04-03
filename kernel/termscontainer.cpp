@@ -150,6 +150,7 @@ bool TermsContainer::hasTerm(const Term &t) const
 {
     if (termsVector->empty() || termsVector->at(0).getSize() != t.getSize())
         return false;
+    bool found = find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
     return find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
 }
 

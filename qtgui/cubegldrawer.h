@@ -156,7 +156,7 @@ private:
     // figures position of lights
     void figureLights();
     // makes text images and binds them to the texture
-    GLuint bindTextTextures(QString text, int width, int height,
+    GLuint bindTextTextures(const QString &text, int width, int height,
         int fontSize, const char *fontFamily,
         Qt::GlobalColor fontColor = Qt::black,
         Qt::GlobalColor bgColor = Qt::white);
@@ -210,6 +210,9 @@ private:
     int winHeight;
     // for term texture translation - not actived
     int termTranslated;
+    // whether formula is tautology or contradiction
+    bool tautology;
+    bool contradiction;
 
     // Timers setting - for correct pausing in inactive mode
     struct 	{

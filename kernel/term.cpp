@@ -52,7 +52,7 @@ Term::Term(unsigned s, bool isDC)
 Term::Term(int idx, unsigned s, bool isDC)
 {
     if (idx == MISSING_ALL)
-        init(idx, (1 << s) - 1, s, isDC);
+        init(0, (1 << s) - 1, s, isDC);
     else
         init(idx, 0, s, isDC);
 }

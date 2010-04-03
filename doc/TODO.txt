@@ -65,6 +65,11 @@ shell programming language - special bytecode
 - welcomewidget.cpp
   parametrized measuring
 
+- cubegldrawer.cpp
+  slowdown in textures - display, background
+  bad movement in some situations
+  animation by contradiction and tautology
+
 ## ------------------------------------------------------------------
 # TESTING FCE -------------------------------------------------------
 f(c,b,a) = sum m(1, 2)
