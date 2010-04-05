@@ -43,8 +43,7 @@ class QMenu;
 class QAction;
 class QActionGroup;
 class QString;
-class Formula;
-class Term;
+class Cube;
 class OutputValue;
 
 // widget class for opengl cube
@@ -128,17 +127,24 @@ private:
     void resizeWin(bool fullSetting = true);
     // makes all transformations
     void transformScene();
-    // draws min box
+    // transforms cover
+    void transformCover(int cover, GLdouble x = 0.0, GLdouble y = 0.0);
+    // draws covers
+    void drawCovers();
+    // draws min box and animated ball
     void drawMin();
     // draws cube - makes list
     void drawCube(int n, GLenum mode = GL_RENDER);
     // draws sphere
-    void drawSphere(int idx, GLenum mode,
-            GLdouble x, GLdouble y, GLdouble z);
+    void drawSphere(int idx, GLenum mode, GLdouble x, GLdouble y, GLdouble z);
+    // draws cuboid
+    void drawCuboid(GLdouble w, GLdouble h, GLdouble d, bool front = true);
     // makes sphere list
     void makeSpheres();
     // makes cylinder list
     void makeCylinder(int list);
+    // makes covers list
+    void makeCovers();
     // makes dysplay list
     void makeDisplay();
     // makes msg list
@@ -184,9 +190,10 @@ private:
     // key event
     void keyEvent(QKeyEvent *event, bool start);
 
-    // main formula
-    Formula *formula;
-    std::vector<Term> terms;
+    // kernel cube
+    Cube *cube;
+
+    // textures with terms' string
     std::vector<GLuint> termsTextures;
 
     // FLAGS
@@ -196,6 +203,8 @@ private:
     bool isActive;
     // show minimization panel and animation
     bool isMin;
+    // whether show covers
+    bool showCovers;
     // animation effect
     bool showAnimation;
     // actual visible term
@@ -210,9 +219,6 @@ private:
     int winHeight;
     // for term texture translation - not actived
     int termTranslated;
-    // whether formula is tautology or contradiction
-    bool tautology;
-    bool contradiction;
 
     // Timers setting - for correct pausing in inactive mode
     struct 	{
@@ -254,6 +260,7 @@ private:
     GLuint sphereListId;
     GLuint minSphereListId;
     GLuint cylinderListId;
+    GLuint coversListId;
     GLuint displayListId;
     GLuint bgListId;
     GLuint msgListId;

@@ -45,7 +45,6 @@ using namespace std;
 KMapWidget::KMapWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
 {
-    m_kernel = Kernel::instance();
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(invalidKMap()));
@@ -160,7 +159,7 @@ void KMapWidget::invalidKMap(bool noFormula)
 void KMapWidget::updateData()
 {
     if (m_active) {
-        m_kmap = m_kernel->getKMap();
+        m_kmap = m_gm->getKMap();
         if (!m_kmap->isValid()) {
             invalidKMap(m_kmap->getError() == KMap::NO_FORMULA);
             return;

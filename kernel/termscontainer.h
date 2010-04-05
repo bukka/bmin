@@ -62,7 +62,7 @@ public:
     // returns value of term with idx
     OutputValue getTermValue(int idx) const;
     // returns term at position pos
-    Term at(unsigned pos) const;
+    const Term &at(unsigned pos) const;
 
     // returns terms id with val from original terms
     std::vector<int> getTermsIdx(int val);

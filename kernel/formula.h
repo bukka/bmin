@@ -109,7 +109,7 @@ public:
     // returns actual maxterms (without creating new vector)
     std::vector<Term> &getMaxterms(std::vector<Term> &maxterms) const;
     // returns term at position pos
-    Term getTermAt(unsigned pos) const;
+    const Term &getTermAt(unsigned pos) const;
     // returns number of terms
     unsigned getSize() const;
     // returns maximal number of terms (by tautology or contradiction)

@@ -271,7 +271,7 @@ vector<Term> &Formula::getMaxterms(vector<Term> &maxterms) const
 }
 
 // returns term at position pos
-Term Formula::getTermAt(unsigned pos) const
+const Term &Formula::getTermAt(unsigned pos) const
 {
     if (pos >= terms->getSize())
         throw InvalidPositionExc(pos);

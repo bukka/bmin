@@ -25,6 +25,8 @@
 #include "quinemccluskey.h"
 #include "outputvalue.h"
 #include "constants.h"
+#include "kmap.h"
+#include "cube.h"
 // shell
 #include "parser.h"
 
@@ -141,6 +143,16 @@ Formula *GUIManager::getMinimizedFormula()
 QuineMcCluskeyData *GUIManager::getQmData()
 {
     return m_kernel->getQmData();
+}
+
+KMap *GUIManager::getKMap()
+{
+    return m_kernel->getKMap();
+}
+
+Cube *GUIManager::getCube()
+{
+    return m_kernel->getCube();
 }
 
 void GUIManager::invalidate()

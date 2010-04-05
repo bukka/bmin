@@ -26,7 +26,6 @@
 #include <QString>
 
 class GUIManager;
-class Kernel;
 class KMap;
 class KMapGridWidget;
 class TermsModel;
@@ -55,7 +54,6 @@ private:
     void deselectAll(QTableView *view, const QAbstractItemModel *model);
 
     GUIManager *m_gm;
-    Kernel *m_kernel;
     KMap *m_kmap;
     // array with grid widget (for one variable count one widget)
     KMapGridWidget **m_gridWidgets;

@@ -33,6 +33,7 @@ class Parser;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
 class KMap;
+class Cube;
 
 class QString;
 
@@ -80,6 +81,8 @@ public:
     QuineMcCluskeyData *getQmData();
     // returns K-map data
     KMap *getKMap();
+    // returns Cube data
+    Cube *getCube();
 
 protected:
     virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);

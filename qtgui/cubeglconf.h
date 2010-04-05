@@ -27,7 +27,7 @@
 #include <map>
 #include <string.h>
 
-#define CONF_FILE "conf/gl_cube.txt"
+#define CONF_FILE "glcube.conf"
 #define CONF_FILE_MAX_ROW 50
 
 #define CF_CUBE_A       "cube-size"
@@ -81,8 +81,9 @@ public:
     static const int MSG_FONT_SIZE     = 30; // font size
     static const int KT_CLOCK          = 31; // Key Timers clock
     static const int KT_STOP_AFTER     = 32; // stop interval
+    static const int COVER_PADDING     = 33;
 
-    static const int CONSTANTS_COUNT   = 33;
+    static const int CONSTANTS_COUNT   = 34;
 
     // key timers
     static const int KTR_UP       = 0;

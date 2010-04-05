@@ -33,6 +33,7 @@ class Events;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
 class KMap;
+class Cube;
 
 class Kernel
 {
@@ -88,6 +89,8 @@ public:
     QuineMcCluskeyData *getQmData();
     // returns Karnaugh map class
     KMap *getKMap();
+    // returns Cube class
+    Cube *getCube();
 
     // some error
     void error(std::exception &exc);
@@ -125,6 +128,8 @@ private:
     QuineMcCluskey *qm;
     // Karnaugh map class
     KMap *kmap;
+    // Cube class
+    Cube *cube;
 };
 
 

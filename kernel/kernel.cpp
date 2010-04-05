@@ -19,12 +19,13 @@
  */
 
 #include "kernel.h"
+#include "constants.h"
 #include "events.h"
 #include "formula.h"
 #include "outputvalue.h"
 #include "quinemccluskey.h"
 #include "kmap.h"
-#include "constants.h"
+#include "cube.h"
 
 #include <algorithm>
 
@@ -57,6 +58,7 @@ Kernel::Kernel()
     formula = minFormula = 0;
     qm = new QuineMcCluskey;
     kmap = new KMap;
+    cube = new Cube;
     repre = (Constants::SOP_DEFAULT? Formula::REP_SOP: Formula::REP_POS);
 }
 
@@ -65,6 +67,7 @@ Kernel::~Kernel()
     deleteFormula();
     deleteFormulas();
     delete kmap;
+    delete cube;
 }
 
 // adds new events' class
@@ -197,6 +200,13 @@ KMap *Kernel::getKMap()
 {
     kmap->setFormula(formula);
     return kmap;
+}
+
+// returns Cube class
+Cube *Kernel::getCube()
+{
+    cube->update();
+    return cube;
 }
 
 // adds new term to formula

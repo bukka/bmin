@@ -150,7 +150,6 @@ bool TermsContainer::hasTerm(const Term &t) const
 {
     if (termsVector->empty() || termsVector->at(0).getSize() != t.getSize())
         return false;
-    bool found = find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
     return find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
 }
 
@@ -195,7 +194,7 @@ OutputValue TermsContainer::getTermValue(int idx) const
         return OutputValue::ONE;
 }
 
-Term TermsContainer::at(unsigned pos) const
+const Term &TermsContainer::at(unsigned pos) const
 {
     return termsVector->at(pos);
 }
