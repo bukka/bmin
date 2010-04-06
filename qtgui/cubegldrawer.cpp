@@ -156,7 +156,7 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     animateTime = 0;
     isMin = false;
     showAnimation = true;
-    showCovers = false;
+    showCovers = true;
     termTranslated = 0;
 
     wAngle = 270.0;
@@ -166,6 +166,7 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     x3D = 0.0;
     y3D = 0.0;
     z3D = -1.8;
+    z3D = -0.9; // tmp
     wAngle3D = 0.0;
     hAngle3D = 0.0;
 
@@ -201,9 +202,12 @@ void CubeGLDrawer::reloadCube()
     cube->update();
     if (cube->isValid()) {
         makeCurrent();
+        paintedMsg = MSG_NONE;
         actualCube = cube->getVarsCount();
         drawCube(actualCube);
-        paintedMsg = MSG_NONE;
+
+        if (isMin || showCovers)
+            emit minRequested();
     }
     else if (cube->getError() == Cube::TOO_MANY_VARS) {
         actualCube = -1;
@@ -505,8 +509,18 @@ void CubeGLDrawer::paintGL()
             glCallList(bgListId);
         }
         glCallList(cubeListId + actualCube);
-        if (showCovers)
+        if (showCovers) {
+            /*glDisable(GL_LIGHTING);
+            glLineWidth(5.0);
+            glEnable(GL_LINE_SMOOTH);
+            glBegin(GL_LINE);
+            glColor3f (1.0, 0.0, 0.0);
+            glVertex3d(0.5, 0.5, 0);
+            glVertex3d(0, 0.5, 0);
+            glEnd();
+            glEnable(GL_LIGHTING);*/
             drawCovers();
+        }
         if (isMin && minPos >= 0)
             drawMin();
         glPopMatrix();
@@ -1055,10 +1069,9 @@ void CubeGLDrawer::makeCylinder(int list)
     glEndList();
 }
 
-
-static GLdouble getOverlap(GLdouble x1, GLdouble y1,
-                           GLdouble x2, GLdouble y2,
-                           GLdouble x3, GLdouble y3)
+static GLdouble getOverlapCoef(GLdouble x1, GLdouble y1,
+                               GLdouble x2, GLdouble y2,
+                               GLdouble x3, GLdouble y3)
 {
     GLdouble d12, d13, a, b, c;
 
@@ -1089,55 +1102,64 @@ void CubeGLDrawer::makeCovers()
         GLfloat diffuse[4] = {0.0, 1.0, 0.0, 1.0};
         glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 
-        int strips = 12;
-        int stacks = 8;
+        int strips = 8;
+        int stacks = 32;
         GLdouble r = 0.02;
-        GLdouble size = 0.1;
         GLdouble stripStep = 2 * M_PI / strips;
-        GLdouble stackStep = 1.0 / stacks;
-        GLdouble a = 0;
-        GLdouble t = stackStep;
+        GLdouble stackStep = 2 * M_PI / stacks;
+        GLdouble t = 2 * stackStep;
 
-        GLdouble x1, x2, x3, y1, y2, y3, y, z, normX, normY, normZ, overlap;
+        GLdouble px1, px2, px3, py1, py2, py3, alpha, beta;
+        GLdouble x1, x2, y1, y2, z, normX, normY, normZ, over1, over2;
 
         for (int j = 0; j < stacks; j++, t += stackStep) {
-
             if (j == 0) {
-                x1 = 2 * getD(SPHERE_R) * cos(2 * M_PI - stackStep);
-                y1 = 2 * getD(SPHERE_R) * sin(2 * M_PI - stackStep);
-                // t == 0
-                x2 = 2 * getD(SPHERE_R);
-                y2 = 0;
+                px1 = 2 * getD(SPHERE_R) * cos(2 * M_PI - stackStep);
+                py1 = 2 * getD(SPHERE_R) * sin(2 * M_PI - stackStep);
+                px2 = 2 * getD(SPHERE_R); // t == 0
+                py2 = 0; // t == 0
+                px3 = 2 * getD(SPHERE_R) * cos(stackStep);
+                py3 = 2 * getD(SPHERE_R) * sin(stackStep);
+
+                // for copying as over1
+                over2 = r * getOverlapCoef(px1, py1, px2, py2, px3, py3);
             }
-            else {
-                x1 = x2;
-                y1 = y2;
-                x2 = x3;
-                y2 = y3;
-            }
-            x3 = 2 * getD(SPHERE_R) * cos(t);
-            y3 = 2 * getD(SPHERE_R) * sin(t);
 
-            overlap = getOverlap(x1, y1, x2, y2, x3, y3);
+            px1 = px2;
+            py1 = py2;
+            px2 = px3;
+            py2 = py3;
+            px3 = 2 * getD(SPHERE_R) * cos(t);
+            py3 = 2 * getD(SPHERE_R) * sin(t);
 
+            // overlap
+            over1 = over2;
+            over2 = r * getOverlapCoef(px1, py1, px2, py2, px3, py3);
+            over1 = over2 = 0;
 
-            x1 = 0;
-            normX = 0;
+            alpha = atan((px1 - px2) / (py1 - py2));
+
+            normX = sin(t);
 
             glBegin(GL_QUAD_STRIP);
-            for (int k = 0; k <= strips; k++, a += stripStep) {
-                x2 = size;
-                normY = cos(a);
-                normZ = sin(a);
+            beta = 0;
+            for (int k = 0; k <= strips; k++, beta += stripStep) {
+                normY = cos(beta);
+                normZ = sin(beta);
                 glNormal3d(normX, normY, normZ);
 
-                y = r * cos(a);
-                z = r * sin(a);
-                glVertex3d(x2, y, z);
-                glVertex3d(x1, y, z);
+                x1 = px1 + over1 * sin(alpha);
+                x2 = px2 + over2 * sin(alpha);
+                y1 = py1 + over1 * cos(alpha) + r * cos(beta);
+                y2 = py2 + over2 * cos(alpha) + r * cos(beta);
+                z = r * sin(beta);
+
+                glVertex3d(x1, y1, z);
+                glVertex3d(x2, y2, z);
             }
             glEnd();
 
+            //if (j == 0) break;
         }
         glEndList();
     }
