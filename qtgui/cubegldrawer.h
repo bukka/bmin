@@ -129,6 +129,14 @@ private:
     void transformScene();
     // transforms cover
     void transformCover(int cover, GLdouble x = 0.0, GLdouble y = 0.0);
+    // sets cover points around 4 spheres
+    void setCover4Points();
+    // sets cover points around 2 spheres
+    void setCover2Points();
+    // gets cover points
+    void getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y);
+
+
     // draws covers
     void drawCovers();
     // draws min box and animated ball
@@ -174,10 +182,6 @@ private:
     }
     // binds terms to the textures
     void bindTermsTextures();
-    // set animation points around 4 spheres
-    void setMin4();
-    // set animation points around 2 spheres
-    void setMin2();
     // generates dynamic's texture images
     void genDT();
 

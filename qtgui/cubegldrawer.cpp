@@ -32,6 +32,9 @@
 #include "parser.h"
 
 #include <math.h>
+#define PI    3.14159265358979323846	/* pi */
+#define PI_2  1.57079632679489661923	/* pi/2 */
+#define PI_4  0.78539816339744830962	/* pi/4 */
 
 #include <QWidget>
 #include <QColor>
@@ -56,74 +59,6 @@ static inline void setArray(GLfloat *a, GLfloat r, GLfloat g, GLfloat b, GLfloat
     a[3] = w;
 }
 
-static inline void setParam(GLdouble **pa, GLdouble x, GLdouble y)
-{
-    (*pa)[0] = x;
-    (*pa)[1] = y;
-    *pa += 2;
-}
-
-void CubeGLDrawer::setMin2()
-{
-    GLdouble *p = min2Points;
-    GLdouble *d = min2Derivs;
-    GLdouble h = 2.0 * getD(SPHERE_R);
-    GLdouble w = getD(CUBE_A) / 2.0;
-    GLdouble v = getD(CUBE_A);
-
-    setParam(&p, -w, h);
-    setParam(&d, +v, 0);
-
-    setParam(&p, +w, h);
-    setParam(&d, +v, 0);
-
-    setParam(&p, +w, -h);
-    setParam(&d, -v, 0);
-
-    setParam(&p, -w, -h);
-    setParam(&d, -v, 0);
-
-    setParam(&p, -w, h);
-    setParam(&d, +v, 0);
-
-}
-
-void CubeGLDrawer::setMin4()
-{
-    GLdouble *p = min4Points;
-    GLdouble *d = min4Derivs;
-    GLdouble i = getD(CUBE_A) / 2.0 - 1.3 * getD(SPHERE_R);
-    GLdouble o = getD(CUBE_A) / 2.0 + 2.0 * getD(SPHERE_R);
-    GLdouble v1 = getD(CUBE_A) / 2.0;
-    GLdouble v2 = getD(CUBE_A) / 1.5;
-
-    setParam(&p, -i, o);
-    setParam(&d, v1, 0);
-
-    setParam(&p, i, o);
-    setParam(&d, v2, 0);
-
-    setParam(&p, o, i);
-    setParam(&d, 0, -v1);
-
-    setParam(&p, o, -i);
-    setParam(&d, 0, -v2);
-
-    setParam(&p, i, -o);
-    setParam(&d, -v1, 0);
-
-    setParam(&p, -i, -o);
-    setParam(&d, -v2, 0);
-
-    setParam(&p, -o, -i);
-    setParam(&d, 0, v1);
-
-    setParam(&p, -o, i);
-    setParam(&d, 0, v2);
-
-    setParam(&p, -i, o);
-    setParam(&d, v1, 0);
-}
 
 CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     QWidget *parent) : QGLWidget(format, parent), CubeGLConf()
@@ -138,9 +73,9 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     setArray(zeroDiffuse,     0.0f, 1.0f, 1.0f);
     setArray(dcDiffuse,       1.0f, 0.0f, 1.0f);
     setArray(cylinderDiffuse, 0.6f, 0.6f, 0.6f);
-    // set min points
-    setMin2();
-    setMin4();
+    // set cover points
+    setCover2Points();
+    setCover4Points();
 
     // lights
     lightsAngle = 30.0;
@@ -166,7 +101,6 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     x3D = 0.0;
     y3D = 0.0;
     z3D = -1.8;
-    z3D = -0.9; // tmp
     wAngle3D = 0.0;
     hAngle3D = 0.0;
 
@@ -190,7 +124,7 @@ CubeGLDrawer::~CubeGLDrawer()
     glDeleteLists(cubeListId, MAX_N + 1);
     glDeleteLists(sphereListId, 1);
     glDeleteLists(cylinderListId, 1);
-    glDeleteLists(coversListId, MAX_N + 1);
+    glDeleteLists(coversListId, MAX_N);
     glDeleteLists(displayListId, 1);
     glDeleteLists(bgListId, 1);
 }
@@ -341,7 +275,7 @@ void CubeGLDrawer::rotateCube()
 // figures out lights' positions
 void CubeGLDrawer::figureLights()
 {
-    GLfloat lightsAngleRad = lightsAngle * M_PI / 180;
+    GLfloat lightsAngleRad = lightsAngle * PI / 180;
     GLfloat y = sin(lightsAngleRad);
     GLfloat z = cos(lightsAngleRad);
     setArray(light1Pos,  0.2f,  y,  z, 0.0f);
@@ -426,7 +360,7 @@ void CubeGLDrawer::initializeGL()
     sphereListId = glGenLists(1);
     minSphereListId = glGenLists(1);
     cylinderListId = glGenLists(2);
-    coversListId = glGenLists(MAX_N + 1);
+    coversListId = glGenLists(MAX_N);
     displayListId = glGenLists(1);
     bgListId = glGenLists(1);
 
@@ -509,18 +443,8 @@ void CubeGLDrawer::paintGL()
             glCallList(bgListId);
         }
         glCallList(cubeListId + actualCube);
-        if (showCovers) {
-            /*glDisable(GL_LIGHTING);
-            glLineWidth(5.0);
-            glEnable(GL_LINE_SMOOTH);
-            glBegin(GL_LINE);
-            glColor3f (1.0, 0.0, 0.0);
-            glVertex3d(0.5, 0.5, 0);
-            glVertex3d(0, 0.5, 0);
-            glEnd();
-            glEnable(GL_LIGHTING);*/
+        if (showCovers)
             drawCovers();
-        }
         if (isMin && minPos >= 0)
             drawMin();
         glPopMatrix();
@@ -529,7 +453,7 @@ void CubeGLDrawer::paintGL()
 
 void CubeGLDrawer::transformScene()
 {
-    static GLdouble dtor = M_PI / 180.0;
+    static GLdouble dtor = PI / 180.0;
     GLdouble wAngleRad, hAngleRad;
 
     if (camera == CAM_ROTATE) {
@@ -646,6 +570,128 @@ void CubeGLDrawer::transformCover(int cover, GLdouble x, GLdouble y)
     }
 }
 
+static void setParam(GLdouble **pa, GLdouble x, GLdouble y)
+{
+    (*pa)[0] = x;
+    (*pa)[1] = y;
+    *pa += 2;
+}
+
+void CubeGLDrawer::setCover2Points()
+{
+    GLdouble *p = min2Points;
+    GLdouble *d = min2Derivs;
+    GLdouble h = 2.0 * getD(SPHERE_R);
+    GLdouble w = getD(CUBE_A) / 2.0;
+    GLdouble v = getD(CUBE_A);
+
+    setParam(&p, -w, h);
+    setParam(&d, +v, 0);
+
+    setParam(&p, +w, h);
+    setParam(&d, +v, 0);
+
+    setParam(&p, +w, -h);
+    setParam(&d, -v, 0);
+
+    setParam(&p, -w, -h);
+    setParam(&d, -v, 0);
+
+    setParam(&p, -w, h);
+    setParam(&d, +v, 0);
+
+}
+
+void CubeGLDrawer::setCover4Points()
+{
+    GLdouble *p = min4Points;
+    GLdouble *d = min4Derivs;
+    GLdouble i = getD(CUBE_A) / 2.0 - 1.3 * getD(SPHERE_R);
+    GLdouble o = getD(CUBE_A) / 2.0 + 2.0 * getD(SPHERE_R);
+    GLdouble v1 = getD(CUBE_A) / 2.0;
+    GLdouble v2 = getD(CUBE_A) / 1.5;
+
+    setParam(&p, -i, o);
+    setParam(&d, v1, 0);
+
+    setParam(&p, i, o);
+    setParam(&d, v2, 0);
+
+    setParam(&p, o, i);
+    setParam(&d, 0, -v1);
+
+    setParam(&p, o, -i);
+    setParam(&d, 0, -v2);
+
+    setParam(&p, i, -o);
+    setParam(&d, -v1, 0);
+
+    setParam(&p, -i, -o);
+    setParam(&d, -v2, 0);
+
+    setParam(&p, -o, -i);
+    setParam(&d, 0, v1);
+
+    setParam(&p, -o, i);
+    setParam(&d, 0, v2);
+
+    setParam(&p, -i, o);
+    setParam(&d, v1, 0);
+}
+
+// Hermit curve: t-polynomials
+static inline GLdouble hcF1(GLdouble t)
+{
+    return 2.0 * t * t * t - 3.0 * t * t + 1.0;
+}
+static inline GLdouble hcF2(GLdouble t)
+{
+    return -2.0 * t * t * t + 3.0 * t * t ;
+}
+static inline GLdouble hcF3(GLdouble t)
+{
+    return t * t * t - 2.0 * t * t + t;
+}
+static inline GLdouble hcF4(GLdouble t)
+{
+    return t * t * t - t * t;
+}
+
+void CubeGLDrawer::getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y)
+{
+    if (cover == 0) {
+        t *= 2 * PI;
+        x = 2 * getD(SPHERE_R) * cos(t);
+        y = 2 * getD(SPHERE_R) * sin(t);
+    }
+    else {
+        GLdouble *p, *d;
+        int size, pos;
+
+        if (cover == 1) {
+            p = min2Points;
+            d = min2Derivs;
+            size = MIN2_POINTS;
+        }
+        else { // cover == 2
+            p = min4Points;
+            d = min4Derivs;
+            size = MIN4_POINTS;
+        }
+
+        t *= size;
+        pos = (int) t;
+        t -= pos;
+
+        GLdouble *p1 = &p[2 * pos];
+        GLdouble *p2 = &p[2 * pos + 2];
+        GLdouble *d1 = &d[2 * pos];
+        GLdouble *d2 = &d[2 * pos + 2];
+        x =  p1[0] * hcF1(t) + p2[0] * hcF2(t) + d1[0] * hcF3(t) + d2[0] * hcF4(t);
+        y =  p1[1] * hcF1(t) + p2[1] * hcF2(t) + d1[1] * hcF3(t) + d2[1] * hcF4(t);
+    }
+}
+
 void CubeGLDrawer::drawCovers()
 {
     if (cube->isContradiction())
@@ -665,24 +711,6 @@ void CubeGLDrawer::drawCovers()
             glPopMatrix();
         }
     }
-}
-
-// Hermit curve: t-polynomials
-static inline GLdouble hcF1(GLdouble t)
-{
-    return 2.0 * t * t * t - 3.0 * t * t + 1.0;
-}
-static inline GLdouble hcF2(GLdouble t)
-{
-    return -2.0 * t * t * t + 3.0 * t * t ;
-}
-static inline GLdouble hcF3(GLdouble t)
-{
-    return t * t * t - 2.0 * t * t + t;
-}
-static inline GLdouble hcF4(GLdouble t)
-{
-    return t * t * t - t * t;
 }
 
 void CubeGLDrawer::drawMin()
@@ -737,7 +765,7 @@ void CubeGLDrawer::drawMin()
     GLdouble x, y, t;
 
     if (ozSize == actualCube) {
-        t = animateTime * 4 * M_PI;
+        t = animateTime * 4 * PI;
         x = 2 * getD(SPHERE_R) * cos(t);
         y = 2 * getD(SPHERE_R) * sin(t);
     }
@@ -1035,7 +1063,7 @@ void CubeGLDrawer::makeCylinder(int list)
     a = 0.0;
     x1 = getD(CYLINDER_R);
     y1 = 0.0;
-    step = M_PI / getI(CYLINDER_STRIPS);
+    step = PI / getI(CYLINDER_STRIPS);
 
     if (list == 0) {
         length = (getD(CUBE_A) - 2 * overlap) / getI(CYLINDER_STACKS);
@@ -1069,97 +1097,117 @@ void CubeGLDrawer::makeCylinder(int list)
     glEndList();
 }
 
-static GLdouble getOverlapCoef(GLdouble x1, GLdouble y1,
-                               GLdouble x2, GLdouble y2,
-                               GLdouble x3, GLdouble y3)
+static GLdouble getAngle(GLdouble x, GLdouble y)
 {
-    GLdouble d12, d13, a, b, c;
+    GLdouble alpha = atan(y / x);
+    if (x > 0 && y < 0)
+        alpha += 2 * PI;
+    else if (x < 0)
+        alpha += PI;
+    return alpha;
+}
 
-    d12 = sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2));
-    d13 = sqrt((x1 - x3) * (x1 - x3) + (y1 - y3) * (y1 - y3));
-    c = d12;
-    b = d13 / 2.0;
-    a = sqrt(c * c - b * b);
+static bool isVerticalConnection(GLdouble angle)
+{
+    static GLdouble pi_m3d4 = 3 * PI_4;
+    static GLdouble pi_m5d4 = 5 * PI_4;
+    static GLdouble pi_m7d4 = 7 * PI_4;
 
-    return a / b; // tg alpha
+    return (angle > PI_4 && angle < pi_m3d4) || (angle > pi_m5d4 && angle < pi_m7d4);
 }
 
 void CubeGLDrawer::makeCovers()
 {
-    GLdouble small = 2.0 * (getD(SPHERE_R) + getD(COVER_PADDING));
-    GLdouble big = getD(CUBE_A) + small;
-    GLdouble data[] = {
-        small, small, small, // 1 term
-        big, small, small,   // 2 terms
-        big, big, small,     // 4 terms
-    };
-    GLdouble *ptr = data;
+    GLdouble px1, px2, px0, py1, py2, py0, alpha, beta;
+    GLdouble x1, x2, y1, y2, z, normX, normY, normZ;
+    bool vert1, vert2, reverse;
+    int strips = getI(COVER_STRIPS);
+    int stacks = getI(COVER_STACKS);
+    GLdouble r = getD(COVER_R);
+    GLdouble stripStep = 2 * PI / strips;
+    GLdouble stackStep = 1.0 / stacks;
 
-
-    int count = sizeof (data) / (3 * sizeof (GLdouble));
-    for (int i = 0; i < count; i++, ptr += 3) {
-        glNewList(coversListId + i, GL_COMPILE);
+    for (int cover = 0; cover < MAX_N; cover++) {
+        glNewList(coversListId + cover, GL_COMPILE);
         GLfloat diffuse[4] = {0.0, 1.0, 0.0, 1.0};
         glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 
-        int strips = 8;
-        int stacks = 32;
-        GLdouble r = 0.02;
-        GLdouble stripStep = 2 * M_PI / strips;
-        GLdouble stackStep = 2 * M_PI / stacks;
-        GLdouble t = 2 * stackStep;
+        GLdouble t = stackStep;
+        reverse = false;
 
-        GLdouble px1, px2, px3, py1, py2, py3, alpha, beta;
-        GLdouble x1, x2, y1, y2, z, normX, normY, normZ, over1, over2;
+        for (int i = 0; i < stacks; i++, t += stackStep) {
+            if (i == 0) {
+                t = 1.0 - 2 * stackStep;
+                getCoverPoint(cover, t, px0, py0);
+                t += stackStep;
+                getCoverPoint(cover, t, px1, py1);
 
-        for (int j = 0; j < stacks; j++, t += stackStep) {
-            if (j == 0) {
-                px1 = 2 * getD(SPHERE_R) * cos(2 * M_PI - stackStep);
-                py1 = 2 * getD(SPHERE_R) * sin(2 * M_PI - stackStep);
-                px2 = 2 * getD(SPHERE_R); // t == 0
-                py2 = 0; // t == 0
-                px3 = 2 * getD(SPHERE_R) * cos(stackStep);
-                py3 = 2 * getD(SPHERE_R) * sin(stackStep);
-
-                // for copying as over1
-                over2 = r * getOverlapCoef(px1, py1, px2, py2, px3, py3);
+                alpha = getAngle(px1, py1);
+                vert1 = isVerticalConnection(alpha);
+                t = 0;
+            }
+            else {
+                px1 = px2;
+                py1 = py2;
+                vert1 = vert2;
             }
 
-            px1 = px2;
-            py1 = py2;
-            px2 = px3;
-            py2 = py3;
-            px3 = 2 * getD(SPHERE_R) * cos(t);
-            py3 = 2 * getD(SPHERE_R) * sin(t);
+            getCoverPoint(cover, t, px2, py2);
 
-            // overlap
-            over1 = over2;
-            over2 = r * getOverlapCoef(px1, py1, px2, py2, px3, py3);
-            over1 = over2 = 0;
-
-            alpha = atan((px1 - px2) / (py1 - py2));
-
-            normX = sin(t);
+            alpha = getAngle(px2, py2);
+            normX = -cos(alpha);
+            vert2 = isVerticalConnection(alpha);
 
             glBegin(GL_QUAD_STRIP);
             beta = 0;
-            for (int k = 0; k <= strips; k++, beta += stripStep) {
+            for (int j = 0; j <= strips; j++, beta += stripStep) {
                 normY = cos(beta);
                 normZ = sin(beta);
+                if (reverse) {
+                    normX = -normX;
+                    normY = -normY;
+                }
                 glNormal3d(normX, normY, normZ);
 
-                x1 = px1 + over1 * sin(alpha);
-                x2 = px2 + over2 * sin(alpha);
-                y1 = py1 + over1 * cos(alpha) + r * cos(beta);
-                y2 = py2 + over2 * cos(alpha) + r * cos(beta);
+                if (vert1) {
+                    x1 = px1;
+                    y1 = py1 + r * cos(beta);
+                }
+                else {
+                    x1 = px1 + r * cos(beta);
+                    y1 = py1;
+                }
+
+                if (vert2) {
+                    x2 = px2;
+                    
+                    y2 = py2 + r * cos(beta);
+                }
+                else {
+                    if (vert1)
+                       x2 = px2 - r * cos(beta);
+                    else
+                        x2 = px2 + r * cos(beta);
+                    y2 = py2;
+                }
+
                 z = r * sin(beta);
 
-                glVertex3d(x1, y1, z);
-                glVertex3d(x2, y2, z);
-            }
-            glEnd();
 
-            //if (j == 0) break;
+                if (reverse) {
+                    glVertex3d(x2, y2, z);
+                    glVertex3d(x1, y1, z);
+                }
+                else {
+                    glVertex3d(x1, y1, z);
+                    glVertex3d(x2, y2, z);
+                }
+            }
+
+            if ((vert1 && !vert2))
+                reverse = !reverse;
+
+            glEnd();
         }
         glEndList();
     }
@@ -1365,7 +1413,7 @@ void CubeGLDrawer::makeTimers()
 void CubeGLDrawer::go3D(direction d, GLdouble orient)
 {
     GLfloat stepX, stepY, stepZ;
-    GLfloat dtor = M_PI / 180.0;
+    GLfloat dtor = PI / 180.0;
     GLfloat wAngleRad  = wAngle3D * dtor;
     GLfloat hAngleRad  = hAngle3D * dtor;
 

@@ -67,7 +67,9 @@ CubeGLConf::CubeGLConf()
     data[MSG_FONT_SIZE].i     = 20; // font size
     data[KT_CLOCK].i          = 30;
     data[KT_STOP_AFTER].i     = 50;
-    data[COVER_PADDING].d     = 0.1;
+    data[COVER_R].d           = 0.01;
+    data[COVER_STRIPS].i      = 8;
+    data[COVER_STACKS].i      = 32;
 
     cfm_def(cfm, CUBE_A);
     cfm_def(cfm, SPHERE_R);
