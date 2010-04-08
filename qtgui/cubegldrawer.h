@@ -178,7 +178,7 @@ private:
     GLuint bindMsgTexture(QString text)
     {
         return bindTextTextures(text, getI(MSG_IMG_W), getI(MSG_IMG_H),
-            getI(MSG_FONT_SIZE), "Monospace", Qt::red, Qt::black);
+            getI(MSG_FONT_SIZE), "Arial", Qt::red, Qt::black);
     }
     // binds terms to the textures
     void bindTermsTextures();

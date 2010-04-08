@@ -32,7 +32,6 @@ class TermsModel;
 class CoversModel;
 class QLabel;
 class QCheckBox;
-class QListView;
 class QTableView;
 class QAbstractItemModel;
 class QGraphicsScene;

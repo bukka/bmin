@@ -26,6 +26,14 @@
 #include "modulewidget.h"
 
 class CubeGLDrawer;
+class GUIManager;
+class KMap;
+class KMapGridWidget;
+class TermsModel;
+class CoversModel;
+class QLabel;
+class QCheckBox;
+class QTableView;
 
 // BooleanCube class - superstructure for cube drawer
 class CubeWidget : public ModuleWidget
@@ -33,6 +41,8 @@ class CubeWidget : public ModuleWidget
     Q_OBJECT
 
 public:
+    static const int SIDEBAR_SIZE = 150;
+
     // CubeWidget constructor
     CubeWidget(const QString &name, int pos);
 
@@ -42,6 +52,17 @@ protected:
 
 private:
     CubeGLDrawer *m_drawer;
+    GUIManager *m_gm;
+
+    TermsModel *m_termsModel;
+    CoversModel *m_coversModel;
+    QTableView *m_termsView;
+    QTableView *m_coversView;
+    QCheckBox *m_coversCheckBox;
+    QLabel *m_termsLabel;
+    QString m_termsStr;
+    QString m_mintermsStr;
+    QString m_maxtermsStr;
 
 signals:
     void activated(bool); // activity of cube was changed

@@ -62,8 +62,8 @@ CubeGLConf::CubeGLConf()
     data[TERM_IMG_W].i        = 90;
     data[TERM_IMG_H].i        = 30;
     data[TERM_FONT_SIZE].i    = 18; // font size
-    data[MSG_IMG_W].i         = 300;
-    data[MSG_IMG_H].i         = 40;
+    data[MSG_IMG_W].i         = 350;
+    data[MSG_IMG_H].i         = 50;
     data[MSG_FONT_SIZE].i     = 20; // font size
     data[KT_CLOCK].i          = 30;
     data[KT_STOP_AFTER].i     = 50;

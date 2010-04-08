@@ -679,7 +679,7 @@ void CubeGLDrawer::getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y
             size = MIN4_POINTS;
         }
 
-        t *= size;
+        t = (1.0 - t) * size;
         pos = (int) t;
         t -= pos;
 
@@ -763,40 +763,18 @@ void CubeGLDrawer::drawMin()
         return;
 
     GLdouble x, y, t;
+    int cover;
 
     if (ozSize == actualCube) {
-        t = animateTime * 4 * PI;
-        x = 2 * getD(SPHERE_R) * cos(t);
-        y = 2 * getD(SPHERE_R) * sin(t);
+        t = 2 * animateTime;
+        cover = 0;
     }
     else {
-        GLdouble *p, *d;
-        int size, pos;
-
-        if (ozSize == actualCube - 1) {
-            p = min2Points;
-            d = min2Derivs;
-            size = MIN2_POINTS;
-        }
-        else {
-            p = min4Points;
-            d = min4Derivs;
-            size = MIN4_POINTS;
-        }
-
-        t = animateTime * size;
-        pos = (int) t;
-        t -= pos;
-
-        GLdouble *p1 = &p[2 * pos];
-        GLdouble *p2 = &p[2 * pos + 2];
-        GLdouble *d1 = &d[2 * pos];
-        GLdouble *d2 = &d[2 * pos + 2];
-        x =  p1[0] * hcF1(t) + p2[0] * hcF2(t)
-             + d1[0] * hcF3(t) + d2[0] * hcF4(t);
-        y =  p1[1] * hcF1(t) + p2[1] * hcF2(t)
-             + d1[1] * hcF3(t) + d2[1] * hcF4(t);
+        t = animateTime;
+        cover = ((ozSize == actualCube - 1)? 1: 2);
     }
+
+    getCoverPoint(cover, t, x, y);
 
     glPushMatrix();
     transformCover(minPos, x, y);
@@ -1097,29 +1075,10 @@ void CubeGLDrawer::makeCylinder(int list)
     glEndList();
 }
 
-static GLdouble getAngle(GLdouble x, GLdouble y)
-{
-    GLdouble alpha = atan(y / x);
-    if (x > 0 && y < 0)
-        alpha += 2 * PI;
-    else if (x < 0)
-        alpha += PI;
-    return alpha;
-}
-
-static bool isVerticalConnection(GLdouble angle)
-{
-    static GLdouble pi_m3d4 = 3 * PI_4;
-    static GLdouble pi_m5d4 = 5 * PI_4;
-    static GLdouble pi_m7d4 = 7 * PI_4;
-
-    return (angle > PI_4 && angle < pi_m3d4) || (angle > pi_m5d4 && angle < pi_m7d4);
-}
-
 void CubeGLDrawer::makeCovers()
 {
-    GLdouble px1, px2, px0, py1, py2, py0, alpha, beta;
-    GLdouble x1, x2, y1, y2, z, normX, normY, normZ;
+    GLdouble px1, px2, px0, py1, py2, py0, beta;
+    GLdouble x1, x2, y1, y2, z, normY, normZ;
     bool vert1, vert2, reverse;
     int strips = getI(COVER_STRIPS);
     int stacks = getI(COVER_STACKS);
@@ -1142,8 +1101,7 @@ void CubeGLDrawer::makeCovers()
                 t += stackStep;
                 getCoverPoint(cover, t, px1, py1);
 
-                alpha = getAngle(px1, py1);
-                vert1 = isVerticalConnection(alpha);
+                vert1 = fabs(px0 - px1) > fabs(py0 - py1);
                 t = 0;
             }
             else {
@@ -1154,20 +1112,18 @@ void CubeGLDrawer::makeCovers()
 
             getCoverPoint(cover, t, px2, py2);
 
-            alpha = getAngle(px2, py2);
-            normX = -cos(alpha);
-            vert2 = isVerticalConnection(alpha);
+            vert2 = fabs(px1 - px2) > fabs(py1 - py2);
 
             glBegin(GL_QUAD_STRIP);
             beta = 0;
             for (int j = 0; j <= strips; j++, beta += stripStep) {
                 normY = cos(beta);
                 normZ = sin(beta);
-                if (reverse) {
-                    normX = -normX;
+                if (reverse)
                     normY = -normY;
-                }
-                glNormal3d(normX, normY, normZ);
+
+                glNormal3d(0, normY, normZ);
+
 
                 if (vert1) {
                     x1 = px1;
@@ -1180,12 +1136,12 @@ void CubeGLDrawer::makeCovers()
 
                 if (vert2) {
                     x2 = px2;
-                    
+
                     y2 = py2 + r * cos(beta);
                 }
                 else {
                     if (vert1)
-                       x2 = px2 - r * cos(beta);
+                        x2 = px2 - r * cos(beta);
                     else
                         x2 = px2 + r * cos(beta);
                     y2 = py2;
@@ -1202,12 +1158,14 @@ void CubeGLDrawer::makeCovers()
                     glVertex3d(x1, y1, z);
                     glVertex3d(x2, y2, z);
                 }
+
             }
 
             if ((vert1 && !vert2))
                 reverse = !reverse;
 
             glEnd();
+
         }
         glEndList();
     }
@@ -1248,7 +1206,7 @@ void CubeGLDrawer::makeMsg()
     msgTexture[MSG_OVER] = bindMsgTexture(QString(tr("Maximal "))
         + QString::number(MAX_N) + QString(tr("-Cube")));
     // MSG_INVALID = 1
-    msgTexture[MSG_INVALID] = bindMsgTexture(tr("Unknown function"));
+    msgTexture[MSG_INVALID] = bindMsgTexture(tr("No logic function for Cube"));
 
 
     GLdouble x = 0.75;

@@ -49,6 +49,9 @@ namespace Constants {
     const bool SOP_DEFAULT = true;    
 
     // whether show covers in kmap implicitly
+    const bool CUBE_COVERS_DEFAULT = false;
+
+    // whether show covers in kmap implicitly
     const bool KMAP_COVERS_DEFAULT = false;
 
     // whether line mode in kmap head is default
