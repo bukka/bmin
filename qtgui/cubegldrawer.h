@@ -53,48 +53,20 @@ class CubeGLDrawer : public QGLWidget, public CubeGLConf
 
 public:
     // maximal number of variables
-    static const int MAX_N = 3;
+    static const unsigned MAX_N = 3;
     // maximal number of terms
-    static const int MAX_T = 1 << MAX_N; // 2 ^ MAX_N
+    static const unsigned MAX_T = 1 << MAX_N; // 2 ^ MAX_N
 
     CubeGLDrawer(const QGLFormat &format, QWidget *parent = 0);
     ~CubeGLDrawer();
 
+    // updates Cube
+    void updateCube() { updateGL(); }
+
+    // key events
     void cubeKeyPressEvent(QKeyEvent *event);
     void cubeKeyReleaseEvent(QKeyEvent *event);
 
-signals:
-    // emmited when key M is pushed - minimizing
-    void minRequested();
-    // emited when it is clicked on sphere
-    void cubeChanged(int idx, OutputValue &value);
-
-public slots:
-    // formula changed -> reloading cube
-    void reloadCube();
-    // when formula is minimized
-    void minimizeCube();
-    // when formula is invalid
-    void invalidateCube();
-    // setting activity
-    void setActivity(bool active);
-
-private slots:
-    // slots for menu actions
-    void rotateCube();
-    void rotateLights();
-    void animateMin();
-    void setCamera3D();
-    void setCameraRotate();
-    void switchLight0();
-    void switchLight1();
-    void switchLight2();
-    void setBgNone();
-    void setBgPattern();
-    void setBgComplete();
-    void setAnimation();
-    void keyClock();
-    void keyTimerStop();
 
 protected:
     // OpenGL methods
@@ -135,8 +107,6 @@ private:
     void setCover2Points();
     // gets cover points
     void getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y);
-
-
     // draws covers
     void drawCovers();
     // draws min box and animated ball
@@ -175,21 +145,14 @@ private:
         Qt::GlobalColor fontColor = Qt::black,
         Qt::GlobalColor bgColor = Qt::white);
     // binds msg to the the texture
-    GLuint bindMsgTexture(QString text)
-    {
-        return bindTextTextures(text, getI(MSG_IMG_W), getI(MSG_IMG_H),
-            getI(MSG_FONT_SIZE), "Arial", Qt::red, Qt::black);
-    }
+    inline GLuint bindMsgTexture(QString text);
     // binds terms to the textures
     void bindTermsTextures();
     // generates dynamic's texture images
     void genDT();
 
-    void stopMin() { minTimer->stop(); isMin = false; }
     bool isInverted3D() { return hAngle3D > 90.0 && hAngle3D < 270.0; }
 
-    // updates Cube
-    void updateCube() { updateGL(); }
 
     // key event
     void keyEvent(QKeyEvent *event, bool start);
@@ -203,12 +166,16 @@ private:
     // FLAGS
     // cube N
     int actualCube;
+    // whether function was changed during inactive time
+    bool fceChanged;
+    // whether minimized function was changed during inactive time
+    bool minFceChanged;
     // whether cube tab is showed
     bool isActive;
     // show minimization panel and animation
     bool isMin;
     // whether show covers
-    bool showCovers;
+    bool areCovers;
     // animation effect
     bool showAnimation;
     // actual visible term
@@ -241,7 +208,12 @@ private:
     GLfloat oneDiffuse[4];
     GLfloat zeroDiffuse[4];
     GLfloat dcDiffuse[4];
+    GLfloat oneSelectedDiffuse[4];
+    GLfloat zeroSelectedDiffuse[4];
+    GLfloat dcSelectedDiffuse[4];
     GLfloat cylinderDiffuse[4];
+    GLfloat coverDiffuse[4];
+    GLfloat coverSelectedDiffuse[4];
     GLfloat light1Pos[4];
     GLfloat light2Pos[4];
     GLdouble min4Points[(MIN4_POINTS + 1) * 2];
@@ -293,6 +265,51 @@ private:
     QTimer *lightsTimer;
     QTimer *minTimer;
 
+signals:
+    // emmited when key M is pushed - minimizing
+    void minRequested();
+    // emited when it is clicked on sphere
+    void cubeChanged(int, OutputValue &);
+    // emitted when showing covers changed
+    void showingCoversChanged(bool);
+    // min signals
+    void minStarted(int);
+    void minStopped();
+    void minShifted(int);
+
+public slots:
+    // formula changed -> reloading cube
+    void reloadCube();
+    // when formula is minimized
+    void minimizeCube();
+    // when formula is invalid
+    void invalidateCube();
+    // setting activity
+    void setActivity(bool active);
+    // setting covers
+    void showCovers(bool show);
+    // min slots
+    void toggleMin();
+    void stopMin();
+    void nextMin();
+    void prevMin();
+
+private slots:
+    // slots for menu actions
+    void rotateCube();
+    void rotateLights();
+    void animateMin();
+    void setCamera3D();
+    void setCameraRotate();
+    void switchLight0();
+    void switchLight1();
+    void switchLight2();
+    void setBgNone();
+    void setBgPattern();
+    void setBgComplete();
+    void setAnimation();
+    void keyClock();
+    void keyTimerStop();
 };
 
 #define IMG_BG1 ":/bits.png"

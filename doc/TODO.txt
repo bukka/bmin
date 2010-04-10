@@ -3,8 +3,6 @@
 	
 # FEATURES ----------------------------------------------------------
 
-PLA format
-rewrite Cube (Qt 4.6 OpenGL framework)
 ASCII art - cube
 espresso
 settings: last open dir, kmap covers and lines, sop
@@ -32,6 +30,8 @@ shell programming language - special bytecode
    treating products of sums ._/
    creating formula dialog ._/
    K-map rewritten ._/
+   Cube rewritten ._/
+   PLA format ._/
 
 
 
@@ -67,8 +67,8 @@ shell programming language - special bytecode
 
 - cubegldrawer.cpp
   slowdown in textures - display, background
-  bad movement in some situations
-  animation by contradiction and tautology
+  bad movement in some situations (ringing round cover)
+  animation and covers by contradiction and tautology
 
 ## ------------------------------------------------------------------
 # TESTING FCE -------------------------------------------------------

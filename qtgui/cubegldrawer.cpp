@@ -69,10 +69,15 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     // color definition
     bgColor = Qt::black;
     // material definition
-    setArray(oneDiffuse,      1.0f, 0.0f, 0.0f);
-    setArray(zeroDiffuse,     0.0f, 1.0f, 1.0f);
-    setArray(dcDiffuse,       1.0f, 0.0f, 1.0f);
+    setArray(oneDiffuse,  1.0f, 0.0f, 0.0f);
+    setArray(zeroDiffuse, 0.0f, 1.0f, 1.0f);
+    setArray(dcDiffuse,   1.0f, 0.0f, 1.0f);
+    setArray(oneSelectedDiffuse,  0.5f, 0.0f, 0.0f);
+    setArray(zeroSelectedDiffuse, 0.0f, 0.5f, 0.5f);
+    setArray(dcSelectedDiffuse,   0.5f, 0.0f, 0.5f);
     setArray(cylinderDiffuse, 0.6f, 0.6f, 0.6f);
+    setArray(coverDiffuse, 1.0f, 1.0f, 0.0f);
+    setArray(coverSelectedDiffuse, 0.0f, 1.0f, 0.0f);
     // set cover points
     setCover2Points();
     setCover4Points();
@@ -87,11 +92,13 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     camera = CAM_3D; // default camera
     background = BG_NONE; // default background
     paintedMsg = MSG_INVALID; // default message
+    fceChanged = false;
+    minFceChanged = false;
     actualCube = -1;
     animateTime = 0;
     isMin = false;
     showAnimation = true;
-    showCovers = true;
+    areCovers = false;
     termTranslated = 0;
 
     wAngle = 270.0;
@@ -100,7 +107,7 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     // 3D camera
     x3D = 0.0;
     y3D = 0.0;
-    z3D = -1.8;
+    z3D = -1.9;
     wAngle3D = 0.0;
     hAngle3D = 0.0;
 
@@ -132,51 +139,63 @@ CubeGLDrawer::~CubeGLDrawer()
 
 void CubeGLDrawer::reloadCube()
 {
-    stopMin();
-    cube->update();
-    if (cube->isValid()) {
-        makeCurrent();
-        paintedMsg = MSG_NONE;
-        actualCube = cube->getVarsCount();
-        drawCube(actualCube);
+    if (isActive) {
+        stopMin();
+        cube->update();
+        if (cube->isValid()) {
+            makeCurrent();
+            paintedMsg = MSG_NONE;
+            actualCube = cube->getVarsCount();
+            drawCube(actualCube);
 
-        if (isMin || showCovers)
-            emit minRequested();
-    }
-    else if (cube->getError() == Cube::TOO_MANY_VARS) {
-        actualCube = -1;
-        paintedMsg = MSG_OVER;
+            if (areCovers)
+                emit minRequested();
+        }
+        else if (cube->getError() == Cube::TOO_MANY_VARS) {
+            actualCube = -1;
+            paintedMsg = MSG_OVER;
+        }
+        else
+            invalidateCube();
+
+        updateCube();
     }
     else
-        invalidateCube();
-
-    updateCube();
+        fceChanged = true;
 }
 
 void CubeGLDrawer::minimizeCube()
 {
-    cube->update();
-    if (!cube->isMinimized())
-        return;
+    if (isActive) {
+        cube->update();
+        if (!cube->isMinimized())
+            return;
 
-    makeCurrent();
+        makeCurrent();
+        bindTermsTextures();
 
-    bindTermsTextures();
-
-    if (isMin) {
-        minPos = 0;
-        dynamicPos = 0;
-        minTimer->start(getI(TIMER_CLOCK));
-        updateCube();
+        if (isMin) {
+            minPos = 0;
+            dynamicPos = 0;
+            minTimer->start(getI(TIMER_CLOCK));
+            updateCube();
+            emit minStarted(termsTextures.size());
+        }
     }
+    else
+        minFceChanged = true;
 }
 
 void CubeGLDrawer::invalidateCube()
 {
-    cube->update();
-    actualCube = -1;
-    paintedMsg = MSG_INVALID;
-    updateCube();
+    if (isActive) {
+        cube->update();
+        actualCube = -1;
+        paintedMsg = MSG_INVALID;
+        updateCube();
+    }
+    else
+        fceChanged = true;
 }
 
 void CubeGLDrawer::setActivity(bool active)
@@ -190,6 +209,14 @@ void CubeGLDrawer::setActivity(bool active)
             lightsTimer->start(getI(TIMER_CLOCK));
 
         setFocus();
+        if (fceChanged) {
+            fceChanged = false;
+            reloadCube();
+        }
+        if (minFceChanged) {
+            minFceChanged = false;
+            minimizeCube();
+        }
     }
     else {
         timersActivity.cube = cubeTimer->isActive();
@@ -202,6 +229,63 @@ void CubeGLDrawer::setActivity(bool active)
     }
 }
 
+void CubeGLDrawer::showCovers(bool show)
+{
+    if ((areCovers = show) && cube->isValid() && !cube->isMinimized()) {
+        emit minRequested();
+    }
+    updateCube();
+}
+
+void CubeGLDrawer::toggleMin()
+{
+    if (isMin) {
+        minTimer->stop();
+        isMin = false;
+        emit minStopped();
+    }
+    else {
+        isMin = true;
+        if (cube->isMinimized()) {
+            minTimer->start(getI(TIMER_CLOCK));
+            minPos = 0;
+            dynamicPos = 0;
+            emit minStarted(termsTextures.size());
+        }
+        else {
+            minPos = -1;
+            emit minRequested();
+            return;
+        }
+    }
+    updateCube();
+}
+
+void CubeGLDrawer::stopMin()
+{
+    minTimer->stop();
+    isMin = false;
+    emit minStopped();
+}
+
+void CubeGLDrawer::nextMin()
+{
+    if (isMin && static_cast<int>(termsTextures.size()) > (minPos + 1)) {
+        termTranslated = 1;
+        minPos++;
+        updateCube();
+        emit minShifted(1);
+    }
+}
+
+void CubeGLDrawer::prevMin()
+{
+    if (isMin && minPos > 0) {
+        minPos--;
+        updateCube();
+        emit minShifted(-1);
+    }
+}
 
 GLuint CubeGLDrawer::bindTextTextures(const QString &text, int width, int height,
                                       int fontSize, const char *fontFamily,
@@ -214,6 +298,12 @@ GLuint CubeGLDrawer::bindTextTextures(const QString &text, int width, int height
     painter.fillRect(0, 0, width, height, QBrush(bgColor));
     painter.drawText(0, 0, width, height, Qt::AlignCenter, text);
     return bindTexture(img);
+}
+
+GLuint CubeGLDrawer::bindMsgTexture(QString text)
+{
+    return bindTextTextures(text, getI(MSG_IMG_W), getI(MSG_IMG_H),
+        getI(MSG_FONT_SIZE), "Arial", Qt::red, Qt::black);
 }
 
 void CubeGLDrawer::bindTermsTextures()
@@ -380,7 +470,7 @@ void CubeGLDrawer::initializeGL()
     if (background != BG_NONE)
         makeBackground();
 
-    for (int i = 0; i <= MAX_N; i++) {
+    for (unsigned i = 0; i <= MAX_N; i++) {
         drawCube(i);
     }
 
@@ -443,7 +533,7 @@ void CubeGLDrawer::paintGL()
             glCallList(bgListId);
         }
         glCallList(cubeListId + actualCube);
-        if (showCovers)
+        if (areCovers)
             drawCovers();
         if (isMin && minPos >= 0)
             drawMin();
@@ -694,19 +784,14 @@ void CubeGLDrawer::getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y
 
 void CubeGLDrawer::drawCovers()
 {
-    if (cube->isContradiction())
+    if (cube->isContradiction() || cube->isTautology())
         return;
-
-    
-    if (cube->isTautology()) {
-        glPushMatrix();
-        glCallList(coversListId + actualCube);
-        glPopMatrix();
-    }
     else {
         for (unsigned i = 0; i < cube->getCoversCount(); i++) {
             glPushMatrix();
             transformCover(i);
+            glMaterialfv(GL_FRONT, GL_DIFFUSE,
+                         cube->isCoverSelected(i)? coverSelectedDiffuse: coverDiffuse);
             glCallList(coversListId + actualCube - cube->at(i).getSize(false));
             glPopMatrix();
         }
@@ -796,17 +881,17 @@ void CubeGLDrawer::drawSphere(int idx, GLenum mode, GLdouble x, GLdouble y, GLdo
     else {
         OutputValue value = cube->value(idx);
         switch (value.getValue()) {
-            case OutputValue::ZERO:
-                diffuse = zeroDiffuse;
-                break;
-            case OutputValue::ONE:
-                diffuse = oneDiffuse;
-                break;
-            case OutputValue::DC:
-                diffuse = dcDiffuse;
-                break;
-            default:
-                diffuse = 0;
+        case OutputValue::ZERO:
+            diffuse = cube->isTermSelected(idx)? zeroSelectedDiffuse: zeroDiffuse;
+            break;
+        case OutputValue::ONE:
+            diffuse = cube->isTermSelected(idx)? oneSelectedDiffuse: oneDiffuse;
+            break;
+        case OutputValue::DC:
+            diffuse = cube->isTermSelected(idx)? dcSelectedDiffuse: dcDiffuse;
+            break;
+        default:
+            diffuse = 0;
         }
     }
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
@@ -1081,15 +1166,15 @@ void CubeGLDrawer::makeCovers()
     GLdouble x1, x2, y1, y2, z, normY, normZ;
     bool vert1, vert2, reverse;
     int strips = getI(COVER_STRIPS);
-    int stacks = getI(COVER_STACKS);
+    int stacksArray[3] = {getI(COVER_STACKS_1), getI(COVER_STACKS_2), getI(COVER_STACKS_4)};
     GLdouble r = getD(COVER_R);
     GLdouble stripStep = 2 * PI / strips;
-    GLdouble stackStep = 1.0 / stacks;
 
-    for (int cover = 0; cover < MAX_N; cover++) {
+    for (unsigned cover = 0; cover < MAX_N; cover++) {
+        int stacks = stacksArray[cover];
+        GLdouble stackStep = 1.0 / stacks;
+
         glNewList(coversListId + cover, GL_COMPILE);
-        GLfloat diffuse[4] = {0.0, 1.0, 0.0, 1.0};
-        glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
 
         GLdouble t = stackStep;
         reverse = false;
@@ -1525,75 +1610,46 @@ void CubeGLDrawer::cubeKeyPressEvent(QKeyEvent *event)
 
     makeCurrent();
     switch (event->key()) {
-        case Qt::Key_1:
-            setCamera3D();
-            return;
-        case Qt::Key_2:
-            setCameraRotate();
-            return;
-        case Qt::Key_L:
-            switchPosLights();
-            return;
-        case Qt::Key_I:
+    case Qt::Key_1:
+        setCamera3D();
+        return;
+    case Qt::Key_2:
+        setCameraRotate();
+        return; 
+    /*case Qt::Key_I:
+        switchPosLights();
+        return; */
+    case Qt::Key_L:
             lightsTimer->isActive()? lightsTimer->stop():
                     lightsTimer->start(getI(TIMER_CLOCK));
             return;
-        case Qt::Key_M:
-            if (isMin) {
-                minTimer->stop();
-                isMin = false;
-            }
-            else {
-                isMin = true;
-                if (cube->isMinimized()) {
-                    minTimer->start(getI(TIMER_CLOCK));
-                    minPos = 0;
-                    dynamicPos = 0;
-                }
-                else {
-                    minPos = -1;
-                    emit minRequested();
-                    return;
-                }
-            }
-            break;
-        case Qt::Key_C:
-            if (showCovers)
-                showCovers = false;
-            else {
-                showCovers = true;
-                if (!cube->isMinimized()) {
-                    emit minRequested();
-
-                }
-            }
-            break;
-        case Qt::Key_N:
-            if (isMin && (int) termsTextures.size() > (minPos + 1)) {
-                termTranslated = 1;
-                minPos++;
-                break;
-            }
+    case Qt::Key_C:
+        showCovers(!areCovers);
+        emit showingCoversChanged(areCovers);
+        return;
+    case Qt::Key_M:
+        toggleMin();
+        return;
+    case Qt::Key_N:
+        nextMin();
+        return;
+    case Qt::Key_P:
+        prevMin();
+        return;
+    case Qt::Key_R:
+        if (camera == CAM_ROTATE) {
+            if (cubeTimer->isActive())
+                cubeTimer->stop();
             else
-                return;
-        case Qt::Key_B:
-            if (isMin && minPos > 0)
-                minPos--;
-            break;
-        case Qt::Key_R:
-            if (camera == CAM_ROTATE) {
-                if (cubeTimer->isActive())
-                    cubeTimer->stop();
-                else
-                    cubeTimer->start(getI(TIMER_CLOCK));
-                return;
-            }
-            else
-                switchLight0();
-            break;
-        default:
-            keyEvent(event, true);
-            break;
+                cubeTimer->start(getI(TIMER_CLOCK));
+            return;
+        }
+        else
+            switchLight0();
+        break;
+    default:
+        keyEvent(event, true);
+        break;
     }
 
     updateCube();

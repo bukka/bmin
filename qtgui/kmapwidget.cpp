@@ -219,7 +219,7 @@ void KMapWidget::updateData()
 
 void KMapWidget::enableCovers(bool show)
 {
-    if (show && m_gm->isCorrectFormula()) {
+    if (show && m_gm->isCorrectFormula() && m_gm->getFormula()->getVarsCount() <= KMap::MAX_VARS) {
         m_gm->minimizeFormula(false);
         m_coversModel->setFormula(m_gm->getMinimizedFormula());
         m_coversView->resizeRowsToContents();

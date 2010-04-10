@@ -54,7 +54,7 @@ ModeManager::ModeManager()
     // Boolean n-cube
     m_cube = new CubeWidget(tr("Boolean n-Cube"), ID_CUBE);
     m_modules << m_cube;
-    connect(this, SIGNAL(cubeActivated(bool)), m_cube, SIGNAL(activated(bool)));
+    connect(this, SIGNAL(cubeActivated(bool)), m_cube, SLOT(setActivity(bool)));
 #endif
 }
 

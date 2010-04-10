@@ -22,6 +22,7 @@
 #define CUBE_H
 
 #include <vector>
+#include <bitset>
 
 class Kernel;
 class Term;
@@ -50,8 +51,15 @@ public:
 
     std::vector<char> getVars();
 
-    bool isValid() { return error == OK; }
+    bool isValid();
     Error getError() { return error; }
+
+    void setTermSelection(int idx, bool selected);
+    void setCoverSelection(int idx, bool selected);
+    void deselectTerms();
+    void deselectCovers();
+    bool isTermSelected(int idx);
+    bool isCoverSelected(int idx);
 
 private:
     bool tautology;
@@ -60,6 +68,9 @@ private:
     Error error;
     Formula *formula; // formula with minterms or maxterms
     Formula *minFormula; // minimized formula
+
+    std::bitset<1 << MAX_VARS> terms;
+    std::bitset<1 << (MAX_VARS - 1)> covers;
 };
 
 #endif // CUBE_H

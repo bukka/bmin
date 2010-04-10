@@ -28,18 +28,27 @@
 #include "coversmodel.h"
 // kernel
 #include "constants.h"
+#include "formula.h"
+#include "kernel.h"
+#include "cube.h"
 
 #include <QLabel>
 #include <QCheckBox>
 #include <QPushButton>
 #include <QTableView>
+#include <QAbstractItemModel>
 #include <QHeaderView>
 #include <QGroupBox>
 #include <QBoxLayout>
+#include <QItemSelection>
 
 CubeWidget::CubeWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
 {
+    m_active = false;
+    m_varsCount = 0;
+    m_cube = Kernel::instance()->getCube();
+
     // OpenGL format
     QGLFormat fmt;
     fmt.setDepth(true);
@@ -56,10 +65,14 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 
     // creating new formula
     connect(m_gm, SIGNAL(formulaChanged()), m_drawer, SLOT(reloadCube()));
+    connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
     // request for minimizing cube
     connect(m_gm, SIGNAL(formulaMinimized()), m_drawer, SLOT(minimizeCube()));
     // request for invalidating cube
     connect(m_gm, SIGNAL(formulaInvalidated()), m_drawer, SLOT(invalidateCube()));
+    connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(invalidateData()));
+    // formula representation changed
+    connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
     // setting drawer activity
     connect(this, SIGNAL(activated(bool)), m_drawer, SLOT(setActivity(bool)));
 
@@ -69,7 +82,6 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 
     BorderWidget *borderWidget = new BorderWidget;
     borderWidget->setLayout(glLayout);
-
 
     // terms
     m_termsModel = new TermsModel;
@@ -94,22 +106,44 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     m_coversView->setMaximumWidth(SIDEBAR_SIZE);
     m_coversCheckBox = new QCheckBox(tr("Show covers"));
     m_coversCheckBox->setChecked(Constants::CUBE_COVERS_DEFAULT);
-    //connect(m_coversCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableCovers(bool)));
+    m_drawer->showCovers(Constants::CUBE_COVERS_DEFAULT);
+    connect(m_coversCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableCovers(bool)));
+    connect(m_coversCheckBox, SIGNAL(toggled(bool)), m_drawer, SLOT(showCovers(bool)));
+    connect(m_drawer, SIGNAL(showingCoversChanged(bool)), m_coversCheckBox, SLOT(setChecked(bool)));
+    connect(m_termsView->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+            this, SLOT(selectTerms(QItemSelection, QItemSelection)));
+    connect(m_coversView->selectionModel(),
+            SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
+            this, SLOT(selectCovers(QItemSelection, QItemSelection)));
 
     // covers tour
+    m_tourPos = -1;
     QGroupBox *tourGroupBox = new QGroupBox(tr("Covers tour"));
-    QPushButton *tourBtn = new QPushButton(tr("Start tour"));
-    QPushButton *tourPrevBtn = new QPushButton(tr("Prev"));
-    QPushButton *tourNextBtn = new QPushButton(tr("Next"));
+    m_tourStartStr = tr("Start tour");
+    m_tourStopStr = tr("Stop tour");
+    m_tourBtn = new QPushButton(m_tourStartStr);
+    m_tourBtn->setEnabled(false);
+    m_tourPrevBtn = new QPushButton(tr("Prev"));
+    m_tourPrevBtn->setEnabled(false);
+    m_tourNextBtn = new QPushButton(tr("Next"));
+    m_tourNextBtn->setEnabled(false);
     QHBoxLayout *tourShiftLayout = new QHBoxLayout;
     tourShiftLayout->setMargin(0);
-    tourShiftLayout->addWidget(tourPrevBtn);
-    tourShiftLayout->addWidget(tourNextBtn);
+    tourShiftLayout->addWidget(m_tourPrevBtn);
+    tourShiftLayout->addWidget(m_tourNextBtn);
     QVBoxLayout *tourMainLayout = new QVBoxLayout;
     tourMainLayout->setMargin(0);
-    tourMainLayout->addWidget(tourBtn);
+    tourMainLayout->addWidget(m_tourBtn);
     tourMainLayout->addLayout(tourShiftLayout);
     tourGroupBox->setLayout(tourMainLayout);
+    // tour connections with drawer
+    connect(m_tourBtn, SIGNAL(clicked()), m_drawer, SLOT(toggleMin()));
+    connect(m_tourNextBtn, SIGNAL(clicked()), m_drawer, SLOT(nextMin()));
+    connect(m_tourPrevBtn, SIGNAL(clicked()), m_drawer, SLOT(prevMin()));
+    connect(m_drawer, SIGNAL(minStarted(int)), this, SLOT(startTour(int)));
+    connect(m_drawer, SIGNAL(minStopped()), this, SLOT(stopTour()));
+    connect(m_drawer, SIGNAL(minShifted(int)), this, SLOT(shiftTour(int)));
 
     // espresso
     QGroupBox *espressoGroupBox = new QGroupBox(tr("Espresso"));
@@ -127,6 +161,8 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     sideLayout->addWidget(m_coversView);
     sideLayout->addWidget(tourGroupBox);
     sideLayout->addWidget(espressoGroupBox);
+    sideLayout->setStretchFactor(m_termsView, 5);
+    sideLayout->setStretchFactor(m_coversView, 3);
 
     QHBoxLayout *mainLayout = new QHBoxLayout;
     mainLayout->setMargin(0);
@@ -138,6 +174,142 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     setFocusPolicy(Qt::StrongFocus);
 }
 
+void CubeWidget::setActivity(bool active)
+{
+    m_active = active;
+    if (active)
+        updateData();
+    emit activated(true);
+}
+
+void CubeWidget::setRepre(bool isSoP)
+{
+    m_termsLabel->setText(isSoP? m_mintermsStr: m_maxtermsStr);
+}
+
+void CubeWidget::updateData()
+{
+    if (m_active) {
+        Formula *formula = m_gm->getFormula();
+        if (!formula || formula->getVarsCount() > CubeGLDrawer::MAX_N)
+            invalidateData();
+        else {
+            m_termsModel->setFormula(formula);
+            m_termsView->resizeRowsToContents();
+            m_termsView->setColumnWidth(0, m_termsView->width());
+            enableCovers(m_coversCheckBox->isChecked());
+            m_tourBtn->setEnabled(true);
+
+            if (formula->getVarsCount() != m_varsCount) {
+                m_varsCount = formula->getVarsCount();
+                deselectAll(m_termsView, m_termsModel);
+                m_cube->deselectTerms();
+            }
+        }
+    }
+}
+
+void CubeWidget::invalidateData()
+{
+    if (m_active) {
+        m_termsModel->clearFormula();
+        m_coversModel->clearFormula();
+        m_tourBtn->setEnabled(false);
+        m_tourPrevBtn->setEnabled(false);
+        m_tourNextBtn->setEnabled(false);
+    }
+}
+
+void CubeWidget::enableCovers(bool show)
+{
+    if (m_active) {
+        if (show && m_gm->isCorrectFormula()
+            && m_gm->getFormula()->getVarsCount() <= CubeGLDrawer::MAX_N) {
+            m_gm->minimizeFormula(false);
+            m_coversModel->setFormula(m_gm->getMinimizedFormula());
+            m_coversView->resizeRowsToContents();
+            m_coversView->setColumnWidth(0, m_coversView->width());
+            deselectAll(m_coversView, m_coversModel);
+            m_cube->deselectCovers();
+        }
+        else
+            m_coversModel->clearFormula();
+    }
+}
+
+void CubeWidget::deselectAll(QTableView *view, const QAbstractItemModel *model)
+{
+    QModelIndex topIndex;
+    QModelIndex bottomIndex;
+
+    topIndex = model->index(0, 0, QModelIndex());
+    bottomIndex = model->index(model->rowCount() - 1, 0, QModelIndex());
+
+    QItemSelection selection(topIndex, bottomIndex);
+    view->selectionModel()->select(selection, QItemSelectionModel::Deselect);
+}
+
+void CubeWidget::selectTerms(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    QModelIndex index;
+
+    QModelIndexList items = selected.indexes();
+    foreach (index, items) {
+        m_cube->setTermSelection(index.model()->data(index, Qt::UserRole).toInt(), true);
+    }
+
+    items = deselected.indexes();
+    foreach (index, items) {
+        m_cube->setTermSelection(index.model()->data(index, Qt::UserRole).toInt(), false);
+    }
+
+    m_drawer->reloadCube();
+}
+
+
+void CubeWidget::selectCovers(const QItemSelection &selected, const QItemSelection &deselected)
+{
+    QModelIndex index;
+
+    QModelIndexList items = selected.indexes();
+    foreach (index, items) {
+        m_cube->setCoverSelection(index.model()->data(index, Qt::UserRole).toInt(), true);
+    }
+
+    items = deselected.indexes();
+    foreach (index, items) {
+        m_cube->setCoverSelection(index.model()->data(index, Qt::UserRole).toInt(), false);
+    }
+
+    m_drawer->reloadCube();
+}
+
+void CubeWidget::startTour(int covers)
+{
+    m_tourSteps = covers - 1;
+    m_tourPos = 0;
+    m_tourBtn->setText(m_tourStopStr);
+    if (covers > 1)
+        m_tourNextBtn->setEnabled(true);
+}
+
+void CubeWidget::stopTour()
+{
+    m_tourPos = -1;
+    m_tourBtn->setText(m_tourStartStr);
+    m_tourPrevBtn->setEnabled(false);
+    m_tourNextBtn->setEnabled(false);
+}
+
+void CubeWidget::shiftTour(int steps)
+{
+    if (m_tourPos >= 0) {
+        m_tourPos += steps;
+        m_tourPrevBtn->setEnabled(m_tourPos > 0);
+        m_tourNextBtn->setEnabled(m_tourPos < m_tourSteps);
+    }
+}
+
 void CubeWidget::keyPressEvent(QKeyEvent *event)
 {
     m_drawer->cubeKeyPressEvent(event);
@@ -147,4 +319,3 @@ void CubeWidget::keyReleaseEvent(QKeyEvent *event)
 {
     m_drawer->cubeKeyReleaseEvent(event);
 }
-

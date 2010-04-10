@@ -83,9 +83,11 @@ public:
     static const int KT_STOP_AFTER     = 32; // stop interval
     static const int COVER_R           = 33;
     static const int COVER_STRIPS      = 34;
-    static const int COVER_STACKS      = 35;
+    static const int COVER_STACKS_1    = 35;
+    static const int COVER_STACKS_2    = 36;
+    static const int COVER_STACKS_4    = 37;
 
-    static const int CONSTANTS_COUNT   = 36;
+    static const int CONSTANTS_COUNT   = 38;
 
     // key timers
     static const int KTR_UP       = 0;

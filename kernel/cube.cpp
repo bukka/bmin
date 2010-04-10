@@ -22,6 +22,9 @@
 #include "kernel.h"
 #include "formula.h"
 
+#include <iostream>
+using namespace std;
+
 Cube::Cube()
 {
     error = OK;
@@ -42,6 +45,12 @@ void Cube::update()
         tautology = minFormula && minFormula->isTautology();
         contradiction = minFormula && minFormula->isContradiction();
     }
+}
+
+bool Cube::isValid()
+{
+    update();
+    return error == OK;
 }
 
 const Term &Cube::at(int pos)
@@ -87,7 +96,38 @@ unsigned Cube::getCoversCount()
     return (minFormula? minFormula->getSize(): 0);
 }
 
-std::vector<char> Cube::getVars()
+vector<char> Cube::getVars()
 {
     return formula->getVars();
 }
+
+void Cube::setTermSelection(int idx, bool selected)
+{
+    terms.set(idx, selected);
+}
+
+void Cube::setCoverSelection(int idx, bool selected)
+{
+    covers.set(idx, selected);
+}
+
+void Cube::deselectTerms()
+{
+    terms.reset();
+}
+
+void Cube::deselectCovers()
+{
+    covers.reset();
+}
+
+bool Cube::isTermSelected(int idx)
+{
+    return terms[idx];
+}
+
+bool Cube::isCoverSelected(int idx)
+{
+    return covers[idx];
+}
+
