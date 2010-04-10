@@ -25,17 +25,25 @@ class Formula;
 
 class MinimizingAlgorithm
 {
-protected:
-    Formula *of; // original formula
-    Formula *mf; // minimized formula
-
 public:
-    MinimizingAlgorithm() : of(0), mf(0) {}
+    MinimizingAlgorithm() : of(0), mf(0), debug(false) {}
 
-    virtual Formula *minimize(Formula *) = 0;
+    virtual Formula *minimize(Formula *f, bool debug) = 0;
 
     virtual inline Formula *getMinimizedFormula() { return mf; }
     virtual inline Formula *getOriginalFormula() { return of; }
+
+    // debugging
+    inline void setDebug(bool value) { debug = value; }
+    void enableDebug() { setDebug(true); }
+    void disableDebug() { setDebug(false); }
+    bool isDebug() { return debug; }
+
+
+protected:
+    Formula *of; // original formula
+    Formula *mf; // minimized formula
+    bool debug;
 };
 
 #endif // MINIMIZINGALGORITHM_H

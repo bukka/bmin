@@ -164,6 +164,15 @@ void CubeGLDrawer::reloadCube()
         fceChanged = true;
 }
 
+void CubeGLDrawer::redrawCube()
+{
+    if (isActive && cube->isValid()) {
+        makeCurrent();
+        drawCube(actualCube);
+        updateCube();
+    }
+}
+
 void CubeGLDrawer::minimizeCube()
 {
     if (isActive) {

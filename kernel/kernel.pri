@@ -11,7 +11,8 @@ SOURCES += formula.cpp \
     outputvalue.cpp \
     events.cpp \
     kmap.cpp \
-    cube.cpp
+    cube.cpp \
+    espresso.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -24,4 +25,5 @@ HEADERS += formula.h \
     outputvalue.h \
     events.h \
     kmap.h \
-    cube.h
+    cube.h \
+    espresso.h

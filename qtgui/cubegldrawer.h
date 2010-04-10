@@ -60,8 +60,8 @@ public:
     CubeGLDrawer(const QGLFormat &format, QWidget *parent = 0);
     ~CubeGLDrawer();
 
-    // updates Cube
-    void updateCube() { updateGL(); }
+    // redrawing actual cube
+    void redrawCube();
 
     // key events
     void cubeKeyPressEvent(QKeyEvent *event);
@@ -94,6 +94,9 @@ private:
     // key timers flags
     enum keyTimerFlag {KTS_FREE, KTS_ACTIVE, KTS_ENQ};
 
+
+    // updates Cube
+    void updateCube() { updateGL(); }
 
     // changes viewport
     void resizeWin(bool fullSetting = true);

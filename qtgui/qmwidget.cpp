@@ -48,6 +48,7 @@ QmWidget::QmWidget(const QString &name, int pos)
     connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(setMinimizedData()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(setMinimizedData()));
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(algorithmChanged(bool)), this, SLOT(checkAlgorithm(bool)));
 
     m_textArea = new QTextEdit;
     m_textArea->setFont(QFont("monospace", 10));
@@ -73,32 +74,39 @@ void QmWidget::setActivity(bool a)
 {
     m_active = a;
     if (a) {
-        if (m_gm->isCorrectFormula())
+        if (!m_gm->isQM())
+            showBadAlgorithm();
+        else if (m_gm->isCorrectFormula())
             m_gm->minimizeFormula(true);
-        else {
-            showHeader();
+        else
             showNothing();
-        }
     }
 }
 
 void QmWidget::updateData()
 {
-    if (m_active)
+    if (m_active && m_gm->isQM()) {
         m_gm->minimizeFormula(true);
+    }
 }
 
 void QmWidget::setMinimizedData()
 {
-    if (m_active) {
+    if (m_active && m_gm->isQM()) {
         m_data = m_gm->getQmData();
-        showHeader();
-        if (m_data) {
+        if (m_data)
             showData();
-        }
         else
             showNothing();
     }
+}
+
+void QmWidget::checkAlgorithm(bool isQM)
+{
+    if (isQM)
+        updateData();
+    else
+        showBadAlgorithm();
 }
 
 void QmWidget::showHeader()
@@ -111,8 +119,16 @@ void QmWidget::showHeader()
 
 void QmWidget::showNothing()
 {
+    showHeader();
     m_textArea->insertHtml(QString("<br><h3 align=\"center\">%1</h3>").arg(
             tr("No logic function.")));
+}
+
+void QmWidget::showBadAlgorithm()
+{
+    showHeader();
+    m_textArea->insertHtml(QString("<br><h3 align=\"center\">%1</h3>").arg(
+            tr("You must set Quine-McCluskey algorithm.")));
 }
 
 
@@ -125,6 +141,7 @@ void QmWidget::setCell(QTextTable *table, int row, int col, const QString &html)
 
 void QmWidget::showData()
 {
+    showHeader();
     if (m_data->isEmpty()) {
         m_textArea->insertHtml(QString("<br><h3 align=\"center\">%1</h3><br>").arg(
                 QString(tr("Function is %1 (no terms for Quine-McCluskey algorithm).")).arg(

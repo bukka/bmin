@@ -149,6 +149,7 @@ public:
     friend std::ostream &operator<<(std::ostream &os, Formula &t);
 
     friend class QuineMcCluskey;
+    friend class Espresso;
     friend class Kernel;
 
 private:

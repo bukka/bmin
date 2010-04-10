@@ -42,6 +42,7 @@ public:
 private:
     void showHeader();
     void showNothing();
+    void showBadAlgorithm();
     void showData();
     void setCell(QTextTable *table, int row, int col, const QString &html);
 
@@ -54,6 +55,7 @@ public slots:
     void setActivity(bool a);
     void updateData();
     void setMinimizedData();
+    void checkAlgorithm(bool isQM);
 };
 
 #endif // QUINEMCCLUSKEYWIDGET_H

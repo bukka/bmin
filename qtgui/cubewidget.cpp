@@ -263,7 +263,7 @@ void CubeWidget::selectTerms(const QItemSelection &selected, const QItemSelectio
         m_cube->setTermSelection(index.model()->data(index, Qt::UserRole).toInt(), false);
     }
 
-    m_drawer->reloadCube();
+    m_drawer->redrawCube();
 }
 
 
@@ -281,7 +281,7 @@ void CubeWidget::selectCovers(const QItemSelection &selected, const QItemSelecti
         m_cube->setCoverSelection(index.model()->data(index, Qt::UserRole).toInt(), false);
     }
 
-    m_drawer->reloadCube();
+    m_drawer->redrawCube();
 }
 
 void CubeWidget::startTour(int covers)

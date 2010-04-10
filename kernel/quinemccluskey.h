@@ -79,19 +79,12 @@ public:
     virtual ~QuineMcCluskey();
 
     // complete minimization
-    Formula *minimize(Formula *f) { return minimize(f, false); }
-    Formula *minimize(Formula *f, bool dbg);
+    Formula *minimize(Formula *f, bool dbg = false);
 
     // creates prime implicant
     void findPrimeImplicants();
     // makes covering
     void findFinalImplicants();
-
-    // debugging
-    inline void setDebug(bool value) { debug = value; }
-    void enableDebug() { setDebug(true); }
-    void disableDebug() { setDebug(false); }
-    bool isDebug() { return debug; }
 
     QuineMcCluskeyData *getData() { return &data; }
 
@@ -109,7 +102,6 @@ private:
     // duplicates vector with terms, but dont care terms are ignored
     std::vector<Term> *getTermsVector(TermsContainer *tc, bool onlyExplicits = false) const;
 
-    bool debug;
     QuineMcCluskeyData data;
 };
 

@@ -23,6 +23,7 @@
 #include "events.h"
 #include "formula.h"
 #include "outputvalue.h"
+#include "espresso.h"
 #include "quinemccluskey.h"
 #include "kmap.h"
 #include "cube.h"
@@ -56,10 +57,19 @@ void Kernel::destroy()
 Kernel::Kernel()
 {
     formula = minFormula = 0;
+    espresso = new Espresso;
     qm = new QuineMcCluskey;
     kmap = new KMap;
     cube = new Cube;
-    repre = (Constants::SOP_DEFAULT? Formula::REP_SOP: Formula::REP_POS);
+    repre = Constants::SOP_DEFAULT? Formula::REP_SOP: Formula::REP_POS;
+    if (Constants::DEFAULT_ALG_QM) {
+        algorithm = QM;
+        ma = qm;
+    }
+    else {
+        algorithm = ESPRESSO;
+        ma = espresso;
+    }
 }
 
 Kernel::~Kernel()
@@ -68,6 +78,8 @@ Kernel::~Kernel()
     deleteFormulas();
     delete kmap;
     delete cube;
+    delete qm;
+    delete espresso;
 }
 
 // adds new events' class
@@ -82,6 +94,25 @@ void Kernel::unregisterEvents(Events *evt)
     list<Events *>::iterator it = find(events.begin(), events.end(), evt);
     if (it != events.end())
         events.erase(it);
+}
+
+// sets minimizing algorithm
+void Kernel::setAlgorithm(Algorithm alg)
+{
+    if (alg == algorithm)
+        return;
+
+
+    if ((algorithm = alg) == QM)
+        ma = qm;
+    else
+        ma = espresso;
+
+    if (formula && minFormula && formula->isMinimized()) {
+        formula->setMinimized(false);
+        minFormula->setMinimized(false);
+        emitEvent(evtFormulaChanged(formula));
+    }
 }
 
 // returns formula with minterms or maxterms
@@ -155,10 +186,13 @@ void Kernel::minimizeFormula(bool debug)
         me.enableFormula();
         if (debug)
             me.enableDebug();
+        if (algorithm == ESPRESSO)
+            me.enableEspresso();
+
         // minimize only when it is necessary (no redundant minimization)
-        if (!formula->isMinimized() || (debug && !qm->isDebug())) {
+        if (!formula->isMinimized() || (debug && (algorithm == ESPRESSO || !qm->isDebug()))) {
             me.enableRun();
-            minFormula = qm->minimize(formula, debug);
+            minFormula = ma->minimize(formula, debug);
             emitEvent(evtFormulaMinimized(minFormula, me));
         }
         else
@@ -189,7 +223,7 @@ void Kernel::deleteFormulas()
 // returns debugging data from Quine-McCluskey
 QuineMcCluskeyData *Kernel::getQmData()
 {
-    if (formula && (formula->isMinimized() && qm->isDebug()))
+    if (algorithm == QM && formula && (formula->isMinimized() && qm->isDebug()))
         return qm->getData();
     else
         return 0;
@@ -264,7 +298,7 @@ void Kernel::setRepre(Formula::Repre rep)
             emitEvent(evtFormulaChanged(formula));
             // minimize but not twice (second condition)
             if (minimized && !formula->isMinimized())
-                minimizeFormula(qm->isDebug());
+                minimizeFormula(ma->isDebug());
         }
     }
 }

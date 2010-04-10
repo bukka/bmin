@@ -31,15 +31,17 @@ class KMap;
 class MinimizeEvent
 {
 public:
-    static const int FORMULA = 1;  // Some formula is set
-    static const int DEBUG   = 2;  // Minimized in debug mode
-    static const int RUN     = 4;  // Minimizing was run
+    static const int FORMULA  = 1;  // Some formula is set
+    static const int DEBUG    = 2;  // Minimized in debug mode
+    static const int RUN      = 4;  // Minimizing was run
+    static const int ESPRESSO = 8;  // Espresso algorithm
 
     MinimizeEvent(int f = 0) : flags(f) {}
 
     void enableFormula() { flags |= FORMULA; }
     void enableDebug() { flags |= DEBUG; }
     void enableRun() { flags |= RUN; }
+    void enableEspresso() { flags |= ESPRESSO; }
 
     bool isFormula() { return flags & FORMULA; }
     bool isDebug() { return flags & DEBUG; }

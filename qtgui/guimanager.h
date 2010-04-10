@@ -60,6 +60,8 @@ public:
     inline bool isCorrectFormula() const { return m_isCorrect; }
     // whether formula has Sum of Products representation
     bool isSoP() const { return m_isSoP; }
+    // whether actual algorithm is Quine-McCluskey
+    bool isQM() const { return m_isQM; }
 
     // loads fce from PLA file
     void loadPLAfile(const QString &);
@@ -113,6 +115,8 @@ private:
     bool m_isCorrect;
     // whether formula has Sum of Product form
     bool m_isSoP;
+    // whether actual algorithm is Quine-McCluskey
+    bool m_isQM;
 
 public slots:
     // set mode
@@ -129,6 +133,8 @@ public slots:
     void setTerm(int idx, OutputValue &);
     // changes representation mode
     void setRepre(bool sop);
+    // changes algorithm
+    void setAlgorithm(bool isQM);
 
 signals:
     // emitted when mode is changed
@@ -149,6 +155,8 @@ signals:
     void formulasSet(unsigned);
     // emitted when representation is changed
     void repreChanged(bool);
+    // emitted when minimizing algorithm is changed
+    void algorithmChanged(bool);
     // emitted when status msg is set
     void statusSet(const QString &, int);
     // emitted when error message is required

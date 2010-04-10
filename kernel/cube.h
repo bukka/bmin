@@ -70,7 +70,7 @@ private:
     Formula *minFormula; // minimized formula
 
     std::bitset<1 << MAX_VARS> terms;
-    std::bitset<1 << (MAX_VARS - 1)> covers;
+    std::bitset<1 << MAX_VARS> covers;
 };
 
 #endif // CUBE_H

@@ -42,8 +42,11 @@ namespace Constants {
     // Version string
     const char * const VERSION = BMIN_VESION_STRING;
 
-    // Whether show default formula
+    // whether show default formula
     const bool DEFAULT_FORMULA = false;
+
+    // whether default algorithm is Quine-McCluskey
+    const bool DEFAULT_ALG_QM = false;
 
     // whether Sum of Product is default representation
     const bool SOP_DEFAULT = true;    

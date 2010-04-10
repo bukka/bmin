@@ -30,6 +30,8 @@
 #include <vector>
 
 class Events;
+class MinimizingAlgorithm;
+class Espresso;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
 class KMap;
@@ -38,6 +40,8 @@ class Cube;
 class Kernel
 {
 public:
+    enum Algorithm { QM, ESPRESSO };
+
     static Kernel *instance();
     static void destroy();
 
@@ -47,6 +51,11 @@ public:
     void registerEvents(Events *evt);
     // removes events' class
     void unregisterEvents(Events *evt);
+
+    // sets minimizing algorithm
+    void setAlgorithm(Algorithm alg);
+    // returns minimizing algorithm
+    Algorithm getAlgorithm() { return algorithm; }
 
     // returns formula with minterms or maxterms
     Formula *getFormula() const;
@@ -124,6 +133,12 @@ private:
 
     std::vector<Formula *> formulas; // formulas container
 
+    // minimizing algorithm
+    Algorithm algorithm;
+    // minimizing algorithm class
+    MinimizingAlgorithm *ma;
+    // Espresso algorithm class
+    Espresso *espresso;
     // Quine-McCluskey algorithm class
     QuineMcCluskey *qm;
     // Karnaugh map class

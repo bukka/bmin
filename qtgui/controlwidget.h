@@ -43,8 +43,10 @@ protected:
     virtual void paintEvent(QPaintEvent* e);
 
 private:
-    static const int SOP_REP_IDX = 0;
-    static const int POS_REP_IDX = 1;
+    static const int REP_SOP_IDX = 0;
+    static const int REP_POS_IDX = 1;
+    static const int ALG_QM_IDX       = 0;
+    static const int ALG_ESPRESSO_IDX = 1;
 
     // line input
     QLineEdit *m_fceLine;
@@ -56,6 +58,8 @@ private:
     QLineEdit *m_minFceLine;
     // combo box for choosing fce representation
     QComboBox *m_repreCombo;
+    // combo box for choosing minimizing algorithm
+    QComboBox *m_algCombo;
 
     // previous function
     QString m_prevFce;
@@ -76,12 +80,16 @@ public slots:
     void setMinFce(const QString &minFceStr);
     // called by changing formula for checking repre setting
     void setRepre(bool sop);
+    // called by changing minimizing algorithm
+    void setAlgorithm(bool qm);
 
 private slots:
     // called when QLineEdit with fce is changed
     void sendFce();
-    // called when rep combo is changed
+    // called when repre combo is changed
     void sendRepre(int idx);
+    // called when algorithm combo is changed
+    void sendAlgorithm(int idx);
     // called by creating function
     void createFce();
 
@@ -90,6 +98,8 @@ signals:
     void fceChanged(const QString &);
     // emitted when rep is changed
     void repreChanged(bool);
+    // emitted when algorithm is changed
+    void algorithmChanged(bool);
 };
 
 #endif // CONTROLWIDGET_H

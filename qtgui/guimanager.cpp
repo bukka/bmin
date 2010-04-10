@@ -59,6 +59,7 @@ GUIManager::GUIManager()
     m_actualFce = "";
     m_isCorrect = false;
     m_isSoP =  Constants::SOP_DEFAULT;
+    m_isQM = Constants::DEFAULT_ALG_QM;
     m_newFormula = 0;
 }
 
@@ -227,6 +228,14 @@ void GUIManager::setRepre(bool sop)
     else
         m_kernel->setRepre(sop? Formula::REP_SOP: Formula::REP_POS);
 
+}
+
+// changes algorithm
+void GUIManager::setAlgorithm(bool isQM)
+{
+    m_isQM = isQM;
+    m_kernel->setAlgorithm(isQM? Kernel::QM: Kernel::ESPRESSO);
+    emit algorithmChanged(isQM);
 }
 
 

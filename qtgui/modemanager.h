@@ -56,9 +56,11 @@ public:
     // modes' identifiers
     static const int ID_WELCOME = 0;
     static const int ID_KMAP    = 1;
-    static const int ID_QM      = 2;
 #if CUBE3D
-    static const int ID_CUBE    = 3;
+    static const int ID_CUBE    = 2;
+    static const int ID_QM      = 3;
+#else
+    static const int ID_QM      = 2;
 #endif
 
     // return modules

@@ -49,12 +49,17 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     connect(m_gm, SIGNAL(fceRead()), this, SLOT(sendFce()));
     // changing repre
     connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
+    // changing algorithm
+    connect(m_gm, SIGNAL(algorithmChanged(bool)), this, SLOT(setAlgorithm(bool)));
 
     // emitte by changing fce
     connect(this, SIGNAL(fceChanged(const QString &)),
             m_gm, SLOT(setFormula(const QString &)));
-    // emitted by changing rep combo box
+    // emitted by changing repre combo box
     connect(this, SIGNAL(repreChanged(bool)), m_gm, SLOT(setRepre(bool)));
+    // emitted by changing algorithm combo bxo
+    connect(this, SIGNAL(algorithmChanged(bool)), m_gm, SLOT(setAlgorithm(bool)));
+
 
     m_prevFce = "";
 
@@ -88,8 +93,8 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
 
 
     m_repreCombo = new QComboBox;
-    m_repreCombo->insertItem(SOP_REP_IDX, tr("Sum of Products"));
-    m_repreCombo->insertItem(POS_REP_IDX, tr("Product of Sums"));
+    m_repreCombo->insertItem(REP_SOP_IDX, tr("Sum of Products"));
+    m_repreCombo->insertItem(REP_POS_IDX, tr("Product of Sums"));
     setRepre(m_gm->isSoP());
     connect(m_repreCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(sendRepre(int)));
     QLabel *repreLabel = new QLabel(tr("&Representation of logic function: "));
@@ -99,15 +104,29 @@ ControlWidget::ControlWidget(QWidget *parent) : QWidget(parent)
     repreLayout->addWidget(repreLabel);
     repreLayout->addWidget(m_repreCombo);
 
+    m_algCombo = new QComboBox;
+    m_algCombo->insertItem(ALG_QM_IDX, tr("Quine-McCluskey"));
+    m_algCombo->insertItem(ALG_ESPRESSO_IDX, tr("Espresso"));
+    setAlgorithm(m_gm->isQM());
+    connect(m_algCombo, SIGNAL(currentIndexChanged(int)), this, SLOT(sendAlgorithm(int)));
+    QLabel *algLabel = new QLabel(tr("&Algorithm: "));
+    algLabel->setBuddy(m_algCombo);
+
+    QHBoxLayout *algLayout = new QHBoxLayout;
+    algLayout->addSpacing(20);
+    algLayout->addWidget(algLabel);
+    algLayout->addWidget(m_algCombo);
+
     m_minBtn = new QPushButton(tr("&Minimize"), this);
     connect(m_minBtn, SIGNAL(clicked()), m_gm, SLOT(minimizeFormula()));
 
     QGridLayout *mainLayout = new QGridLayout;
     mainLayout->setVerticalSpacing(5);
-    mainLayout->addLayout(fceLayout, 0, 0, 1, 3);
+    mainLayout->addLayout(fceLayout, 0, 0, 1, 5);
     mainLayout->addLayout(repreLayout, 2, 0);
-    mainLayout->addWidget(m_minBtn, 2, 2);
-    mainLayout->setColumnStretch(1, 10);
+    mainLayout->addLayout(algLayout, 2, 2);
+    mainLayout->addWidget(m_minBtn, 2, 4);
+    mainLayout->setColumnStretch(3, 5);
 
     setLayout(mainLayout);
 }
@@ -162,19 +181,33 @@ void ControlWidget::setMinFce(const QString &minFceStr)
     m_minFceLine->setText(minFceStr);
 }
 
-// called when rep combo is changed
+// called when repre combo is changed
 void ControlWidget::sendRepre(int idx)
 {
-    emit repreChanged(idx == SOP_REP_IDX);
+    emit repreChanged(idx == REP_SOP_IDX);
+}
+
+// called when algorithm combo is changed
+void ControlWidget::sendAlgorithm(int idx)
+{
+    emit algorithmChanged(idx == ALG_QM_IDX);
 }
 
 // called by changing formula for checking repre setting
 void ControlWidget::setRepre(bool sop)
 {
     if (sop)
-        m_repreCombo->setCurrentIndex(SOP_REP_IDX);
+        m_repreCombo->setCurrentIndex(REP_SOP_IDX);
     else
-        m_repreCombo->setCurrentIndex(POS_REP_IDX);
+        m_repreCombo->setCurrentIndex(REP_POS_IDX);
+}
+
+void ControlWidget::setAlgorithm(bool qm)
+{
+    if (qm)
+        m_algCombo->setCurrentIndex(ALG_QM_IDX);
+    else
+        m_algCombo->setCurrentIndex(ALG_ESPRESSO_IDX);
 }
 
 
