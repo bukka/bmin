@@ -22,14 +22,26 @@
 #define ESPRESSO_H
 
 #include "minimizingalgorithm.h"
+#include "term.h"
+
+#include <list>
+
+typedef std::list<Term> cover;
 
 class Espresso : public MinimizingAlgorithm
 {
 public:
-    Espresso();
+    Espresso() {}
     virtual ~Espresso();
 
     Formula *minimize(Formula *f, bool dbg = false);
+
+private:
+    void expand(cover &f, cover &r);
+    void irredundant(cover &f, cover &d);
+    void reduce(cover &f, cover &d);
+    void lastGasp(cover &f, cover &d, cover &r);
+
 };
 
 #endif // ESPRESSO_H

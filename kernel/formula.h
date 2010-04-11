@@ -74,6 +74,7 @@ public:
             throw(InvalidVarsExc, InvalidTermExc);
     Formula(const FormulaSpec *spec, const FormulaDecl *decl)
             throw(InvalidVarsExc, InvalidIndexExc);
+    Formula(const Formula &formula, const std::list<Term> &coverF);
     // Copy Construtor
     Formula(const Formula &f, bool toMinterms = false);
 
@@ -108,6 +109,8 @@ public:
     std::vector<Term> getMaxterms() const;
     // returns actual maxterms (without creating new vector)
     std::vector<Term> &getMaxterms(std::vector<Term> &maxterms) const;
+    // returns on-set, off-set and dc-set covers
+    void getCovers(std::list<Term> &f, std::list<Term> &d, std::list<Term> &r);
     // returns term at position pos
     const Term &getTermAt(unsigned pos) const;
     // returns number of terms

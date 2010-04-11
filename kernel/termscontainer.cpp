@@ -24,6 +24,7 @@
 #include "outputvalue.h"
 
 #include <vector>
+#include <list>
 #include <algorithm>
 
 using namespace std;
@@ -255,6 +256,29 @@ vector<Term> TermsContainer::getMaxterms()
     vector<Term> maxterms;
     return getMaxterms(maxterms);
 }
+
+void TermsContainer::getCovers(list<Term> &f, list<Term> &d, list<Term> &r)
+{
+    vector<Term> minterms = getMinterms();
+    vector<Term> maxterms = getMaxterms();
+
+    f.clear();
+    d.clear();
+    r.clear();
+
+    for (unsigned i = 0; i < minterms.size(); i++) {
+        if (minterms[i].isDC())
+            d.push_back(minterms[i]);
+        else
+            f.push_back(minterms[i]);
+    }
+
+    for (unsigned i = 0; i < maxterms.size(); i++) {
+        if (!maxterms[i].isDC())
+            r.push_back(maxterms[i]);
+    }
+}
+
 
 vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs)
 {

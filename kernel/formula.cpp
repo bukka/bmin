@@ -74,8 +74,9 @@ Formula::Formula(unsigned vs, char fn, Repre rep, const vector<char> *v)
 {
     init(vs, v, fn, rep);
 
-        terms->touch();
-/*
+    terms->touch();
+
+    /*
     for (unsigned i = 1; i < f->size(); i++) {
         if (f->at(i).getSize() != vs) // check correct size of term
             throw InvalidTermExc(f->at(i).getSize(), varsCount);
@@ -134,15 +135,22 @@ Formula::Formula(const FormulaSpec *spec, const FormulaDecl *decl)
     }
 }
 
-Formula::Formula(const Formula &f, bool toMinterms)
+Formula::Formula(const Formula &formula, const std::list<Term> &coverF)
 {
-    init(f.varsCount, &f.vars, f.name, f.repre);
+    init(formula.varsCount, &formula.vars, formula.name, formula.repre);
+    vector<Term> v(coverF.begin(), coverF.end());
+    terms->setContainer(v);
+}
+
+Formula::Formula(const Formula &formula, bool toMinterms)
+{
+    init(formula.varsCount, &formula.vars, formula.name, formula.repre);
     if (toMinterms) {
         vector<Term> v;
-        terms->setContainer(f.getMinterms(v));
+        terms->setContainer(formula.getMinterms(v));
     }
     else
-        *terms = *f.terms;
+        *terms = *formula.terms;
 
 }
 
@@ -268,6 +276,12 @@ vector<Term> Formula::getMaxterms() const
 vector<Term> &Formula::getMaxterms(vector<Term> &maxterms) const
 {
     return terms->getMaxterms(maxterms);
+}
+
+// returns on-set, off-set and dc-set covers
+void Formula::getCovers(std::list<Term> &f, std::list<Term> &d, std::list<Term> &r)
+{
+    terms->getCovers(f, d, r);
 }
 
 // returns term at position pos

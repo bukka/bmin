@@ -21,27 +21,66 @@
 #include "espresso.h"
 #include "formula.h"
 
-Espresso::Espresso()
-{
-
-}
-
 Espresso::~Espresso()
 {
     delete of;
 }
 
-Formula *Espresso::minimize(Formula *f, bool dbg)
+Formula *Espresso::minimize(Formula *formula, bool dbg)
 {
     debug = dbg;
 
     delete of;
-    of = new Formula(*f, true);
-    mf = new Formula(*of);
+    of = new Formula(*formula, true);
 
+    cover f, d, r;
 
+    // main loop
+    unsigned cost, initCost;
+    do {
+        of->getCovers(f, d, r);
+
+        initCost = f.size();
+        expand(f, r);
+        irredundant(f, d);
+
+        do {
+            do {
+                cost = f.size();
+                reduce(f, d);
+                expand(f, r);
+                irredundant(f, d);
+            } while (cost > f.size());
+
+            cost = f.size();
+            lastGasp(f, d, r);
+        } while (cost > f.size());
+    } while (initCost < f.size());
+
+    mf = new Formula(*formula, f);
     mf->setMinimized(true);
-    f->setMinimized(true);
+    formula->setMinimized(true);
 
     return mf;
 }
+
+void Espresso::expand(cover &f, cover &r)
+{
+
+}
+
+void Espresso::irredundant(cover &f, cover &d)
+{
+
+}
+
+void Espresso::reduce(cover &f, cover &d)
+{
+
+}
+
+void Espresso::lastGasp(cover &f, cover &d, cover &r)
+{
+
+}
+

@@ -24,6 +24,7 @@
 #include "term.h"
 
 #include <vector>
+#include <list>
 
 class OutputValue;
 class Term;
@@ -76,6 +77,8 @@ public:
     // returns actual maxterms
     std::vector<Term> getMaxterms();
     std::vector<Term> &getMaxterms(std::vector<Term> &minterms);
+    // returns on-set, off-set and dc-set covers
+    void getCovers(std::list<Term> &f, std::list<Term> &d, std::list<Term> &r);
 
 
     void clear();
