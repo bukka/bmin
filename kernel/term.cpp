@@ -259,6 +259,25 @@ bool Term::operator>(const Term & t) const
     return operator!=(t) && !operator<(t);
 }
 
+// intersection
+Term Term::operator&(const Term &t) const
+{
+    return Term(liters & t.liters, missing & t.missing, size);
+}
+
+// union
+Term Term::operator|(const Term &t) const
+{
+    return Term(liters | t.liters, missing | t.missing | (liters ^ t.liters), size);
+}
+
+// difference
+Term Term::operator/(const Term &t) const
+{
+    return Term(liters & ~t.liters, missing & t.missing, size);
+}
+
+
 // index operator
 LiteralValue Term::operator[](int position) const
 {

@@ -23,10 +23,41 @@
 
 #include "minimizingalgorithm.h"
 #include "term.h"
+#include "literalvalue.h"
 
 #include <list>
 
-typedef std::list<Term> cover;
+class EspressoCover
+{
+public:
+    EspressoCover() : activeCount(0) {}
+
+    unsigned cost() { return cover.size(); }
+    int count() { return cover.size(); }
+
+    void sort() { cover.sort(DecreasingOrder()); }
+    void removeInactived() { cover.remove_if(InactiveEql()); }
+
+    std::list<Term> cover;
+    int activeCount;
+
+private:
+    struct DecreasingOrder
+    {
+        bool operator()(const Term &t1, const Term &t2) const
+        {
+            return t1.valuesCount(LiteralValue::MISSING) > t2.valuesCount(LiteralValue::MISSING);
+        }
+    };
+
+    struct InactiveEql
+    {
+        bool operator()(const Term &t) const
+        {
+            return !t.isActive();
+        }
+    };
+};
 
 class Espresso : public MinimizingAlgorithm
 {
@@ -37,11 +68,26 @@ public:
     Formula *minimize(Formula *f, bool dbg = false);
 
 private:
-    void expand(cover &f, cover &r);
-    void irredundant(cover &f, cover &d);
-    void reduce(cover &f, cover &d);
-    void lastGasp(cover &f, cover &d, cover &r);
+    // EXPAND
+    void expand(EspressoCover &f, EspressoCover &r);
+    int expand1(EspressoCover &bb, EspressoCover &cc, Term &raise, Term &freeset,
+                Term &overexpandedCube, Term &superCube, Term &initLower, Term &cube);
+    void setupBB_CC(EspressoCover &bb, EspressoCover &cc);
 
+    // IRREDUNDANT
+    void irredundant(EspressoCover &f, EspressoCover &d);
+    void reduce(EspressoCover &f, EspressoCover &d);
+    void lastGasp(EspressoCover &f, EspressoCover &d, EspressoCover &r);
+
+    // variables count
+    unsigned vc;
 };
+
+
+
+#define foreach_cube(_c, _pcube) \
+_pcube = &(*_c.cover.begin()); \
+for (std::list<Term>::iterator it = _c.cover.begin(); it != _c.cover.end(); _pcube = &(*++it))
+
 
 #endif // ESPRESSO_H

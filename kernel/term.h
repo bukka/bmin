@@ -43,9 +43,15 @@ class Term
 {
 public:
     static const int MISSING_ALL = -1;
-    static const int ONE   = 1;
-    static const int DC    = 2;
-    static const int PRIME = 4;
+    // flags
+    static const int ONE      = 0x01; // term is one
+    static const int DC       = 0x02; // term is dont care term
+    static const int PRIME    = 0x04; // term is prime implicant
+    static const int NONESSEN = 0x08; // term cannot be essential
+    static const int ACTIVE   = 0x10; // term is still active
+    static const int REDUND   = 0x20; // term is redundant(at this point)
+    static const int COVERED  = 0x40; // term has been covered
+    static const int RELESSEN = 0x80; // term is relatively essential
 
     // Term string format
     enum StringForm { SF_BIN, SF_SET };
@@ -59,20 +65,28 @@ public:
     // constructor - from string
     Term(const std::string &str, unsigned s = 0) throw(InvalidTermExc);
 
+    // FLAGS methods
     // sets certain flag
-    void setFlag(int flag, bool is);
-    // true if this term is don't care term
-    inline bool isOne() const { return flags & ONE; }
-    // sets whether this term is don't care term
-    inline void setOne(bool isOne) { setFlag(ONE, isOne); }
-    // true if this term is don't care term
-    inline bool isDC() const { return flags & DC; }
-    // sets whether this term is don't care term
-    inline void setDC(bool isDC) { setFlag(DC, isDC); }
-    // true if this term is prime implicant
-    inline bool isPrime() const { return flags & PRIME; }
-    // sets whether this term is prime implicant
-    inline void setPrime(bool isPrime)  { setFlag(PRIME, isPrime); }
+    void setFlag(int flag, bool is = true);
+    inline bool hasFlag(int flag) const { return flags & flag; }
+
+    inline bool isOne() const { return hasFlag(ONE); }
+    inline void setOne(bool is = true) { setFlag(ONE, is); }
+    inline bool isDC() const { return hasFlag(DC); }
+    inline void setDC(bool is = true) { setFlag(DC, is); }
+    inline bool isPrime() const { return hasFlag(PRIME); }
+    inline void setPrime(bool is = true)  { setFlag(PRIME, is); }
+    inline bool isNonessential() const { return hasFlag(NONESSEN); }
+    inline void setNonessenial(bool is = true)  { setFlag(NONESSEN, is); }
+    inline bool isActive() const { return hasFlag(ACTIVE); }
+    inline void setActive(bool is = true)  { setFlag(ACTIVE, is); }
+    inline bool isRedundant() const { return hasFlag(REDUND); }
+    inline void setRedundant(bool is = true)  { setFlag(REDUND, is); }
+    inline bool isCovered() const { return hasFlag(COVERED); }
+    inline void setCovered(bool is = true)  { setFlag(COVERED, is); }
+    inline bool isRelativelyEssential() const { return hasFlag(RELESSEN); }
+    inline void setRelativelyEssential(bool is = true)  { setFlag(RELESSEN, is); }
+
     // returns size of term, if all is false returns size reduced of dont cares
     unsigned getSize(bool all = true) const;
     // returns terms index of boolean function
@@ -91,10 +105,17 @@ public:
     bool implies(Term & t) const;
 
     // eqaulity operators
-    bool operator==(const Term & t) const;
-    bool operator!=(const Term & t) const;
-    bool operator<(const Term & t) const;
-    bool operator>(const Term & t) const;
+    bool operator==(const Term &t) const;
+    bool operator!=(const Term &t) const;
+    bool operator<(const Term &t) const;
+    bool operator>(const Term &t) const;
+
+    // intersection
+    Term operator&(const Term &t) const;
+    // union
+    Term operator|(const Term &t) const;
+    // difference
+    Term operator/(const Term &t) const;
 
     // index operator
     LiteralValue operator[](int position) const;
