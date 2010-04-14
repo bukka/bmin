@@ -47,6 +47,7 @@ shell programming language - special bytecode
   make const QuineMcCluskeyData
 
 - termscontainer.cpp
+  getMinterms function is ok with termsVectorZeros ???
   iterator
   more containers - list, ternary tree, terms tree
 

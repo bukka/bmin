@@ -56,6 +56,9 @@ public:
     // Term string format
     enum StringForm { SF_BIN, SF_SET };
 
+    // returns full position
+    static term_t getFullLiters(unsigned size);
+
     // constructor - the term of size s with all variables setted to missing value
     Term(unsigned s = 0, bool isDC = false);
     // constructor - makes the variables array with size s by index idx
@@ -91,9 +94,13 @@ public:
     unsigned getSize(bool all = true) const;
     // returns terms index of boolean function
     int getIdx() const;
+    // returns liters
+    term_t getLiters() { return liters; }
+    // returns missings
+    term_t getMissing() { return missing; }
     // returns the count of values in term
-    int valuesCount(int value) const;
-    inline int valuesCount(const LiteralValue & value) const;
+    int valuesCount(int value, term_t varMask = 0) const;
+    inline int valuesCount(const LiteralValue & value, term_t varMask = 0) const;
     // returns the new term combined (only by difference of one varible)
     // with *this and t, for example 0010 & 0000 => 00X0
     Term *combine(const Term & t) const;
@@ -103,6 +110,17 @@ public:
     Term *expandMissingValue() const;
     // returns true if *this term implies term t
     bool implies(Term & t) const;
+
+    // ESPRESSO FEATURES
+    // makes row of blocking matrix
+    void makeBB(const Term &cube);
+    // make srow of covering matrix
+    void makeCC(const Term &cube);
+    // lower *this term
+    void lower(term_t loweringSet);
+    // returns position of first one in liters
+    term_t getFirstOnePos(term_t colMask = 0) const;
+
 
     // eqaulity operators
     bool operator==(const Term &t) const;

@@ -30,16 +30,20 @@
 class EspressoCover
 {
 public:
-    EspressoCover() : activeCount(0) {}
+    EspressoCover() : activeCount(0), colMask(0) {}
 
     unsigned cost() { return cover.size(); }
     int count() { return cover.size(); }
 
     void sort() { cover.sort(DecreasingOrder()); }
     void removeInactived() { cover.remove_if(InactiveEql()); }
+    bool isCovered();
+    void clearCovering();
+    void setCovering(EspressoCover &c);
 
     std::list<Term> cover;
     int activeCount;
+    term_t colMask;
 
 private:
     struct DecreasingOrder
@@ -70,9 +74,15 @@ public:
 private:
     // EXPAND
     void expand(EspressoCover &f, EspressoCover &r);
-    int expand1(EspressoCover &bb, EspressoCover &cc, Term &raise, Term &freeset,
-                Term &overexpandedCube, Term &superCube, Term &initLower, Term &cube);
-    void setupBB_CC(EspressoCover &bb, EspressoCover &cc);
+    void expand1(Term &cube, EspressoCover &r, EspressoCover &f);
+    void matrices(Term &cube, EspressoCover &bb, EspressoCover &cc);
+    term_t essential(EspressoCover &bb);
+    term_t inessential(EspressoCover &bb);
+    term_t mfc(EspressoCover &mat);
+    term_t minlow(EspressoCover &bb);
+    void elim1bb(term_t columns, EspressoCover &bb);
+    void elim1cc(term_t columns, EspressoCover &cc);
+    void elim2(term_t columns, EspressoCover &bb, EspressoCover &cc);
 
     // IRREDUNDANT
     void irredundant(EspressoCover &f, EspressoCover &d);
@@ -81,6 +91,7 @@ private:
 
     // variables count
     unsigned vc;
+    term_t fullRow;
 };
 
 

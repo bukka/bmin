@@ -31,6 +31,15 @@
 using namespace std;
 
 
+term_t Term::getFullLiters(unsigned size)
+{
+    term_t full = 0, pos = 1;
+    for (unsigned i = 0; i < size; i++, pos <<= 1) {
+        full |= pos;
+    }
+    return full;
+}
+
 // term initialization
 void Term::init(term_t lit, term_t mis, unsigned s, bool isDC)
 {
@@ -97,7 +106,7 @@ void Term::setFlag(int flag, bool is)
 }
 
 // returns the count of values in term
-int Term::valuesCount(int value) const
+int Term::valuesCount(int value, term_t varMask) const
 {
     term_t mask, pos;
     unsigned i;
@@ -114,17 +123,18 @@ int Term::valuesCount(int value) const
     }
 
     int count = 0;
+    varMask = ~varMask;
     for(i = 0, pos = 1; i < size; i++, pos <<= 1) {
-         if (pos & mask)
+         if (pos & mask & varMask)
              count++;
      }
 
     return count;
 }
 
-inline int valuesCount(const LiteralValue & value)
+inline int valuesCount(const LiteralValue & value, term_t varMask)
 {
-    return valuesCount(value.getValue());
+    return valuesCount(value.getValue(), varMask);
 }
 
 // returns the new term combined (only for difference of one varible)
@@ -218,6 +228,41 @@ unsigned Term::getSize(bool all) const
 int Term::getIdx() const
 {
     return missing? -1: int(liters);
+}
+
+// ESPRESSO FEATURES
+// makes row of blocking matrix
+void Term::makeBB(const Term &cube)
+{
+    liters = ~(cube.missing | missing) & (liters ^ cube.liters);
+    missing = 0;
+}
+
+// makes row of covering matrix
+void Term::makeCC(const Term &cube)
+{
+    liters = ~cube.missing & (missing | (liters ^ cube.liters));
+    missing = 0;
+}
+
+// lower *this term
+void Term::lower(term_t loweringSet)
+{
+    term_t full = getFullLiters(size);
+    missing = full & (missing | ~loweringSet);
+    liters &= loweringSet;
+}
+
+// returns position of first one in liters
+term_t Term::getFirstOnePos(term_t colMask) const
+{
+    term_t pos = 1;
+    term_t maskedLiters = liters & ~colMask;
+    for (unsigned i = 0; i < size; i++, pos <<= 1) {
+        if (maskedLiters & pos)
+            return pos;
+    }
+    return 0;
 }
 
 // eqaulity operator

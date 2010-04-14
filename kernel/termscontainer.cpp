@@ -244,9 +244,9 @@ vector<Term> &TermsContainer::getMaxterms(vector<Term> &maxterms)
     }
     else {
         setComplement();
-        maxterms.reserve(termsVectorOnes->size());
-        for (unsigned i = 0; i < termsVectorOnes->size(); i++)
-            Term::expandTerm(maxterms, termsVectorOnes->at(i));
+        maxterms.reserve(termsVectorZeros->size());
+        for (unsigned i = 0; i < termsVectorZeros->size(); i++)
+            Term::expandTerm(maxterms, termsVectorZeros->at(i));
     }
     return maxterms;
 }
