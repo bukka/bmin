@@ -26,6 +26,8 @@
 #include <bitset>
 using namespace std;
 
+// COVER CLASS
+
 bool EspressoCover::isCovered()
 {
     for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
@@ -45,9 +47,20 @@ void EspressoCover::setCovering(EspressoCover &c)
 {
     list<Term>::iterator itT = cover.begin();
     list<Term>::iterator itC = c.cover.begin();
-    for (; itT != cover.end() && itC != c.cover.end(); itT++, itC++)
-        (*itT).setCovered((*itC).isCovered());
+    for (; itT != cover.end() && itC != c.cover.end(); itT++, itC++) {
+        if ((*itC).isCovered())
+            (*itT).setCovered(true);
+    }
 }
+
+void EspressoCover::setTautology()
+{
+    unsigned size = cover.front().getSize();
+    cover.clear();
+    cover.push_back(Term(Term::MISSING_ALL, size));
+}
+
+// ESPRESSO
 
 Espresso::~Espresso()
 {
@@ -104,6 +117,13 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
 // expand each nonprime cube of F into a prime implicant
 void Espresso::expand(EspressoCover &f, EspressoCover &r)
 {
+     // tautology test
+    if (r.isEmpty()) {
+        f.setTautology();
+        return;
+    }
+
+
     // sorts in decreasing order - larger cube first
     f.sort();
     f.clearCovering();
@@ -142,7 +162,6 @@ void Espresso::expand1(Term &cube, EspressoCover &r, EspressoCover &f)
     EspressoCover cc = f;
     matrices(cube, bb, cc);
 
-    Term *row;
     term_t lower = 0;
     term_t raise = 0;
     term_t essen, inessen, maxFeasible;
@@ -229,7 +248,7 @@ term_t Espresso::mfc(EspressoCover &mat)
         if (!row->isCovered()) {
             liters = row->getLiters() & ~mat.colMask;
             pos = 1;
-            for (int i = 0; i < vc; i++, pos <<= 1) {
+            for (unsigned i = 0; i < vc; i++, pos <<= 1) {
                 if (liters & pos)
                     counts[i]++;
             }
@@ -300,12 +319,38 @@ void Espresso::elim2(term_t columns, EspressoCover &bb, EspressoCover &cc)
     cc.colMask |= columns;
 }
 
+
 // IRREDUNDANT
 
+// returns a minimal subset of F
 void Espresso::irredundant(EspressoCover &f, EspressoCover &d)
 {
 
 }
+
+// finds essential and redundant cubes
+void redundant(EspressoCover &f, EspressoCover &d,
+               EspressoCover &essen, EspressoCover &redun)
+{
+
+}
+
+// finds partialy and totaly redundant cubes
+void partialyRedundant(EspressoCover &f, EspressoCover &essen,
+                       EspressoCover &redun, EspressoCover &partRedun)
+{
+
+}
+
+// finds minimal irredundant cover from partial redundant set
+void minimalIrredundant(EspressoCover &d, EspressoCover &essen,
+                        EspressoCover &partRedun, EspressoCover &minIrredun)
+{
+
+}
+
+
+// REDUCE
 
 void Espresso::reduce(EspressoCover &f, EspressoCover &d)
 {

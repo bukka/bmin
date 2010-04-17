@@ -34,12 +34,14 @@ public:
 
     unsigned cost() { return cover.size(); }
     int count() { return cover.size(); }
+    bool isEmpty() { return cover.empty(); }
 
     void sort() { cover.sort(DecreasingOrder()); }
     void removeInactived() { cover.remove_if(InactiveEql()); }
     bool isCovered();
     void clearCovering();
     void setCovering(EspressoCover &c);
+    void setTautology();
 
     std::list<Term> cover;
     int activeCount;
@@ -86,6 +88,16 @@ private:
 
     // IRREDUNDANT
     void irredundant(EspressoCover &f, EspressoCover &d);
+    void redundant(EspressoCover &f, EspressoCover &d,
+                   EspressoCover &essen, EspressoCover &redun);
+    void partialyRedundant(EspressoCover &f, EspressoCover &essen,
+                           EspressoCover &redun, EspressoCover &partRedun);
+    void minimalIrredundant(EspressoCover &d, EspressoCover &essen,
+                            EspressoCover &partRedun, EspressoCover &minIrredun);
+
+
+
+
     void reduce(EspressoCover &f, EspressoCover &d);
     void lastGasp(EspressoCover &f, EspressoCover &d, EspressoCover &r);
 
