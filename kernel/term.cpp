@@ -265,6 +265,28 @@ term_t Term::getFirstOnePos(term_t colMask) const
     return 0;
 }
 
+// returns cofactor with respect to term t, if it isn't exist disable ONE flag
+Term Term::cofactor(const Term &p, term_t full)
+{
+    if ((liters ^ p.liters) & ~(p.missing | missing)) {
+        Term tmp(size);
+        tmp.setOne(false);
+        return tmp;
+    }
+    else {
+        if (!full)
+            full = getFullLiters(size);
+        return Term(liters & p.missing, (~p.missing | missing) & full, size);
+    }
+}
+
+// returns cofactor with respect to var at pos with val, if it isn't exist disable ONE flag
+Term Term::cofactor(unsigned pos, bool val, term_t full)
+{
+    term_t termPos = 1 << pos;
+    return cofactor(Term(val? termPos: 0, full & ~termPos, size), full);
+}
+
 // eqaulity operator
 bool Term::operator==(const Term & t) const
 {

@@ -37,12 +37,6 @@ bool EspressoCover::isCovered()
     return true;
 }
 
-void EspressoCover::clearCovering()
-{
-    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++)
-        (*it).setCovered(false);
-}
-
 void EspressoCover::setCovering(EspressoCover &c)
 {
     list<Term>::iterator itT = cover.begin();
@@ -53,12 +47,25 @@ void EspressoCover::setCovering(EspressoCover &c)
     }
 }
 
+void EspressoCover::clearCovering()
+{
+    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++)
+        (*it).setCovered(false);
+}
+
+void EspressoCover::clearActivity()
+{
+    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++)
+        (*it).setActive(false);
+}
+
 void EspressoCover::setTautology()
 {
     unsigned size = cover.front().getSize();
     cover.clear();
     cover.push_back(Term(Term::MISSING_ALL, size));
 }
+
 
 // ESPRESSO
 
@@ -74,9 +81,18 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
     delete of;
     of = new Formula(*formula, true);
     vc = formula->getVarsCount();
+    fullRow = Term::getFullLiters(vc);
 
     EspressoCover f, d, r;
     Term *pcube;
+
+    /* tautology test
+    EspressoCover c;
+    c.add(Term("0212"));
+    c.add(Term("0122"));
+    c.add(Term("1121"));
+    c.add(Term("2220"));
+    bool taut = tautology(c);*/
 
     // main loop
     unsigned cost, initCost;
@@ -112,6 +128,55 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
 }
 
 
+// COFACTOR AND TAUTOLOGY
+
+// returns cofactor (to out) of cover c with respect to cube p
+void Espresso::cofactor(Term &p, EspressoCover &c, EspressoCover &out)
+{
+    out.clear();
+    Term *pcube;
+    foreach_cube(c, pcube) {
+        Term t = pcube->cofactor(p, fullRow);
+        if (t.isOne())
+            out.add(t);
+    }
+}
+
+// Shannon expansion for variable at position pos of cover c, cofactors are save to out0 and out1
+void Espresso::shannon(unsigned pos, EspressoCover &c, EspressoCover &out0, EspressoCover &out1)
+{
+    out0.clear();
+    out1.clear();
+    Term *pcube;
+    foreach_cube(c, pcube) {
+        Term t0 = pcube->cofactor(pos, false, fullRow);
+        if (t0.isOne())
+            out0.add(t0);
+        Term t1 = pcube->cofactor(pos, true, fullRow);
+        if (t1.isOne())
+            out1.add(t1);
+    }
+}
+
+// tautology algorithm for cover c
+bool Espresso::tautology(EspressoCover &c, unsigned pos)
+{
+    // tautology if it has row with all 2's
+    Term *pcube;
+    foreach_cube (c, pcube) {
+        if ((pcube->getMissing() & fullRow) == fullRow)
+            return true;
+    }
+
+    EspressoCover c0, c1;
+    shannon(pos, c, c0, c1);
+    if (c0.isEmpty() || c1.isEmpty())
+        return false;
+    else
+        return tautology(c0, pos + 1) && tautology(c1, pos + 1);
+}
+
+
 // EXPAND
 
 // expand each nonprime cube of F into a prime implicant
@@ -127,8 +192,6 @@ void Espresso::expand(EspressoCover &f, EspressoCover &r)
     // sorts in decreasing order - larger cube first
     f.sort();
     f.clearCovering();
-
-    fullRow = Term::getFullLiters(vc);
 
     Term *pcube;
     foreach_cube(f, pcube) {
@@ -326,25 +389,34 @@ void Espresso::elim2(term_t columns, EspressoCover &bb, EspressoCover &cc)
 void Espresso::irredundant(EspressoCover &f, EspressoCover &d)
 {
 
+
+    redundant(f, d);
+    partialyRedundant(f);
+    minimalIrredundant(f, d);
 }
 
 // finds essential and redundant cubes
-void redundant(EspressoCover &f, EspressoCover &d,
-               EspressoCover &essen, EspressoCover &redun)
+void Espresso::redundant(EspressoCover &f, EspressoCover &d)
 {
+    //EspressoCover fd(f, d);
+    f.clearActivity();
 
+    Term *pcube;
+    foreach_cube(f, pcube) {
+        pcube->setActive(true);
+
+        pcube->setActive(false);
+    }
 }
 
 // finds partialy and totaly redundant cubes
-void partialyRedundant(EspressoCover &f, EspressoCover &essen,
-                       EspressoCover &redun, EspressoCover &partRedun)
+void Espresso::partialyRedundant(EspressoCover &f)
 {
 
 }
 
 // finds minimal irredundant cover from partial redundant set
-void minimalIrredundant(EspressoCover &d, EspressoCover &essen,
-                        EspressoCover &partRedun, EspressoCover &minIrredun)
+void Espresso::minimalIrredundant(EspressoCover &f, EspressoCover &d)
 {
 
 }

@@ -36,11 +36,14 @@ public:
     int count() { return cover.size(); }
     bool isEmpty() { return cover.empty(); }
 
+    void add(const Term &t) { cover.push_back(t); }
+    void clear() { cover.clear(); }
     void sort() { cover.sort(DecreasingOrder()); }
     void removeInactived() { cover.remove_if(InactiveEql()); }
     bool isCovered();
-    void clearCovering();
     void setCovering(EspressoCover &c);
+    void clearCovering();
+    void clearActivity();
     void setTautology();
 
     std::list<Term> cover;
@@ -74,6 +77,11 @@ public:
     Formula *minimize(Formula *f, bool dbg = false);
 
 private:
+    // COFACTOR AND TAUTOLOGY
+    void cofactor(Term &p, EspressoCover &in, EspressoCover &out);
+    void shannon(unsigned pos, EspressoCover &in, EspressoCover &o0, EspressoCover &o1);
+    bool tautology(EspressoCover &c, unsigned pos = 0);
+
     // EXPAND
     void expand(EspressoCover &f, EspressoCover &r);
     void expand1(Term &cube, EspressoCover &r, EspressoCover &f);
@@ -88,12 +96,9 @@ private:
 
     // IRREDUNDANT
     void irredundant(EspressoCover &f, EspressoCover &d);
-    void redundant(EspressoCover &f, EspressoCover &d,
-                   EspressoCover &essen, EspressoCover &redun);
-    void partialyRedundant(EspressoCover &f, EspressoCover &essen,
-                           EspressoCover &redun, EspressoCover &partRedun);
-    void minimalIrredundant(EspressoCover &d, EspressoCover &essen,
-                            EspressoCover &partRedun, EspressoCover &minIrredun);
+    void redundant(EspressoCover &f, EspressoCover &d);
+    void partialyRedundant(EspressoCover &f);
+    void minimalIrredundant(EspressoCover &f, EspressoCover &d);
 
 
 

@@ -120,7 +120,10 @@ public:
     void lower(term_t loweringSet);
     // returns position of first one in liters
     term_t getFirstOnePos(term_t colMask = 0) const;
-
+    // returns cofactor with respect to term t, if it isn't exist disable ONE flag
+    Term cofactor(const Term &t, term_t full = 0);
+    // returns cofactor with respect to var at pos with val, if it isn't exist disable ONE flag
+    Term cofactor(unsigned pos, bool val, term_t full = 0);
 
     // eqaulity operators
     bool operator==(const Term &t) const;

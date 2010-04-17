@@ -44,6 +44,7 @@ LiteralValue::LiteralValue(char c) throw(InvalidValueExc)
         value = ONE;
         break;
     case '-':
+    case '2':
         value = MISSING;
         break;
     default:
