@@ -23,50 +23,7 @@
 
 #include "minimizingalgorithm.h"
 #include "term.h"
-#include "literalvalue.h"
-
-#include <list>
-
-class EspressoCover
-{
-public:
-    EspressoCover() : activeCount(0), colMask(0) {}
-
-    unsigned cost() { return cover.size(); }
-    int count() { return cover.size(); }
-    bool isEmpty() { return cover.empty(); }
-
-    void add(const Term &t) { cover.push_back(t); }
-    void clear() { cover.clear(); }
-    void sort() { cover.sort(DecreasingOrder()); }
-    void removeInactived() { cover.remove_if(InactiveEql()); }
-    bool isCovered();
-    void setCovering(EspressoCover &c);
-    void clearCovering();
-    void clearActivity();
-    void setTautology();
-
-    std::list<Term> cover;
-    int activeCount;
-    term_t colMask;
-
-private:
-    struct DecreasingOrder
-    {
-        bool operator()(const Term &t1, const Term &t2) const
-        {
-            return t1.valuesCount(LiteralValue::MISSING) > t2.valuesCount(LiteralValue::MISSING);
-        }
-    };
-
-    struct InactiveEql
-    {
-        bool operator()(const Term &t) const
-        {
-            return !t.isActive();
-        }
-    };
-};
+#include "espressocover.h"
 
 class Espresso : public MinimizingAlgorithm
 {
@@ -78,7 +35,7 @@ public:
 
 private:
     // COFACTOR AND TAUTOLOGY
-    void cofactor(Term &p, EspressoCover &in, EspressoCover &out);
+    void cofactor(const Term &p, EspressoCover &in, EspressoCover &out, int flags = 0);
     void shannon(unsigned pos, EspressoCover &in, EspressoCover &o0, EspressoCover &o1);
     bool tautology(EspressoCover &c, unsigned pos = 0);
 
@@ -96,13 +53,11 @@ private:
 
     // IRREDUNDANT
     void irredundant(EspressoCover &f, EspressoCover &d);
-    void redundant(EspressoCover &f, EspressoCover &d);
-    void partialyRedundant(EspressoCover &f);
-    void minimalIrredundant(EspressoCover &f, EspressoCover &d);
+    void redundant(EspressoCover &fd);
+    void partialyRedundant(EspressoCover &fd);
+    void minimalIrredundant(EspressoCover &fd);
 
-
-
-
+    // REDUCE
     void reduce(EspressoCover &f, EspressoCover &d);
     void lastGasp(EspressoCover &f, EspressoCover &d, EspressoCover &r);
 
@@ -110,12 +65,6 @@ private:
     unsigned vc;
     term_t fullRow;
 };
-
-
-
-#define foreach_cube(_c, _pcube) \
-_pcube = &(*_c.cover.begin()); \
-for (std::list<Term>::iterator it = _c.cover.begin(); it != _c.cover.end(); _pcube = &(*++it))
 
 
 #endif // ESPRESSO_H

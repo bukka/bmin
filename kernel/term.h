@@ -71,23 +71,23 @@ public:
     // FLAGS methods
     // sets certain flag
     void setFlag(int flag, bool is = true);
-    inline bool hasFlag(int flag) const { return flags & flag; }
+    inline bool hasFlags(int f) const { return (flags & f); }
 
-    inline bool isOne() const { return hasFlag(ONE); }
+    inline bool isOne() const { return hasFlags(ONE); }
     inline void setOne(bool is = true) { setFlag(ONE, is); }
-    inline bool isDC() const { return hasFlag(DC); }
+    inline bool isDC() const { return hasFlags(DC); }
     inline void setDC(bool is = true) { setFlag(DC, is); }
-    inline bool isPrime() const { return hasFlag(PRIME); }
+    inline bool isPrime() const { return hasFlags(PRIME); }
     inline void setPrime(bool is = true)  { setFlag(PRIME, is); }
-    inline bool isNonessential() const { return hasFlag(NONESSEN); }
+    inline bool isNonessential() const { return hasFlags(NONESSEN); }
     inline void setNonessenial(bool is = true)  { setFlag(NONESSEN, is); }
-    inline bool isActive() const { return hasFlag(ACTIVE); }
+    inline bool isActive() const { return hasFlags(ACTIVE); }
     inline void setActive(bool is = true)  { setFlag(ACTIVE, is); }
-    inline bool isRedundant() const { return hasFlag(REDUND); }
+    inline bool isRedundant() const { return hasFlags(REDUND); }
     inline void setRedundant(bool is = true)  { setFlag(REDUND, is); }
-    inline bool isCovered() const { return hasFlag(COVERED); }
+    inline bool isCovered() const { return hasFlags(COVERED); }
     inline void setCovered(bool is = true)  { setFlag(COVERED, is); }
-    inline bool isRelativelyEssential() const { return hasFlag(RELESSEN); }
+    inline bool isRelativelyEssential() const { return hasFlags(RELESSEN); }
     inline void setRelativelyEssential(bool is = true)  { setFlag(RELESSEN, is); }
 
     // returns size of term, if all is false returns size reduced of dont cares

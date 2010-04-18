@@ -21,53 +21,9 @@
 #include "espresso.h"
 #include "formula.h"
 #include "literalvalue.h"
+#include "espressocover.h"
 
-#include <iostream>
-#include <bitset>
 using namespace std;
-
-// COVER CLASS
-
-bool EspressoCover::isCovered()
-{
-    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
-        if (!(*it).isCovered())
-            return false;
-    }
-    return true;
-}
-
-void EspressoCover::setCovering(EspressoCover &c)
-{
-    list<Term>::iterator itT = cover.begin();
-    list<Term>::iterator itC = c.cover.begin();
-    for (; itT != cover.end() && itC != c.cover.end(); itT++, itC++) {
-        if ((*itC).isCovered())
-            (*itT).setCovered(true);
-    }
-}
-
-void EspressoCover::clearCovering()
-{
-    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++)
-        (*it).setCovered(false);
-}
-
-void EspressoCover::clearActivity()
-{
-    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++)
-        (*it).setActive(false);
-}
-
-void EspressoCover::setTautology()
-{
-    unsigned size = cover.front().getSize();
-    cover.clear();
-    cover.push_back(Term(Term::MISSING_ALL, size));
-}
-
-
-// ESPRESSO
 
 Espresso::~Espresso()
 {
@@ -93,6 +49,14 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
     c.add(Term("1121"));
     c.add(Term("2220"));
     bool taut = tautology(c);*/
+
+    /* cofactor test
+    EspressoCover in, out;
+    in.add(Term("2011"));
+    in.add(Term("0210"));
+    in.add(Term("1111"));
+    cofactor(Term("2211"), in, out);*/
+
 
     // main loop
     unsigned cost, initCost;
@@ -131,14 +95,16 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
 // COFACTOR AND TAUTOLOGY
 
 // returns cofactor (to out) of cover c with respect to cube p
-void Espresso::cofactor(Term &p, EspressoCover &c, EspressoCover &out)
+void Espresso::cofactor(const Term &p, EspressoCover &c, EspressoCover &out, int flags)
 {
     out.clear();
     Term *pcube;
     foreach_cube(c, pcube) {
-        Term t = pcube->cofactor(p, fullRow);
-        if (t.isOne())
-            out.add(t);
+        if (!flags || pcube->hasFlags(flags)) {
+            Term t = pcube->cofactor(p, fullRow);
+            if (t.isOne())
+                out.add(t);
+        }
     }
 }
 
@@ -191,7 +157,7 @@ void Espresso::expand(EspressoCover &f, EspressoCover &r)
 
     // sorts in decreasing order - larger cube first
     f.sort();
-    f.clearCovering();
+    f.setCovered(false);
 
     Term *pcube;
     foreach_cube(f, pcube) {
@@ -251,7 +217,7 @@ void Espresso::expand1(Term &cube, EspressoCover &r, EspressoCover &f)
     cube.lower(lower);
 
     // sets covered cubes
-    cc.clearCovering();
+    cc.setCovered(false);
     elim1cc(lower, cc);
     f.setCovering(cc);
 
@@ -388,36 +354,65 @@ void Espresso::elim2(term_t columns, EspressoCover &bb, EspressoCover &cc)
 // returns a minimal subset of F
 void Espresso::irredundant(EspressoCover &f, EspressoCover &d)
 {
+    f.appendDC(d);
+    f.setActived(true);
 
-
-    redundant(f, d);
+    redundant(f);
     partialyRedundant(f);
-    minimalIrredundant(f, d);
+    minimalIrredundant(f);
+
+    f.removeDC();
+    f.removeRedundant();
 }
 
 // finds essential and redundant cubes
-void Espresso::redundant(EspressoCover &f, EspressoCover &d)
+void Espresso::redundant(EspressoCover &fd)
 {
-    //EspressoCover fd(f, d);
-    f.clearActivity();
-
+    EspressoCover cof;
     Term *pcube;
-    foreach_cube(f, pcube) {
-        pcube->setActive(true);
-
-        pcube->setActive(false);
+    foreach_cube(fd, pcube) {
+        if (!pcube->isDC()) {
+            pcube->setActive(false);
+            cofactor(*pcube, fd, cof, Term::ACTIVE);
+            bool isTaut = tautology(cof);
+            pcube->setRedundant(isTaut);
+            pcube->setRelativelyEssential(!isTaut);
+            pcube->setActive(true);
+        }
     }
 }
 
 // finds partialy and totaly redundant cubes
-void Espresso::partialyRedundant(EspressoCover &f)
+void Espresso::partialyRedundant(EspressoCover &fd)
 {
-
+    int flags = Term::ACTIVE | Term::DC | Term::RELESSEN;
+    EspressoCover cof;
+    Term *pcube;
+    foreach_cube(fd, pcube) {
+        if (pcube->isRedundant()) {
+            pcube->setActive(false);
+            cofactor(*pcube, fd, cof, flags);
+            if (tautology(cof))
+                pcube->setRedundant(false);
+            pcube->setActive(true);
+        }
+    }
 }
 
 // finds minimal irredundant cover from partial redundant set
-void Espresso::minimalIrredundant(EspressoCover &f, EspressoCover &d)
+void Espresso::minimalIrredundant(EspressoCover &fd)
 {
+    EspressoCover cof;
+    Term *pcube;
+    foreach_cube(fd, pcube) {
+        if (!pcube->hasFlags(Term::DC | Term::RELESSEN | Term::REDUND))  {
+            cofactor(*pcube, fd, cof,  Term::DC | Term::RELESSEN);
+            if (tautology(cof))
+                pcube->setRedundant(true);
+            else
+                pcube->setRelativelyEssential(true);
+        }
+    }
 
 }
 
