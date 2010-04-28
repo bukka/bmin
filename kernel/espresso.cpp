@@ -57,7 +57,6 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
     in.add(Term("1111"));
     cofactor(Term("2211"), in, out);*/
 
-
     // main loop
     unsigned cost, initCost;
     do {
@@ -72,16 +71,12 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
         irredundant(f, d);
 
         do {
-            do {
-                cost = f.cost();
-                reduce(f, d);
-                expand(f, r);
-                irredundant(f, d);
-            } while (cost > f.cost());
-
             cost = f.cost();
-            lastGasp(f, d, r);
+            reduce(f, d);
+            expand(f, r);
+            irredundant(f, d);
         } while (cost > f.cost());
+
     } while (initCost < f.cost());
 
     mf = new Formula(*formula, f.cover);
@@ -92,7 +87,7 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
 }
 
 
-// COFACTOR AND TAUTOLOGY
+// OPERATIONS - cofactor, tautology, intersection
 
 // returns cofactor (to out) of cover c with respect to cube p
 void Espresso::cofactor(const Term &p, EspressoCover &c, EspressoCover &out, int flags)
@@ -102,7 +97,7 @@ void Espresso::cofactor(const Term &p, EspressoCover &c, EspressoCover &out, int
     foreach_cube(c, pcube) {
         if (!flags || pcube->hasFlags(flags)) {
             Term t = pcube->cofactor(p, fullRow);
-            if (t.isOne())
+            if (t.isValid())
                 out.add(t);
         }
     }
@@ -116,10 +111,10 @@ void Espresso::shannon(unsigned pos, EspressoCover &c, EspressoCover &out0, Espr
     Term *pcube;
     foreach_cube(c, pcube) {
         Term t0 = pcube->cofactor(pos, false, fullRow);
-        if (t0.isOne())
+        if (t0.isValid())
             out0.add(t0);
         Term t1 = pcube->cofactor(pos, true, fullRow);
-        if (t1.isOne())
+        if (t1.isValid())
             out1.add(t1);
     }
 }
@@ -140,6 +135,20 @@ bool Espresso::tautology(EspressoCover &c, unsigned pos)
         return false;
     else
         return tautology(c0, pos + 1) && tautology(c1, pos + 1);
+}
+
+// intersectio with cover
+void Espresso::intersection(const Term &p, EspressoCover &in, EspressoCover &out, int flags)
+{
+    out.clear();
+    Term *pcube;
+    foreach_cube(in, pcube) {
+        if (!flags || pcube->hasFlags(flags)) {
+            Term t = *pcube & p;
+            if (t.isValid())
+                out.add(t);
+        }
+    }
 }
 
 
@@ -167,17 +176,14 @@ void Espresso::expand(EspressoCover &f, EspressoCover &r)
         }
     }
 
-    f.activeCount = 0;
     bool change = false;
     foreach_cube(f, pcube) {
         if (!pcube->isPrime() && pcube->isCovered()) {
             pcube->setActive(false);
             change = true;
         }
-        else {
+        else
             pcube->setActive();
-            f.activeCount++;
-        }
     }
     if (change)
         f.removeInactived();
@@ -421,11 +427,82 @@ void Espresso::minimalIrredundant(EspressoCover &fd)
 
 void Espresso::reduce(EspressoCover &f, EspressoCover &d)
 {
+    f.sort(EspressoCover::SORT_REDUCE);
+    f.appendDC(d);
+    f.setCovered(false);
+    f.setActived(true);
 
+    EspressoCover c, cof;
+    Term *pcube, simple;
+    foreach_cube(f, pcube) {
+        if (!pcube->isDC() && !pcube->isCovered() && !pcube->isRedundant()) {
+            pcube->setActive(false);
+            intersection(*pcube, f, c, Term::ACTIVE);
+            if (!c.isEmpty()) {
+                cofactor(*pcube, c, cof);
+                simple = *pcube & sccc(cof);
+                if (simple.isValid()) { // for sure
+                    simple.setCovered(true);
+                    simple.setActive(true);
+                    f.add(simple);
+                    pcube->setRedundant(true);
+                }
+            }
+            if (!pcube->isRedundant())
+                pcube->setActive(true);
+        }
+    }
+
+    f.removeRedundant();
+    f.removeDC();
 }
 
-void Espresso::lastGasp(EspressoCover &f, EspressoCover &d, EspressoCover &r)
+Term Espresso::sccc(EspressoCover &c)
 {
+    Term unateTerm, *pcube;
+    if (c.isUnate(&unateTerm)) {
+        // whether has term with all 2's, return empty term
+        foreach_cube(c, pcube) {
+            if (pcube->getMissing() == fullRow) {
+                unateTerm.setInvalid(true);
+                return unateTerm; // return invalid term
+            }
+        }
 
+        term_t pos = 1;
+        for (unsigned i = 0; i < unateTerm.getSize(); i++, pos <<= 1) {
+            if (unateTerm.at(i).isMissing())
+                continue;
+
+            bool hasCompl = false;
+            foreach_cube(c, pcube) {
+                if ((pcube->getMissing() | pos) == fullRow) {
+                    hasCompl = true;
+                    break;
+                }
+
+            }
+            if (!hasCompl)
+                unateTerm.setValueAt(i, LiteralValue::MISSING);
+            else if (unateTerm.at(i).isOne())
+                unateTerm.setValueAt(i, LiteralValue::ZERO);
+            else
+                unateTerm.setValueAt(i, LiteralValue::ONE);
+        }
+
+        return unateTerm;
+    }
+    else {
+        EspressoCover c0, c1;
+        unsigned j = c.binateSelect();
+        shannon(j, c, c0, c1);
+
+        Term t0 = sccc(c0);
+        Term t1 = sccc(c1);
+        if (t0.isInvalid() && t1.isInvalid())
+            return t0;
+        else
+            return t0.reduceMerge(j, t1);
+    }
 }
 

@@ -44,14 +44,15 @@ class Term
 public:
     static const int MISSING_ALL = -1;
     // flags
-    static const int ONE      = 0x01; // term is one
-    static const int DC       = 0x02; // term is dont care term
-    static const int PRIME    = 0x04; // term is prime implicant
-    static const int NONESSEN = 0x08; // term cannot be essential
-    static const int ACTIVE   = 0x10; // term is still active
-    static const int REDUND   = 0x20; // term is redundant(at this point)
-    static const int COVERED  = 0x40; // term has been covered
-    static const int RELESSEN = 0x80; // term is relatively essential
+    static const int ONE      = 0x001; // term is one
+    static const int DC       = 0x002; // term is dont care term
+    static const int PRIME    = 0x004; // term is prime implicant
+    static const int NONESSEN = 0x008; // term cannot be essential
+    static const int ACTIVE   = 0x010; // term is still active
+    static const int REDUND   = 0x020; // term is redundant(at this point)
+    static const int COVERED  = 0x040; // term has been covered
+    static const int RELESSEN = 0x080; // term is relatively essential
+    static const int INVALID  = 0x100; // term is invalid
 
     // Term string format
     enum StringForm { SF_BIN, SF_SET };
@@ -64,14 +65,14 @@ public:
     // constructor - makes the variables array with size s by index idx
     Term(int idx, unsigned s, bool isDC = false);
     // constructor - internal usage
-    Term(term_t lit, term_t miss, unsigned s, bool isDC = false);
+    Term(term_t lit, term_t miss, unsigned s, int flg = ONE);
     // constructor - from string
     Term(const std::string &str, unsigned s = 0) throw(InvalidTermExc);
 
     // FLAGS methods
     // sets certain flag
     void setFlag(int flag, bool is = true);
-    inline bool hasFlags(int f) const { return (flags & f); }
+    inline bool hasFlags(int flg) const { return (flags & flg); }
 
     inline bool isOne() const { return hasFlags(ONE); }
     inline void setOne(bool is = true) { setFlag(ONE, is); }
@@ -89,6 +90,9 @@ public:
     inline void setCovered(bool is = true)  { setFlag(COVERED, is); }
     inline bool isRelativelyEssential() const { return hasFlags(RELESSEN); }
     inline void setRelativelyEssential(bool is = true)  { setFlag(RELESSEN, is); }
+    inline bool isInvalid() const { return hasFlags(INVALID); }
+    inline bool isValid() const { return !hasFlags(INVALID); }
+    inline void setInvalid(bool is = true)  { setFlag(INVALID, is); }
 
     // returns size of term, if all is false returns size reduced of dont cares
     unsigned getSize(bool all = true) const;
@@ -121,27 +125,30 @@ public:
     // returns position of first one in liters
     term_t getFirstOnePos(term_t colMask = 0) const;
     // returns cofactor with respect to term t, if it isn't exist disable ONE flag
-    Term cofactor(const Term &t, term_t full = 0);
+    Term cofactor(const Term &t, term_t full = 0) const;
     // returns cofactor with respect to var at pos with val, if it isn't exist disable ONE flag
-    Term cofactor(unsigned pos, bool val, term_t full = 0);
+    Term cofactor(unsigned pos, bool val, term_t full = 0) const;
+    // special merge for reduce procedure
+    Term reduceMerge(unsigned pos, const Term &t) const;
 
     // eqaulity operators
     bool operator==(const Term &t) const;
     bool operator!=(const Term &t) const;
     bool operator<(const Term &t) const;
     bool operator>(const Term &t) const;
-
     // intersection
     Term operator&(const Term &t) const;
-    // union
-    Term operator|(const Term &t) const;
-    // difference
-    Term operator/(const Term &t) const;
+    // inversion
+    Term operator~() const;
+
+    // delta distance - number of mismatches
+    int distance(const Term &t) const;
 
     // index operator
     LiteralValue operator[](int position) const;
     LiteralValue at(unsigned position) const throw(InvalidPositionExc);
     int getValueAt(unsigned position) const;
+    void setValueAt(unsigned position, const LiteralValue &value);
     
     // term to string
     std::string toString(StringForm sf = SF_BIN) const;
@@ -154,7 +161,7 @@ public:
 
 private:
     // term initialization
-    void init(term_t lit, term_t mis, unsigned s, bool isDC);
+    void init(term_t lit, term_t mis, unsigned s, int flg);
 
     term_t liters;     // literals value
     term_t missing;    // which literals are missing literals

@@ -27,15 +27,18 @@
 class EspressoCover
 {
 public:
-    EspressoCover() : activeCount(0), colMask(0) {}
+    enum SortOrder { SORT_DECREASING, SORT_REDUCE };
+
+    EspressoCover() : colMask(0) {}
 
     unsigned cost() const;
     int count() const;
     bool isEmpty() const;
+    unsigned varsCount() const;
 
     void add(const Term &t);
     void clear();
-    void sort();
+    void sort(SortOrder order = SORT_DECREASING);
 
     bool isCovered();
     void setCovered(bool value);
@@ -51,8 +54,12 @@ public:
 
     void setTautology();
 
+    // whether cover is unate
+    bool isUnate(Term *prod = 0);
+    // select the most binate var
+    unsigned binateSelect();
+
     std::list<Term> cover;
-    int activeCount;
     term_t colMask;
 
 private:
@@ -62,6 +69,24 @@ private:
         {
             return t1.valuesCount(LiteralValue::MISSING) > t2.valuesCount(LiteralValue::MISSING);
         }
+    };
+
+    struct ReduceOrder
+    {
+        ReduceOrder(Term *largest) : seed(largest) {}
+
+        bool operator()(const Term &t1, const Term &t2) const
+        {
+            if (t1 == *seed)
+                return true;
+            else if (t2 == *seed)
+                return false;
+            else
+                return t1.distance(*seed) < t2.distance(*seed);
+        }
+
+    private:
+        Term *seed;
     };
 
     struct InactiveEql

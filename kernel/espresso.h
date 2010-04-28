@@ -34,10 +34,11 @@ public:
     Formula *minimize(Formula *f, bool dbg = false);
 
 private:
-    // COFACTOR AND TAUTOLOGY
+    // OPERATIONS - cofactor, tautology, intersection
     void cofactor(const Term &p, EspressoCover &in, EspressoCover &out, int flags = 0);
     void shannon(unsigned pos, EspressoCover &in, EspressoCover &o0, EspressoCover &o1);
     bool tautology(EspressoCover &c, unsigned pos = 0);
+    void intersection(const Term &p, EspressoCover &in, EspressoCover &out, int flags = 0);
 
     // EXPAND
     void expand(EspressoCover &f, EspressoCover &r);
@@ -59,7 +60,7 @@ private:
 
     // REDUCE
     void reduce(EspressoCover &f, EspressoCover &d);
-    void lastGasp(EspressoCover &f, EspressoCover &d, EspressoCover &r);
+    Term sccc(EspressoCover &c);
 
     // variables count
     unsigned vc;

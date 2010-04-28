@@ -39,6 +39,14 @@ bool EspressoCover::isEmpty() const
     return cover.empty();
 }
 
+unsigned EspressoCover::varsCount() const
+{
+    if (cover.empty())
+        return 0;
+    else
+        return cover.front().getSize();
+}
+
 void EspressoCover::add(const Term &t)
 {
     cover.push_back(t);
@@ -49,9 +57,25 @@ void EspressoCover::clear()
     cover.clear();
 }
 
-void EspressoCover::sort()
+void EspressoCover::sort(SortOrder order)
 {
-    cover.sort(DecreasingOrder());
+    if (order == SORT_REDUCE) {
+        if (cover.empty())
+            return;
+
+        Term *largest;
+        int maxCount = -1;
+        for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
+            int count = (*it).valuesCount(LiteralValue::MISSING);
+            if (count > maxCount) {
+                largest = &(*it);
+                maxCount = count;
+            }
+        }
+        cover.sort(ReduceOrder(largest));
+    }
+    else
+        cover.sort(DecreasingOrder());
 }
 
 void EspressoCover::removeInactived()
@@ -92,7 +116,7 @@ void EspressoCover::setCovering(EspressoCover &c)
 
 void EspressoCover::setTautology()
 {
-    unsigned size = cover.front().getSize();
+    unsigned size = varsCount();
     cover.clear();
     cover.push_back(Term(Term::MISSING_ALL, size));
 }
@@ -116,4 +140,58 @@ void EspressoCover::removeDC()
 void EspressoCover::removeRedundant()
 {
     cover.remove_if(RedundantEql());
+}
+
+bool EspressoCover::isUnate(Term *prod)
+{
+    Term p = cover.front();
+    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
+        p = p & *it;
+        if (p.isInvalid())
+            return false;
+    }
+    if (prod)
+        *prod = p;
+    return true;
+}
+
+unsigned EspressoCover::binateSelect()
+{
+    unsigned size = varsCount();
+    vector<int> ones(size, 0);
+    vector<int> zeros(size, 0);
+
+    // counts zeros and ones for all columns
+    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
+        Term &t = *it;
+        for (unsigned i = 0; i < size; i++) {
+            LiteralValue lv = t.at(i);
+            if (lv.isOne())
+                ones[i]++;
+            else if (lv.isZero())
+                zeros[i]++;
+        }
+    }
+
+    // finds maximal column
+    unsigned pos = 0;
+    int maxValueMin, maxValueMax, valueMin, valueMax;
+    maxValueMin = maxValueMax = 0;
+    for (unsigned i = 0; i < size; i++) {
+        if (ones[i] < zeros[i]) {
+            valueMin = ones[i];
+            valueMax = zeros[i];
+        }
+        else {
+            valueMin = zeros[i];
+            valueMax = ones[i];
+        }
+
+        if (valueMin > maxValueMin || (valueMin == maxValueMin && valueMax > maxValueMax)) {
+            pos = i;
+            maxValueMin = valueMin;
+            maxValueMax = valueMax;
+        }
+    }
+    return pos;
 }

@@ -41,19 +41,22 @@ term_t Term::getFullLiters(unsigned size)
 }
 
 // term initialization
-void Term::init(term_t lit, term_t mis, unsigned s, bool isDC)
+void Term::init(term_t lit, term_t mis, unsigned s, int flg)
 {
     liters = lit;
     missing = mis;
     size = s;
-    flags = ONE;
-    setDC(isDC);
+    flags = flg;
 }
 
 // default constructor - the term of size s with all variables setted to dont care
 Term::Term(unsigned s, bool isDC)
 {
-    init(0, 0, s, isDC);
+    int flag = ONE;
+    if (isDC)
+        flag = DC;
+
+    init(0, 0, s, flag);
 }
 
 
@@ -61,15 +64,20 @@ Term::Term(unsigned s, bool isDC)
 Term::Term(int idx, unsigned s, bool isDC)
 {
     if (idx == MISSING_ALL)
-        init(0, (1 << s) - 1, s, isDC);
-    else
-        init(idx, 0, s, isDC);
+        init(0, (1 << s) - 1, s, 0);
+    else {
+        int flag = ONE;
+        if (isDC)
+            flag = DC;
+
+        init(idx, 0, s, flag);
+    }
 }
 
 // constructor - internal usage
-Term::Term(term_t lit, term_t miss, unsigned s, bool isDC)
+Term::Term(term_t lit, term_t miss, unsigned s, int flg)
 {
-    init(lit, miss, s, isDC);
+    init(lit, miss, s, flg);
 }
 
 // constructor - from string
@@ -93,7 +101,7 @@ Term::Term(const std::string &str, unsigned s) throw(InvalidTermExc)
         throw InvalidTermExc(str);
     }
 
-    init(liters, missing, str.size(), false);
+    init(liters, missing, str.size(), ONE);
 }
 
 // sets certain flag
@@ -266,11 +274,11 @@ term_t Term::getFirstOnePos(term_t colMask) const
 }
 
 // returns cofactor with respect to term t, if it isn't exist disable ONE flag
-Term Term::cofactor(const Term &p, term_t full)
+Term Term::cofactor(const Term &p, term_t full) const
 {
     if ((liters ^ p.liters) & ~(p.missing | missing)) {
         Term tmp(size);
-        tmp.setOne(false);
+        tmp.setInvalid(true);
         return tmp;
     }
     else {
@@ -281,10 +289,23 @@ Term Term::cofactor(const Term &p, term_t full)
 }
 
 // returns cofactor with respect to var at pos with val, if it isn't exist disable ONE flag
-Term Term::cofactor(unsigned pos, bool val, term_t full)
+Term Term::cofactor(unsigned pos, bool val, term_t full) const
 {
     term_t termPos = 1 << pos;
     return cofactor(Term(val? termPos: 0, full & ~termPos, size), full);
+}
+
+// special merge for reduce procedure - this term is non(t) and t is t
+Term Term::reduceMerge(unsigned pos, const Term &t) const
+{
+    if (isInvalid())
+        return Term(t.liters | (1 << pos), t.missing  & ~(1 << pos), size);
+    else if (t.isInvalid())
+        return Term(liters & ~(1 << pos), missing  & ~(1 << pos), size);
+    else {
+        term_t newMissing = (missing | t.missing) | (t.liters ^ liters) | (1 << pos);
+        return Term(liters & ~newMissing, newMissing, size);
+    }
 }
 
 // eqaulity operator
@@ -326,22 +347,38 @@ bool Term::operator>(const Term & t) const
     return operator!=(t) && !operator<(t);
 }
 
+// inversion
+Term Term::operator~() const
+{
+    return Term(~liters & ~missing & getFullLiters(size), missing, size, flags);
+}
+
 // intersection
 Term Term::operator&(const Term &t) const
 {
-    return Term(liters & t.liters, missing & t.missing, size);
+    term_t l1 = liters & ~missing;
+    term_t l2 = t.liters & ~t.missing;
+
+    int flag = ONE;
+    if ((l1 ^ l2) & ~(missing | t.missing))
+        flag = INVALID;
+
+    return Term(l1 | l2, missing & t.missing, size, flag);
 }
 
-// union
-Term Term::operator|(const Term &t) const
+// delta distance - number of mismatches
+int Term::distance(const Term &t) const
 {
-    return Term(liters | t.liters, missing | t.missing | (liters ^ t.liters), size);
-}
-
-// difference
-Term Term::operator/(const Term &t) const
-{
-    return Term(liters & ~t.liters, missing & t.missing, size);
+    term_t missingMask = ~(missing | t.missing);
+    term_t l1 = liters & missingMask;
+    term_t l2 = t.liters & missingMask;
+    term_t pos = 1;
+    int count = 0;
+    for (unsigned i = 0; i < size; i++, pos <<= 1) {
+        if ((l1 & pos) ^ (l2 & pos))
+            count++;
+    }
+    return count;
 }
 
 
@@ -376,6 +413,29 @@ int Term::getValueAt(unsigned position) const
         return 1;
     else
         return 0;
+}
+
+/*// set literal value at position
+inline void Term::setValueAt(unsigned position, int value)
+{
+    setValueAt(position, LiteralValue(value));
+}*/
+
+// set literal value at position
+void Term::setValueAt(unsigned position, const LiteralValue &value)
+{
+    term_t pos = 1 << position;
+    if (value.isMissing()) {
+        missing |= pos;
+        liters &= ~pos;
+    }
+    else {
+        missing &= ~pos;
+        if (value.isOne())
+            liters |= pos;
+        else
+            liters &= ~pos;
+    }
 }
 
 // term to string
