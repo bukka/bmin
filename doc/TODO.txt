@@ -4,7 +4,6 @@
 # FEATURES ----------------------------------------------------------
 
 ASCII art - cube
-espresso
 settings: last open dir, kmap covers and lines, sop
 speed up debugging of Quine-McCluskey
 vars redundant name checking
@@ -32,6 +31,7 @@ shell programming language - special bytecode
    K-map rewritten ._/
    Cube rewritten ._/
    PLA format ._/
+   espresso ._/
 
 
 
@@ -41,6 +41,7 @@ shell programming language - special bytecode
   exception handling in parse function
 			
 - formula.cpp
+  minimization state (removing value bool minimized)
   iterator
 
 - quinemccluskey.h
@@ -70,6 +71,9 @@ shell programming language - special bytecode
   slowdown in textures - display, background
   bad movement in some situations (ringing round cover)
   animation and covers by contradiction and tautology
+
+- espressocover.h
+  more const methods (cost...)
 
 ## ------------------------------------------------------------------
 # TESTING FCE -------------------------------------------------------

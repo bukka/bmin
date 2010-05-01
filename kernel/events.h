@@ -27,6 +27,7 @@ class Kernel;
 class Formula;
 class QuineMcCluskeyData;
 class KMap;
+class Cube;
 
 class MinimizeEvent
 {
@@ -62,13 +63,14 @@ protected:
     virtual void evtFormulaChanged(Formula *) {}
     virtual void evtFormulaRemoved() {}
     virtual void evtFormulaMinimized(Formula *, MinimizeEvent &) {}
+    virtual void evtMinimalFormulaChanged(Formula *) {}
     virtual void evtFormulasSet(unsigned) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}
     virtual void evtShowQm(QuineMcCluskeyData *) {}
     virtual void evtShowKMap(KMap *) {}
-    virtual void evtShowCube() {}
+    virtual void evtShowCube(Cube *) {}
     virtual void evtShowFce(Formula *, Formula *) {}
 
 

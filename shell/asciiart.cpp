@@ -407,6 +407,11 @@ void AsciiArt::showKMap(KMap *kmap)
     delete [] buff;
 }
 
+void AsciiArt::showCube(Cube *cube)
+{
+
+}
+
 void AsciiArt::decToBin(unsigned dec, char *buff, unsigned vc)
 {
     buff[vc] = '\0';

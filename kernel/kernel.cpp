@@ -56,7 +56,7 @@ void Kernel::destroy()
 
 Kernel::Kernel()
 {
-    formula = minFormula = 0;
+    formula = minFormula = tempFormula = 0;
     espresso = new Espresso;
     qm = new QuineMcCluskey;
     kmap = new KMap;
@@ -205,7 +205,13 @@ void Kernel::deleteFormula()
 {
     delete formula;
     formula = 0;
-    if (minFormula) {
+
+    if (tempFormula) {
+        delete tempFormula;
+        tempFormula = 0;
+        minFormula = 0;
+    }
+    else if (minFormula) {
         delete minFormula;
         minFormula = 0;
     }
@@ -219,6 +225,29 @@ void Kernel::deleteFormulas()
         delete formulas[i];
     formulas.clear();
 }
+
+// sets temporary minimal functions
+void Kernel::setTempMinFormula(Formula *f)
+{
+    if (!formula)
+        return;
+
+    if (!tempFormula)
+        tempFormula = minFormula;
+    minFormula = f;
+    emitEvent(evtMinimalFormulaChanged(minFormula));
+}
+
+// resets temporary minimal functions
+void Kernel::resetTempMinFormula()
+{
+    if (tempFormula) {
+        minFormula = tempFormula;
+        minFormula->setState(Formula::MINIMIZED);
+        emitEvent(evtMinimalFormulaChanged(minFormula));
+    }
+}
+
 
 // returns debugging data from Quine-McCluskey
 QuineMcCluskeyData *Kernel::getQmData()
@@ -337,7 +366,7 @@ void Kernel::showKMap()
 // show Boolean n-Cube
 void Kernel::showCube()
 {
-    emitEvent(evtShowCube());
+    emitEvent(evtShowCube(getCube()));
 }
 
 // show logic function

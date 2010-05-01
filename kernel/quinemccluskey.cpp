@@ -29,108 +29,7 @@
 #include <list>
 #include <set>
 #include <algorithm>
-
-
 using namespace std;
-
-// DEBUG DATA
-
-QuineMcCluskeyData::QuineMcCluskeyData() : varsCount(0)
-{
-    impls.clear();
-}
-
-void QuineMcCluskeyData::initImpls(int vars, bool sp)
-{
-    empty = false;
-    varsCount = vars;
-    maxMissings = 0;
-    impls = vector<list<Term> >((vars + 1) * (vars + 1));
-    sop = sp;
-}
-
-void QuineMcCluskeyData::initCover(vector<Term> *row, vector<Term> *col)
-{
-    coverRowsCount = static_cast<int>(row->size());
-    coverColsCount = static_cast<int>(col->size());
-    coverHeadRow = *row;
-    coverHeadCol = *col;
-    coverTable.clear();
-}
-
-void QuineMcCluskeyData::addImpl(int missings, int explicits, Term *t)
-{
-    if (missings > maxMissings)
-        maxMissings = missings;
-    impls[getImplsIdx(missings, explicits)].push_back(*t);
-}
-
-void QuineMcCluskeyData::setPrimes(vector<Term> primes)
-{
-    vector<Term>::iterator prime;
-    for (int i = impls.size() - 1; i >= 0; i--) {
-        for (list<Term>::iterator it = impls[i].begin(); it != impls[i].end(); it++) {
-            if ((prime = find(primes.begin(), primes.end(), *it)) != primes.end()) {
-                (*it).setPrime(true);
-                primes.erase(prime);
-            }
-            if (primes.empty())
-                return;
-        }
-    }
-}
-
-std::list<Term> *QuineMcCluskeyData::getImpls(int missings, int explicits)
-{
-    return &impls[getImplsIdx(missings, explicits)];
-}
-
-int QuineMcCluskeyData::firstExplicitTerm()
-{
-    int first = 0;
-    while (first <= varsCount) {
-        if (impls[getImplsIdx(0, first)].empty())
-            first++;
-        else
-            return first;
-    }
-    return first;
-}
-
-int QuineMcCluskeyData::lastExplicitTerm()
-{
-    int last = varsCount;
-    while (last >= 0) {
-        if (impls[getImplsIdx(0, last)].empty())
-            last--;
-        else
-            return last;
-    }
-    return last;
-}
-
-void QuineMcCluskeyData::setCover(int row, int col)
-{
-    coverTable.insert(getCoverIdx(row, col));
-}
-
-bool QuineMcCluskeyData::isCovered(int row, int col)
-{
-    return coverTable.find(getCoverIdx(row, col)) != coverTable.end();
-}
-
-int QuineMcCluskeyData::getImplsIdx(int missings, int explicits)
-{
-    return missings * (varsCount + 1) + explicits;
-}
-
-int QuineMcCluskeyData::getCoverIdx(int row, int col)
-{
-    return row + col * coverRowsCount;
-}
-
-
-// ALGORITHM
 
 QuineMcCluskey::QuineMcCluskey() : MinimizingAlgorithm() {}
 
@@ -169,8 +68,8 @@ void QuineMcCluskey::findPrimeImplicants()
     // inicialization
     int missings, explicits, varsCount;
     Term *pterm, *combined;
-    vector<Term *> *left, *right, *out;
-    vector<Term *>::iterator lit, rit, it;
+    list<Term *> *left, *right, *out;
+    list<Term *>::iterator lit, rit, it;
 
     bool sop = (of->getRepre() == Formula::REP_SOP);
     varsCount = of->varsCount;
@@ -179,9 +78,9 @@ void QuineMcCluskey::findPrimeImplicants()
         data.initImpls(varsCount, sop);
 
     // inicializing matrix with vectors contained pointers to terms
-    vector<Term *> **table = new vector<Term *> *[varsCount + 1];
+    list<Term *> **table = new list<Term *> *[varsCount + 1];
     for (int i = 0; i <= varsCount; i++)
-        table[i] = new vector<Term *>[varsCount + 1];
+        table[i] = new list<Term *>[varsCount + 1];
 
     // sorting terms by numbers of dont cares and explicits
     int foundLiteral = LiteralValue::ZERO;
@@ -245,12 +144,13 @@ void QuineMcCluskey::findPrimeImplicants()
     delete [] table;
 }
 
-bool QuineMcCluskey::doesNotHaveTerm(vector<Term *> *v, Term *t)
+bool QuineMcCluskey::doesNotHaveTerm(list<Term *> *l, Term *t)
 {
-    for (unsigned i = 0; i < v->size(); i++) {
-        if (*v->at(i) == *t)
+    for (list<Term *>::iterator it = l->begin(); it != l->end(); it++) {
+        if (*(*it) == *t)
             return false;
     }
+
     return true;
 }
 

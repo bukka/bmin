@@ -42,42 +42,27 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
     EspressoCover f, d, r;
     Term *pcube;
 
-    /* tautology test
-    EspressoCover c;
-    c.add(Term("0212"));
-    c.add(Term("0122"));
-    c.add(Term("1121"));
-    c.add(Term("2220"));
-    bool taut = tautology(c);*/
-
-    /* cofactor test
-    EspressoCover in, out;
-    in.add(Term("2011"));
-    in.add(Term("0210"));
-    in.add(Term("1111"));
-    cofactor(Term("2211"), in, out);*/
-
     // main loop
-    unsigned cost, initCost;
+    EspressoCover::Cost cost;
+
+    of->getCovers(f.cover, d.cover, r.cover);
+
+    foreach_cube(f, pcube) {
+        pcube->setPrime(false);
+    }
+
+    expand(f, r);
+    irredundant(f, d);
+
     do {
-        of->getCovers(f.cover, d.cover, r.cover);
-
-        foreach_cube(f, pcube) {
-            pcube->setPrime(false);
-        }
-
-        initCost = f.cost();
+        cost = f.cost();
+        reduce(f, d);
+        if (cost == f.cost())
+            break;
         expand(f, r);
         irredundant(f, d);
+    } while (cost != f.cost());
 
-        do {
-            cost = f.cost();
-            reduce(f, d);
-            expand(f, r);
-            irredundant(f, d);
-        } while (cost > f.cost());
-
-    } while (initCost < f.cost());
 
     mf = new Formula(*formula, f.cover);
     mf->setMinimized(true);
@@ -438,7 +423,7 @@ void Espresso::reduce(EspressoCover &f, EspressoCover &d)
         if (!pcube->isDC() && !pcube->isCovered() && !pcube->isRedundant()) {
             pcube->setActive(false);
             intersection(*pcube, f, c, Term::ACTIVE);
-            if (!c.isEmpty()) {
+            if (!c.isEmpty()) { // empty intersection
                 cofactor(*pcube, c, cof);
                 simple = *pcube & sccc(cof);
                 if (simple.isValid()) { // for sure
@@ -460,7 +445,7 @@ void Espresso::reduce(EspressoCover &f, EspressoCover &d)
 Term Espresso::sccc(EspressoCover &c)
 {
     Term unateTerm, *pcube;
-    if (c.isUnate(&unateTerm)) {
+    if (c.isUnate(&unateTerm)) { // unateTerm is product term of c
         // whether has term with all 2's, return empty term
         foreach_cube(c, pcube) {
             if (pcube->getMissing() == fullRow) {
@@ -482,7 +467,7 @@ Term Espresso::sccc(EspressoCover &c)
                 }
 
             }
-            if (!hasCompl)
+            if (!hasCompl) // has line with all 2's after adding one pos
                 unateTerm.setValueAt(i, LiteralValue::MISSING);
             else if (unateTerm.at(i).isOne())
                 unateTerm.setValueAt(i, LiteralValue::ZERO);
@@ -499,10 +484,10 @@ Term Espresso::sccc(EspressoCover &c)
 
         Term t0 = sccc(c0);
         Term t1 = sccc(c1);
-        if (t0.isInvalid() && t1.isInvalid())
-            return t0;
+        if (t0.isInvalid() && t1.isInvalid()) // if both terms are invalid
+            return t0; // return invalid term
         else
-            return t0.reduceMerge(j, t1);
+            return t0.reduceMerge(j, t1); // otherwise use special merge for reduce
     }
 }
 

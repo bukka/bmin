@@ -23,13 +23,44 @@
 #include <list>
 using namespace std;
 
-
-unsigned EspressoCover::cost() const
+bool EspressoCover::Cost::operator!=(const EspressoCover::Cost &cost) const
 {
-    return cover.size();
+    return size != cost.size || missings != cost.missings;
 }
 
-int EspressoCover::count() const
+bool EspressoCover::Cost::operator==(const EspressoCover::Cost &cost) const
+{
+    return size == cost.size && missings == cost.missings;
+}
+
+bool EspressoCover::Cost::operator<(const EspressoCover::Cost &cost) const
+{
+    if (size == cost.size)
+        return missings > cost.missings;
+    else
+        return size < cost.size;
+}
+
+bool EspressoCover::Cost::operator>(const EspressoCover::Cost &cost) const
+{
+    if (size == cost.size)
+        return missings < cost.missings;
+    else
+        return size > cost.size;
+}
+
+
+EspressoCover::Cost EspressoCover::cost()
+{
+    unsigned missings = 0;
+    for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
+        Term &t = *it;
+        missings += t.valuesCount(LiteralValue::MISSING);
+    }
+    return Cost(cover.size(), missings);
+}
+
+unsigned EspressoCover::count() const
 {
     return cover.size();
 }

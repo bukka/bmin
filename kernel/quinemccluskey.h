@@ -22,55 +22,13 @@
 #define QUINEMCCLUSKEY_H
 
 #include "minimizingalgorithm.h"
+#include "quinemccluskeydata.h"
 
 #include <vector>
 #include <list>
-#include <set>
 
 class Term;
 class TermsContainer;
-
-class QuineMcCluskeyData
-{
-public:
-    QuineMcCluskeyData();
-    // initialization
-    void initImpls(int vars, bool sp);
-    void initCover(std::vector<Term> *row, std::vector<Term> *col);
-
-    void setEmpty(bool sp) { empty = true; sop = sp; }
-    bool isEmpty() { return empty; }
-    bool isSoP() { return sop; }
-    bool isCovered(int row, int col);
-    void setCover(int row, int col);
-
-    void addImpl(int missings, int explicits, Term *t);
-    std::list<Term> *getImpls(int missings, int explicits);
-    void setPrimes(std::vector<Term> primes);
-    int getVarsCount() { return varsCount; }
-    int getMaxMissings() { return maxMissings; }
-
-    int firstExplicitTerm();
-    int lastExplicitTerm();
-
-    std::vector<Term> *getCoverHeadRow() { return &coverHeadRow; }
-    std::vector<Term> *getCoverHeadCol() { return &coverHeadCol; }
-
-private:
-    inline int getImplsIdx(int missings, int explicits);
-    inline int getCoverIdx(int row, int col);
-
-    bool empty;
-    bool sop;
-    int varsCount;
-    int maxMissings;
-    int coverRowsCount;
-    int coverColsCount;
-    std::vector<std::list<Term> > impls;
-    std::vector<Term> coverHeadRow;
-    std::vector<Term> coverHeadCol;
-    std::set<int> coverTable;
-};
 
 class QuineMcCluskey : public MinimizingAlgorithm
 {
@@ -89,7 +47,7 @@ public:
     QuineMcCluskeyData *getData() { return &data; }
 
 private:
-    bool doesNotHaveTerm(std::vector<Term *> *v, Term *t);
+    bool doesNotHaveTerm(std::list<Term *> *v, Term *t);
 
     // finds essential prime implicants
     int extractEssentialImplicants(bool **table, int nImpls, int nTerms) const;

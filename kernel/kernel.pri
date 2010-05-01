@@ -13,7 +13,9 @@ SOURCES += formula.cpp \
     kmap.cpp \
     cube.cpp \
     espresso.cpp \
-    espressocover.cpp
+    espressocover.cpp \
+    quinemccluskeydata.cpp \
+    espressodata.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -28,4 +30,6 @@ HEADERS += formula.h \
     kmap.h \
     cube.h \
     espresso.h \
-    espressocover.h
+    espressocover.h \
+    quinemccluskeydata.h \
+    espressodata.h

@@ -94,6 +94,11 @@ public:
     // returns repre
     Formula::Repre getRepre() { return repre; }
 
+    // sets temporary minimal functions
+    void setTempMinFormula(Formula *f);
+    // resets temporary minimal functions
+    void resetTempMinFormula();
+
     // returns debugging data from Quine-McCluskey
     QuineMcCluskeyData *getQmData();
     // returns Karnaugh map class
@@ -130,6 +135,7 @@ private:
 
     Formula *formula;     // original formula
     Formula *minFormula;  // minimized formula
+    Formula *tempFormula; // temporary formula (place for minFormula)
 
     std::vector<Formula *> formulas; // formulas container
 

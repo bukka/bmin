@@ -32,7 +32,7 @@
 // term mask
 typedef int term_t;
 
-// maximum number of literals ( -1 means sign in int
+// maximum number of literals (-1 means sign in int)
 #define TERM_MAX_SIZE (sizeof (term_t) * 8 - 1)
 
 class LiteralValue;

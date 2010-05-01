@@ -27,12 +27,25 @@
 class EspressoCover
 {
 public:
+    class Cost
+    {
+    public:
+        Cost(unsigned s = 0, unsigned m = 0) : size(s), missings(m) {}
+        bool operator==(const Cost &cost) const;
+        bool operator!=(const Cost &cost) const;
+        bool operator<(const Cost &cost) const;
+        bool operator>(const Cost &cost) const;
+    private:
+        unsigned size;
+        unsigned missings;
+    };
+
     enum SortOrder { SORT_DECREASING, SORT_REDUCE };
 
     EspressoCover() : colMask(0) {}
 
-    unsigned cost() const;
-    int count() const;
+    Cost cost();
+    unsigned count() const;
     bool isEmpty() const;
     unsigned varsCount() const;
 

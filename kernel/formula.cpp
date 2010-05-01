@@ -65,7 +65,7 @@ void Formula::init(int vs, const vector<char> *v, char fn, Repre r)
 
     name = fn;
     repre = r;
-    minimized = false;
+    state = COMPLETE;
 }
 
 // gets terms from vector t

@@ -159,9 +159,9 @@ void Konsole::evtShowKMap(KMap *kmap)
     art->showKMap(kmap);
 }
 
-void Konsole::evtShowCube()
+void Konsole::evtShowCube(Cube *cube)
 {
-    out << "cube" << endl;
+    art->showCube(cube);
 }
 
 void Konsole::evtShowFce(Formula *f, Formula *mf)

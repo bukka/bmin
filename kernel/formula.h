@@ -62,6 +62,8 @@ class Formula
 public:
     // representation (SOP = sum of products, POS = product of sums)
     enum Repre { REP_SOP, REP_POS };
+    // minimization state
+    enum State { COMPLETE, MINIMIZED, EXPANDED, IRREDUNDANT, REDUCED };
 
     static const char DEFAULT_NAME      = 'f';
     static const char DEFAULT_FIRST_VAR = 'a';
@@ -126,6 +128,11 @@ public:
 
     // whether formula is minimized
     bool isMinimized() const { return minimized; }
+    // returns state
+    State getState() const { return state; }
+    // set state
+    void setState(State s) { state = s; }
+
 
     // equality
     bool operator==(const Formula &f) const;
@@ -177,6 +184,8 @@ private:
     char name;
     // formula visible form
     Repre repre;
+    // minimization state
+    State state;
     // names of variables
     std::vector<char> vars;
 

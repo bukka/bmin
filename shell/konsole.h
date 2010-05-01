@@ -48,7 +48,7 @@ protected:
     virtual void evtHelp();
     virtual void evtShowQm(QuineMcCluskeyData *data);
     virtual void evtShowKMap(KMap *kmap);
-    virtual void evtShowCube();
+    virtual void evtShowCube(Cube *cube);
     virtual void evtShowFce(Formula *f, Formula *mf);
 
 

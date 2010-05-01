@@ -26,6 +26,7 @@
 
 class QuineMcCluskeyData;
 class KMap;
+class Cube;
 
 class AsciiArt
 {
@@ -49,6 +50,7 @@ public:
     void showQmCover(QuineMcCluskeyData *data);
 
     void showKMap(KMap *kmap);
+    void showCube(Cube *cube);
 
 private:
     void decToBin(unsigned dec, char *buff, unsigned vc);
