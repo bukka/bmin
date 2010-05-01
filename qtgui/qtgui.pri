@@ -24,7 +24,8 @@ SOURCES += mainwindow.cpp \
     kmapheadwidget.cpp \
     coversmodel.cpp \
     colors.cpp \
-    pladialog.cpp
+    pladialog.cpp \
+    espressowidget.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -49,5 +50,6 @@ HEADERS += mainwindow.h \
     coversmodel.h \
     colors.h \
     pladialog.h \
-    borderwidget.h
+    borderwidget.h \
+    espressowidget.h
 RESOURCES += resources.qrc
