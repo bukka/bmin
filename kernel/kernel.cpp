@@ -102,8 +102,9 @@ void Kernel::setAlgorithm(Algorithm alg)
     if (alg == algorithm)
         return;
 
+    algorithm = alg;
 
-    if ((algorithm = alg) == QM)
+    if (algorithm == QM)
         ma = qm;
     else
         ma = espresso;
@@ -113,6 +114,7 @@ void Kernel::setAlgorithm(Algorithm alg)
         minFormula->setMinimized(false);
         emitEvent(evtFormulaChanged(formula));
     }
+    emitEvent(evtAlgorithmChanged(algorithm));
 }
 
 // returns formula with minterms or maxterms
@@ -243,6 +245,7 @@ void Kernel::resetTempMinFormula()
 {
     if (tempFormula) {
         minFormula = tempFormula;
+        tempFormula = 0;
         minFormula->setState(Formula::MINIMIZED);
         emitEvent(evtMinimalFormulaChanged(minFormula));
     }
@@ -252,8 +255,17 @@ void Kernel::resetTempMinFormula()
 // returns debugging data from Quine-McCluskey
 QuineMcCluskeyData *Kernel::getQmData()
 {
-    if (algorithm == QM && formula && (formula->isMinimized() && qm->isDebug()))
+    if (algorithm == QM && formula && formula->isMinimized() && qm->isDebug())
         return qm->getData();
+    else
+        return 0;
+}
+
+// returns debugging data from Espresso
+EspressoData *Kernel::getEspressoData()
+{
+    if (algorithm == ESPRESSO && formula && formula->isMinimized() && espresso->isDebug())
+        return espresso->getData();
     else
         return 0;
 }

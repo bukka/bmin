@@ -26,8 +26,6 @@
 
 #include <list>
 
-class Kernel;
-
 class EspressoData
 {
 public:
@@ -38,8 +36,8 @@ public:
     void add(EspressoCover &f, Formula::State state);
     void clear();
 
-    bool start();
-    bool next();
+    Formula::State start();
+    Formula::State next();
     void finish();
     void run();
 
@@ -48,7 +46,6 @@ private:
     std::list<Formula *> steps;
     Formula *origFormula;
     bool started;
-    Kernel *kernel;
 };
 
 #endif // ESPRESSODATA_H

@@ -32,6 +32,7 @@
 class Events;
 class MinimizingAlgorithm;
 class Espresso;
+class EspressoData;
 class QuineMcCluskey;
 class QuineMcCluskeyData;
 class KMap;
@@ -101,6 +102,8 @@ public:
 
     // returns debugging data from Quine-McCluskey
     QuineMcCluskeyData *getQmData();
+    // returns debugging data from Espresso
+    EspressoData *getEspressoData();
     // returns Karnaugh map class
     KMap *getKMap();
     // returns Cube class

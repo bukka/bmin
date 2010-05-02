@@ -23,6 +23,7 @@
 #include "guimanager.h"
 #include "termsmodel.h"
 #include "coversmodel.h"
+#include "espressowidget.h"
 // kernel
 #include "kernel.h"
 #include "constants.h"
@@ -47,6 +48,7 @@ KMapWidget::KMapWidget(const QString &name, int pos)
 {
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(minimalFormulaChanged()), this, SLOT(updateData()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(invalidKMap()));
     connect(m_gm, SIGNAL(repreChanged(bool)), this, SLOT(setRepre(bool)));
 
@@ -65,7 +67,6 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_scene = new QGraphicsScene;
     // view
     m_view = new QGraphicsView(m_scene);
-
 
     // terms
     m_termsModel = new TermsModel;
@@ -92,11 +93,15 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     m_coversCheckBox->setChecked(Constants::KMAP_COVERS_DEFAULT);
     connect(m_coversCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableCovers(bool)));
 
+    // espresso
+    EspressoWidget *espressoWidget = new EspressoWidget;
+
     QVBoxLayout *sideLayout = new QVBoxLayout;
     sideLayout->addWidget(m_termsLabel);
     sideLayout->addWidget(m_termsView);
     sideLayout->addWidget(m_coversCheckBox);
     sideLayout->addWidget(m_coversView);
+    sideLayout->addWidget(espressoWidget);
 
     QHBoxLayout *mainLayout = new QHBoxLayout;
     mainLayout->setMargin(0);
@@ -208,6 +213,7 @@ void KMapWidget::updateData()
                     m_mainWidget, SLOT(selectCovers(QItemSelection,QItemSelection)));
 
             deselectAll(m_termsView, m_termsModel);
+            m_mainWidget->deselectAllTerms();
         }
         else if (m_mainWidget) {
             m_mainWidget->setMapData(m_kmap);

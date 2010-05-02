@@ -51,17 +51,35 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
         pcube->setPrime(false);
     }
 
+    cost = f.cost();
     expand(f, r);
-    irredundant(f, d);
+    if (debug) {
+        data.init(of);
+        data.add(f, Formula::EXPANDED);
+    }
 
-    do {
+    irredundant(f, d);
+    if (debug)
+        data.add(f, Formula::IRREDUNDANT);
+
+    while (cost != f.cost()) {
         cost = f.cost();
+
         reduce(f, d);
+        if (debug)
+            data.add(f, Formula::REDUCED);
+
         if (cost == f.cost())
             break;
+
         expand(f, r);
+        if (debug)
+            data.add(f, Formula::EXPANDED);
+
         irredundant(f, d);
-    } while (cost != f.cost());
+        if (debug)
+            data.add(f, Formula::IRREDUNDANT);
+    }
 
 
     mf = new Formula(*formula, f.cover);

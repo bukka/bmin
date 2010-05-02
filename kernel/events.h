@@ -21,9 +21,10 @@
 #ifndef EVENTS_H
 #define EVENTS_H
 
+#include "kernel.h"
+
 #include <exception>
 
-class Kernel;
 class Formula;
 class QuineMcCluskeyData;
 class KMap;
@@ -65,10 +66,12 @@ protected:
     virtual void evtFormulaMinimized(Formula *, MinimizeEvent &) {}
     virtual void evtMinimalFormulaChanged(Formula *) {}
     virtual void evtFormulasSet(unsigned) {}
+    virtual void evtAlgorithmChanged(Kernel::Algorithm) {}
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}
     virtual void evtShowQm(QuineMcCluskeyData *) {}
+    virtual void evtShowEspresso(EspressoData *) {}
     virtual void evtShowKMap(KMap *) {}
     virtual void evtShowCube(Cube *) {}
     virtual void evtShowFce(Formula *, Formula *) {}

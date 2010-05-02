@@ -24,6 +24,7 @@
 #include "minimizingalgorithm.h"
 #include "term.h"
 #include "espressocover.h"
+#include "espressodata.h"
 
 class Espresso : public MinimizingAlgorithm
 {
@@ -32,6 +33,8 @@ public:
     virtual ~Espresso();
 
     Formula *minimize(Formula *f, bool dbg = false);
+
+    EspressoData *getData() { return &data; }
 
 private:
     // OPERATIONS - cofactor, tautology, intersection
@@ -65,6 +68,8 @@ private:
     // variables count
     unsigned vc;
     term_t fullRow;
+
+    EspressoData data;
 };
 
 

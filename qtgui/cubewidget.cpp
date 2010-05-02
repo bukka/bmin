@@ -26,6 +26,7 @@
 #include "guimanager.h"
 #include "termsmodel.h"
 #include "coversmodel.h"
+#include "espressowidget.h"
 // kernel
 #include "constants.h"
 #include "formula.h"
@@ -66,6 +67,8 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     // creating new formula
     connect(m_gm, SIGNAL(formulaChanged()), m_drawer, SLOT(reloadCube()));
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(minimalFormulaChanged()), this, SLOT(updateData()));
+    connect(m_gm, SIGNAL(minimalFormulaChanged()), m_drawer, SLOT(reloadCube()));
     // request for minimizing cube
     connect(m_gm, SIGNAL(formulaMinimized()), m_drawer, SLOT(minimizeCube()));
     // request for invalidating cube
@@ -146,13 +149,7 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     connect(m_drawer, SIGNAL(minShifted(int)), this, SLOT(shiftTour(int)));
 
     // espresso
-    QGroupBox *espressoGroupBox = new QGroupBox(tr("Espresso"));
-    QPushButton *espressoLeftBtn = new QPushButton(tr("Start"));
-    QPushButton *espressoRightBtn = new QPushButton(tr("Next"));
-    QHBoxLayout *espressoLayout = new QHBoxLayout;
-    espressoLayout->addWidget(espressoLeftBtn);
-    espressoLayout->addWidget(espressoRightBtn);
-    espressoGroupBox->setLayout(espressoLayout);
+    EspressoWidget *espressoWidget = new EspressoWidget;
 
     QVBoxLayout *sideLayout = new QVBoxLayout;
     sideLayout->addWidget(m_termsLabel);
@@ -160,7 +157,7 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     sideLayout->addWidget(m_coversCheckBox);
     sideLayout->addWidget(m_coversView);
     sideLayout->addWidget(tourGroupBox);
-    sideLayout->addWidget(espressoGroupBox);
+    sideLayout->addWidget(espressoWidget);
     sideLayout->setStretchFactor(m_termsView, 5);
     sideLayout->setStretchFactor(m_coversView, 3);
 

@@ -29,7 +29,6 @@ EspressoData::EspressoData()
 {
     started = false;
     origFormula = false;
-    kernel = Kernel::instance();
 }
 
 EspressoData::~EspressoData()
@@ -60,35 +59,38 @@ void EspressoData::clear()
     steps.clear();
 }
 
-bool EspressoData::start()
+Formula::State EspressoData::start()
 {
     if (steps.size() == 0)
-        return false;
+        return Formula::MINIMIZED;
 
     started = true;
     iter = steps.begin();
-    kernel->setTempMinFormula(*iter);
-    return true;
+    Kernel::instance()->setTempMinFormula(*iter);
+
+    return (*iter)->getState();
 }
 
-bool EspressoData::next()
+Formula::State EspressoData::next()
 {
     if (!started)
-        return false;
+        return Formula::COMPLETE;
 
     iter++;
-    if (iter == steps.end())
+    if (iter == steps.end()) {
         finish();
-    else
-        kernel->setTempMinFormula(*iter);
-
-    return true;
+        return Formula::MINIMIZED;
+    }
+    else {
+        Kernel::instance()->setTempMinFormula(*iter);
+        return (*iter)->getState();
+    }
 }
 
 void EspressoData::finish()
 {
     started = false;
-    kernel->resetTempMinFormula();
+    Kernel::instance()->resetTempMinFormula();
 }
 
 void EspressoData::run()

@@ -30,8 +30,8 @@ class Kernel;
 class Formula;
 class OutputValue;
 class Parser;
-class QuineMcCluskey;
 class QuineMcCluskeyData;
+class EspressoData;
 class KMap;
 class Cube;
 
@@ -79,8 +79,10 @@ public:
     void activateNewFormula();
 
     // DATA
-    // returns data for Quine-McCluskey algorithm
+    // returns data from Quine-McCluskey algorithm
     QuineMcCluskeyData *getQmData();
+    // returns data from Espresso algorithm
+    EspressoData *getEspressoData();
     // returns K-map data
     KMap *getKMap();
     // returns Cube data
@@ -90,7 +92,9 @@ protected:
     virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
     virtual void evtFormulaChanged(Formula *f);
     virtual void evtFormulaRemoved();
+    virtual void evtMinimalFormulaChanged(Formula *);
     virtual void evtFormulasSet(unsigned count);
+    virtual void evtAlgorithmChanged(Kernel::Algorithm alg);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
 
@@ -135,6 +139,10 @@ public slots:
     void setRepre(bool sop);
     // changes algorithm
     void setAlgorithm(bool isQM);
+    // emits espressoStarted signal
+    void startEspresso();
+    // emits espressoFinished signal
+    void finishEspresso();
 
 signals:
     // emitted when mode is changed
@@ -151,12 +159,18 @@ signals:
     void formulaMinimized();
     // emitted when user sets invalid formula string
     void formulaInvalidated();
+    // emitted when minimal formula is changed
+    void minimalFormulaChanged();
     // emitted when formulas are set
     void formulasSet(unsigned);
     // emitted when representation is changed
     void repreChanged(bool);
     // emitted when minimizing algorithm is changed
     void algorithmChanged(bool);
+    // emitted when espresso stepping is started
+    void espressoStarted();
+    // emitted when espresso stepping is finished
+    void espressoFinished();
     // emitted when status msg is set
     void statusSet(const QString &, int);
     // emitted when error message is required

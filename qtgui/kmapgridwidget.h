@@ -43,6 +43,7 @@ public:
 
     void setMapData(KMap *data);
     void showCovers();
+    void deselectAllTerms();
     
     const QColor &getColor(int pos, bool withAplpha = false);
     QRectF boundingRect() const;

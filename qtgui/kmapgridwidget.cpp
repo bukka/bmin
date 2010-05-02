@@ -204,6 +204,14 @@ void KMapGridWidget::enableCovers(bool show)
     setMapData(m_kmap);
 }
 
+void KMapGridWidget::deselectAllTerms()
+{
+    for (unsigned i = 0; i < m_rowsCount; i++) {
+         for (unsigned j = 0; j < m_colsCount; j++)
+             m_map[i][j].setSelection(false);
+    }
+}
+
 void KMapGridWidget::selectTerms(const QItemSelection &selected, const QItemSelection &deselected)
 {
     unsigned row, col;

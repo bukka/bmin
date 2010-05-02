@@ -94,6 +94,14 @@ void GUIManager::evtFormulaRemoved()
     emit minFceChanged("");
 }
 
+void GUIManager::evtMinimalFormulaChanged(Formula *mf)
+{
+    QString minFce = QString::fromStdString(m_parser->formulaToString(
+            (mf->getRepre() == Formula::REP_SOP)? Parser::PF_SOP: Parser::PF_POS, mf));
+    emit minFceChanged((minFce == "")? tr("unknown"): minFce);
+    emit minimalFormulaChanged();
+}
+
 void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
 {
     if (evt.isRun()) {
@@ -107,6 +115,12 @@ void GUIManager::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
 void GUIManager::evtFormulasSet(unsigned count)
 {
     emit formulasSet(count);
+}
+
+void GUIManager::evtAlgorithmChanged(Kernel::Algorithm alg)
+{
+    m_isQM = (alg == Kernel::QM);
+    emit algorithmChanged(m_isQM);
 }
 
 void GUIManager::evtError(std::exception &exc)
@@ -144,6 +158,11 @@ Formula *GUIManager::getMinimizedFormula()
 QuineMcCluskeyData *GUIManager::getQmData()
 {
     return m_kernel->getQmData();
+}
+
+EspressoData *GUIManager::getEspressoData()
+{
+    return m_kernel->getEspressoData();
 }
 
 KMap *GUIManager::getKMap()
@@ -233,9 +252,8 @@ void GUIManager::setRepre(bool sop)
 // changes algorithm
 void GUIManager::setAlgorithm(bool isQM)
 {
-    m_isQM = isQM;
-    m_kernel->setAlgorithm(isQM? Kernel::QM: Kernel::ESPRESSO);
-    emit algorithmChanged(isQM);
+    if (isQM != m_isQM)
+        m_kernel->setAlgorithm(isQM? Kernel::QM: Kernel::ESPRESSO);
 }
 
 
@@ -284,4 +302,18 @@ void GUIManager::activateNewFormula()
         m_kernel->deleteFormula();
         m_kernel->setFormula(f);
     }
+}
+
+// ESPRESSO
+
+// emits espressoStarted signal
+void GUIManager::startEspresso()
+{
+    emit espressoStarted();
+}
+
+// emits espressoFinished signal
+void GUIManager::finishEspresso()
+{
+    emit espressoFinished();
 }
