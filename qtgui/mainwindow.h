@@ -75,6 +75,9 @@ public slots:
     // selects formula from opened formulas
     void selectFormula(unsigned count);
 
+    // sets new cursor
+    void setNewCursor(const QCursor &cursor);
+
     // status bar msg
     void setStatusMsg(const QString &msg, int timeout);
 

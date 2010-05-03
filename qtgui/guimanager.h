@@ -36,6 +36,7 @@ class KMap;
 class Cube;
 
 class QString;
+class QCursor;
 
 // GUIManager class
 class GUIManager : public QObject, public Events
@@ -139,6 +140,8 @@ public slots:
     void setRepre(bool sop);
     // changes algorithm
     void setAlgorithm(bool isQM);
+    // changes cursor
+    void setCursor(const QCursor &cursor);
     // emits espressoStarted signal
     void startEspresso();
     // emits espressoFinished signal
@@ -171,6 +174,8 @@ signals:
     void espressoStarted();
     // emitted when espresso stepping is finished
     void espressoFinished();
+    // emitted when cursor is changed
+    void cursorChanged(const QCursor &);
     // emitted when status msg is set
     void statusSet(const QString &, int);
     // emitted when error message is required

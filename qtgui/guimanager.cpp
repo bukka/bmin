@@ -256,6 +256,12 @@ void GUIManager::setAlgorithm(bool isQM)
         m_kernel->setAlgorithm(isQM? Kernel::QM: Kernel::ESPRESSO);
 }
 
+// changes cursor
+void GUIManager::setCursor(const QCursor &cursor)
+{
+    emit cursorChanged(cursor);
+}
+
 
 // loads fce from PLA file
 void GUIManager::loadPLAfile(const QString &fileName)

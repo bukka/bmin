@@ -149,6 +149,8 @@ void QmWidget::showData()
         return;
     }
 
+    m_gm->setCursor(QCursor(Qt::WaitCursor));
+
     m_textArea->insertHtml(QString("<br><h2>%1</h2>").arg(
             tr("Finding Prime Implicants ")));
 
@@ -241,6 +243,8 @@ void QmWidget::showData()
         }
     }
     m_textArea->insertHtml("<br>");
+
+    m_gm->setCursor(QCursor(Qt::ArrowCursor));
 }
 
 

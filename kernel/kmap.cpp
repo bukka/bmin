@@ -28,25 +28,25 @@
 #include <list>
 using namespace std;
 
-const int GreyCode::code[1 << GC_MAX_VC] = {0, 1, 3, 2, 6, 7, 5, 4};
+const int GrayCode::code[1 << GC_MAX_VC] = {0, 1, 3, 2, 6, 7, 5, 4};
 
-GreyCode::GreyCode()
+GrayCode::GrayCode()
 {
     varsCount = 0;
 }
 
-void GreyCode::generate(int vc)
+void GrayCode::generate(int vc)
 {
     varsCount = vc;
     size = (vc <= GC_MAX_VC)? (1 << vc): 0;
 }
 
-int GreyCode::getCode(int idx)
+int GrayCode::getCode(int idx)
 {
     return (idx < static_cast<int>(size))? code[idx]: -1;
 }
 
-int GreyCode::getIdx(int gc)
+int GrayCode::getIdx(int gc)
 {
     for (int i = 0; i < (1 << GC_MAX_VC); i++) {
         if (gc == code[i])

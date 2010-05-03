@@ -1,5 +1,5 @@
 /*
- * aboutdialog.h - about bmin dialog
+ * aboutdialog.h - bmin About dialog
  * created date: 8/6/2009
  *
  * Copyright (C) 2009-2010 Jakub Zelenka.

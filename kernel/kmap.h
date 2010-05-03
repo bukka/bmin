@@ -31,10 +31,10 @@ class Formula;
 
 #define GC_MAX_VC 3
 
-class GreyCode
+class GrayCode
 {
 public:
-    GreyCode();
+    GrayCode();
     void generate(int vc);
     unsigned getSize() { return size; }
     unsigned getVarsCount() { return varsCount; }
@@ -166,8 +166,8 @@ private:
     std::vector<char> topVars;
     std::vector<char> sideVars;
 
-    GreyCode topGC;
-    GreyCode sideGC;
+    GrayCode topGC;
+    GrayCode sideGC;
 };
 
 #endif // KMAP_H

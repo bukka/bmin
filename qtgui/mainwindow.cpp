@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(enableActs()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(enableActs()));
     connect(m_gm, SIGNAL(formulasSet(uint)), this, SLOT(selectFormula(uint)));
+    connect(m_gm, SIGNAL(cursorChanged(QCursor)), this, SLOT(setNewCursor(QCursor)));
     connect(m_gm, SIGNAL(errorInvoked(QString)), this, SLOT(showError(QString)));
     connect(m_gm, SIGNAL(statusSet(QString,int)), this, SLOT(setStatusMsg(QString,int)));
     connect(m_gm, SIGNAL(exit()), this, SLOT(close()));
@@ -166,6 +167,12 @@ void MainWindow::selectFormula(unsigned count)
     PLADialog *dialog = new PLADialog(count, this);
     connect(dialog, SIGNAL(formulaSelected(uint)), m_gm, SLOT(selectFormula(uint)));
     dialog->show();
+}
+
+// sets new cursor
+void MainWindow::setNewCursor(const QCursor &cursor)
+{
+    setCursor(cursor);
 }
 
 // shows status bar msg
