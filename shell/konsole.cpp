@@ -25,6 +25,8 @@
 #include "constants.h"
 #include "kernel.h"
 #include "formula.h"
+#include "quinemccluskeydata.h"
+#include "espressodata.h"
 
 #include <iostream>
 #include <string>
@@ -75,8 +77,10 @@ void Konsole::evtFormulaChanged(Formula *f)
     out << MSG_SETTING << endl;
 }
 
-void Konsole::evtFormulaMinimized(MinimizeEvent &evt)
+void Konsole::evtFormulaMinimized(Formula *mf, MinimizeEvent &evt)
 {
+    (void) mf; // unused arg
+
     if (evt.isDebug())
         return;
 
@@ -86,6 +90,34 @@ void Konsole::evtFormulaMinimized(MinimizeEvent &evt)
         out << MSG_MINIMIZING << endl;
     else
         out << MSG_ALREADY_MINIMIZED << endl;
+}
+
+void Konsole::evtMinimalFormulaChanged(Formula *mf)
+{
+    switch (mf->getState()) {
+    case Formula::EXPANDED:
+        cout << MSG_ESPRESSO_EXPAND;
+        break;
+    case Formula::IRREDUNDANT:
+        cout << MSG_ESPRESSO_IRREDUND;
+        break;
+    case Formula::REDUCED:
+        cout << MSG_ESPRESSO_REDUCE;
+        break;
+    case Formula::MINIMIZED:
+        cout << MSG_ESPRESSO_MINIMIZED;
+        break;
+    default:
+        cout << MSG_ESPRESSO_UNKNOWN << endl;
+        return;
+    }
+
+    Parser::PrintForm pf;
+    if (isSoP)
+        pf = Parser::PF_SOP;
+    else
+        pf = Parser::PF_POS;
+    cout << parser->formulaToString(pf, mf) << endl;
 }
 
 void Konsole::evtFormulasSet(unsigned count)
@@ -113,6 +145,11 @@ void Konsole::evtFormulasSet(unsigned count)
         Kernel::instance()->selectFormula(number);
 }
 
+void Konsole::evtAlgorithmChanged(Kernel::Algorithm alg)
+{
+    out << MSG_ALG_CHANGED << ((alg == Kernel::QM)? MSG_ALG_QM: MSG_ALG_ESPRESSO) << endl;
+}
+
 void Konsole::evtError(exception &exc)
 {
     out << MSG_ERROR << exc.what() << endl;
@@ -134,23 +171,48 @@ void Konsole::evtHelp()
     out << "    IDXS: one number or sequence of more numbers separated by comma" << endl;
     out << "    Example: f(c,b,a) = sum m(1,2,4) + sum d(0)" << endl;
     out << "COMMAND: " << endl;
-    out << "  exit        exit Bmin" << endl;
-    out << "  minimize    minimizing fce" << endl;
-    out << "  sop         set Sum of Products representation" << endl;
-    out << "  pos         set Product of Sums representation" << endl;
-    out << "  load PATH   load PLA file on PATH" << endl;
-    out << "  save PATH   save actual funtion to PLA file on PATH" << endl;
-    out << "    PATH      file path enclosed in double-quotes (e.g. \"/opt/test.pla\")" << endl;
+    out << "  exit          exit Bmin" << endl;
+    out << "  minimize      minimizing fce" << endl;
+    out << "  qm            set actual minimizing algorithm to Quine-McCluskey" << endl;
+    out << "  espresso      set actual minimizing algorithm to Espresso" << endl;
+    out << "  sop           set Sum of Products representation" << endl;
+    out << "  pos           set Product of Sums representation" << endl;
+    out << "  load PATH     load PLA file from PATH" << endl;
+    out << "  save PATH     save actual funtion to PLA file on PATH" << endl;
+    out << "    PATH        file path enclosed in double-quotes (e.g. \"/opt/test.pla\")" << endl;
     out << "  show ARG" << endl;
     out << "    ARG:" << endl;
-    out << "      qm      show prime and cover table of Quine-McCluskey algorithm" << endl;
-    out << "      kmap    show Karnaugh map" << endl;
-    //out << "      cube    show Boolean n-Cube" << endl;
-    out << "      NAME    show function which name is NAME (empty NAME means current fce)" << endl;
+    out << "      qm        show prime and cover table of Quine-McCluskey algorithm" << endl;
+    out << "      espresso  show steps (procedures) of Espresso algorithm" << endl;
+    out << "      kmap      show Karnaugh map" << endl;
+    out << "      cube      show Boolean n-Cube" << endl;
+    out << "      NAME      show function which name is NAME (empty NAME means current fce)" << endl;
+}
+
+
+void Konsole::evtShowEspresso(EspressoData *data)
+{
+    if (Kernel::instance()->getAlgorithm() == Kernel::QM) {
+        Kernel::instance()->setAlgorithm(Kernel::ESPRESSO);
+        Kernel::instance()->minimizeFormula(true);
+        data = Kernel::instance()->getEspressoData();
+    }
+
+    if (data) {
+        out << MSG_ESPRESSO_STEPS << endl;
+        data->run();
+    }
+    else
+        out << MSG_NO_FCE_SET << endl;
 }
 
 void Konsole::evtShowQm(QuineMcCluskeyData *data)
 {
+    if (Kernel::instance()->getAlgorithm() == Kernel::ESPRESSO) {
+        Kernel::instance()->setAlgorithm(Kernel::QM);
+        Kernel::instance()->minimizeFormula(true);
+        data = Kernel::instance()->getQmData();
+    }
     art->showQm(data);
 }
 

@@ -250,6 +250,12 @@ void Parser::command() throw(ShellExc)
     case LexicalAnalyzer::HELP:
         kernel->help();
         break;
+    case LexicalAnalyzer::QM:
+        kernel->setAlgorithm(Kernel::QM);
+        break;
+    case LexicalAnalyzer::ESPRESSO:
+        kernel->setAlgorithm(Kernel::ESPRESSO);
+        break;
     case LexicalAnalyzer::SOP:
         kernel->setRepre(Formula::REP_SOP);
         break;
@@ -285,6 +291,9 @@ void Parser::showArg() throw(ShellExc)
         switch (lex.getCommand()) {
         case LexicalAnalyzer::QM:
             kernel->showQm();
+            break;
+        case LexicalAnalyzer::ESPRESSO:
+            kernel->showEspresso();
             break;
         case LexicalAnalyzer::KMAP:
             kernel->showKMap();

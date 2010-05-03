@@ -369,6 +369,13 @@ void Kernel::showQm()
     emitEvent(evtShowQm(getQmData()));
 }
 
+// show Espresso Algorithm
+void Kernel::showEspresso()
+{
+    minimizeFormula(true);
+    emitEvent(evtShowEspresso(getEspressoData()));
+}
+
 // show Karnaugh map
 void Kernel::showKMap()
 {

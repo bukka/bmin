@@ -61,6 +61,7 @@ const char *LexicalAnalyzer::getCommandName(Command cmd) const
     case HELP: return CMD_HELP;
     case SHOW: return CMD_SHOW;
     case QM: return CMD_QM;
+    case ESPRESSO: return CMD_ESPRESSO;
     case KMAP: return CMD_KMAP;
     case CUBE: return CMD_CUBE;
     case SOP: return CMD_SOP;
@@ -129,6 +130,8 @@ bool LexicalAnalyzer::isCommand(const string &str)
         command = SHOW;
     else if (strcmpi(word, CMD_QM))
         command = QM;
+    else if (strcmpi(word, CMD_ESPRESSO))
+        command = ESPRESSO;
     else if (strcmpi(word, CMD_KMAP))
         command = KMAP;
     else if (strcmpi(word, CMD_CUBE))

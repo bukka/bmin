@@ -57,6 +57,7 @@ static const char * const CMD_EXIT     = "exit";
 static const char * const CMD_HELP     = "help";
 static const char * const CMD_SHOW     = "show";
 static const char * const CMD_QM       = "qm";
+static const char * const CMD_ESPRESSO = "espresso";
 static const char * const CMD_KMAP     = "kmap";
 static const char * const CMD_CUBE     = "cube";
 static const char * const CMD_SOP      = "sop";
@@ -89,6 +90,7 @@ public:
         HELP,
         SHOW,
         QM,
+        ESPRESSO,
         KMAP,
         CUBE,
         SOP,

@@ -39,6 +39,9 @@ shell programming language - special bytecode
 
 - parser.cpp
   exception handling in parse function
+
+- kernel.cpp
+  minimization flag (no evtFormulaChanged)
 			
 - formula.cpp
   minimization state (removing value bool minimized)

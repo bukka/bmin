@@ -117,12 +117,15 @@ public:
     void help();
     // show Quine-McCluskey Algorithm
     void showQm();
+    // show steps of Espresso Algorithm
+    void showEspresso();
     // show Karnaugh map
     void showKMap();
     // show Boolean n-Cube
     void showCube();
     // show logic function
     void showFce(char name = CURRENT_FCE_NAME);
+
 private:
     Kernel();
     ~Kernel();

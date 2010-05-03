@@ -41,11 +41,14 @@ public:
 
 protected:
     virtual void evtFormulaChanged(Formula *f);
-    virtual void evtFormulaMinimized(MinimizeEvent &evt);
+    virtual void evtFormulaMinimized(Formula *mf, MinimizeEvent &evt);
+    virtual void evtMinimalFormulaChanged(Formula *mf);
     virtual void evtFormulasSet(unsigned count);
+    virtual void evtAlgorithmChanged(Kernel::Algorithm alg);
     virtual void evtError(std::exception &exc);
     virtual void evtExit();
     virtual void evtHelp();
+    virtual void evtShowEspresso(EspressoData *data);
     virtual void evtShowQm(QuineMcCluskeyData *data);
     virtual void evtShowKMap(KMap *kmap);
     virtual void evtShowCube(Cube *cube);
@@ -63,23 +66,32 @@ private:
     std::ostream &err;
 };
 
-static const char * const PS = "> ";
-static const char * const MSG_WELCOME           = "Welcome to Bmin";
-static const char * const MSG_NO_FCE            = "No function is set";
-static const char * const MSG_MINIMIZING        = "Function was minimized";
-static const char * const MSG_ALREADY_MINIMIZED = "Function has already been minimized";
-static const char * const MSG_SETTING           = "Function was set";
-static const char * const MSG_ERROR             = "Error: ";
-static const char * const MSG_FCE               = "Function: ";
-static const char * const MSG_MINIMIZED_FORM    = "Minimized form: ";
-static const char * const MSG_NO_SUCH_FCE       = "No such function";
-static const char * const MSG_NO_FCE_SET        = "No function was set";
-static const char * const MSG_REPRE_CHANGED     = "Function representation was changed to ";
-static const char * const MSG_SOP               = "Sum of Products";
-static const char * const MSG_POS               = "Product of Sums";
-static const char * const MSG_MV_INFO           = "Bmin supports only single output value";
-static const char * const MSG_MV_SELECT         = "Select output function";
-static const char * const MSG_MV_NAN            = "Only number is permitted";
-static const char * const MSG_MV_UNKNOWN        = "Unknown output function number";
+static const char * const PS                     = "> ";
+static const char * const MSG_WELCOME            = "Welcome to Bmin";
+static const char * const MSG_NO_FCE             = "No function is set";
+static const char * const MSG_MINIMIZING         = "Function was minimized";
+static const char * const MSG_ALREADY_MINIMIZED  = "Function has already been minimized";
+static const char * const MSG_SETTING            = "Function was set";
+static const char * const MSG_ERROR              = "Error: ";
+static const char * const MSG_FCE                = "Function: ";
+static const char * const MSG_MINIMIZED_FORM     = "Minimized form: ";
+static const char * const MSG_NO_SUCH_FCE        = "No such function";
+static const char * const MSG_NO_FCE_SET         = "No function was set";
+static const char * const MSG_REPRE_CHANGED      = "Function representation was changed to ";
+static const char * const MSG_SOP                = "Sum of Products";
+static const char * const MSG_POS                = "Product of Sums";
+static const char * const MSG_MV_INFO            = "Bmin supports only single output value";
+static const char * const MSG_MV_SELECT          = "Select output function";
+static const char * const MSG_MV_NAN             = "Only number is permitted";
+static const char * const MSG_MV_UNKNOWN         = "Unknown output function number";
+static const char * const MSG_ALG_CHANGED        = "Minimizing algorithm was changed to ";
+static const char * const MSG_ALG_QM             = "Quine-McCluskey";
+static const char * const MSG_ALG_ESPRESSO       = "Espresso";
+static const char * const MSG_ESPRESSO_STEPS     = "Espresso stepping (states after every procedure)";
+static const char * const MSG_ESPRESSO_EXPAND    = "REDUCE:      ";
+static const char * const MSG_ESPRESSO_IRREDUND  = "IRREDUNDANT: ";
+static const char * const MSG_ESPRESSO_REDUCE    = "REDUCE:      ";
+static const char * const MSG_ESPRESSO_MINIMIZED = "MINIMIZED:   ";
+static const char * const MSG_ESPRESSO_UNKNOWN   = "Unknown state";
 
 #endif // KONSOLE_H

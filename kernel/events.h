@@ -70,8 +70,8 @@ protected:
     virtual void evtError(std::exception &) {}
     virtual void evtExit() {}
     virtual void evtHelp() {}
-    virtual void evtShowQm(QuineMcCluskeyData *) {}
     virtual void evtShowEspresso(EspressoData *) {}
+    virtual void evtShowQm(QuineMcCluskeyData *) {}
     virtual void evtShowKMap(KMap *) {}
     virtual void evtShowCube(Cube *) {}
     virtual void evtShowFce(Formula *, Formula *) {}
