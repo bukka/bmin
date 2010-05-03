@@ -3,9 +3,8 @@
 	
 # FEATURES ----------------------------------------------------------
 
-ASCII art - cube
-settings: last open dir, kmap covers and lines, sop
 speed up debugging of Quine-McCluskey
+settings: last open dir, kmap covers and lines, sop
 vars redundant name checking
 improving appearance - more icons and images...
 algorithm testing interface - measure time
@@ -25,7 +24,7 @@ shell programming language - special bytecode
 -- Completed
    kernel events ._/
    Quine-McCluskey debugging info ._/
-   ASCII art - Quine-McCluskey, K-map
+   ASCII art - Quine-McCluskey, K-map, Cube
    treating products of sums ._/
    creating formula dialog ._/
    K-map rewritten ._/

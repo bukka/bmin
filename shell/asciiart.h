@@ -42,6 +42,9 @@ public:
     static const char SEP_ROW   = '-';
     static const char SEP_UNDER = '_';
     static const char SEP_CROSS = '\\';
+    static const char CUBE_X    = '-';
+    static const char CUBE_Y    = '|';
+    static const char CUBE_Z    = '/';
 
     AsciiArt(std::ostream *s) : os(s) {}
 
@@ -100,6 +103,7 @@ static const char * const MSG_MAXTERM           = "Maxterm";
 static const char * const MSG_CUBE              = "%d-Cube";
 static const char * const MSG_KMAP              = "Karnaugh Map";
 static const char * const MSG_MAX_VARS_QM       = "Too many variables for QM algorithm (max %d)";
+static const char * const MSG_MAX_VARS_CUBE     = "Too many variables for cube (max %d)";
 static const char * const MSG_MAX_VARS_KMAP     = "Too many variables for K-map (max %d)";
 static const char * const MSG_INVALID_KMAP      = "Invalid K-map format";
 

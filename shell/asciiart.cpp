@@ -20,8 +20,9 @@
 
 #include "asciiart.h"
 // kernel
-#include "quinemccluskey.h"
+#include "quinemccluskeydata.h"
 #include "kmap.h"
+#include "cube.h"
 #include "term.h"
 
 #include <iostream>
@@ -409,6 +410,289 @@ void AsciiArt::showKMap(KMap *kmap)
 
 void AsciiArt::showCube(Cube *cube)
 {
+    if (!cube->isValid()) {
+        if (cube->getError() == Cube::NO_FORMULA)
+            *os << MSG_NO_DATA << endl;
+        else
+            maxError(os, MSG_MAX_VARS_CUBE, MAX_VARS_CUBE);
+        return;
+    }
+
+    bool legend = true;
+    int offset = 1;
+    int xSize = 10;
+    int xArrowOffset = 2;
+    int yArrowOffset = 2;
+    int zArrowOffset = 2;
+    int yArrowSize = 3;
+    vector<char> vars = cube->getVars();
+
+    int cubeOffset = offset;
+    if (legend)
+        cubeOffset += yArrowSize + yArrowOffset;
+
+    cout << endl;
+    switch (cube->getVarsCount()) {
+    case 3:
+        // line 1
+        os->fill(EMPTY);
+        os->width(cubeOffset + 3);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(6).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(7).toChar(true) << endl;
+
+        // line 2
+        os->width(cubeOffset + 2);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Z << CUBE_Y;
+        os->width(xSize - 1);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Z << CUBE_Y << endl;
+
+        // line 3
+        os->width(cubeOffset + 1);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Z << EMPTY << CUBE_Y;
+        os->width(xSize - 2);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Z << EMPTY << CUBE_Y << endl;
+
+        // line 4
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(2).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(3).toChar(true) << EMPTY << EMPTY << CUBE_Y << endl;
+
+        // line 5
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << EMPTY << EMPTY << CUBE_Y;
+        os->width(xSize - 3);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << EMPTY << EMPTY << CUBE_Y << endl;
+
+        // line 6
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << "/|\\";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y << EMPTY << EMPTY << cube->value(4).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize - 3);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << CUBE_Y << CUBE_X << CUBE_X << cube->value(5).toChar(true);
+        if (legend) { // z arrow
+            os->width(zArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+            *os << " _";
+        }
+        *os << endl;
+
+        // line 7
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << vars[1];
+            *os << "| ";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y << EMPTY << CUBE_Z;
+        os->width(xSize - 2);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << EMPTY << CUBE_Z;
+        if (legend) { // z arrow
+            os->width(zArrowOffset + 1);
+            *os << EMPTY;
+            os->width(1);
+            *os << " /|";
+        }
+        *os << endl;
+
+        // line 8
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << " | ";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y << CUBE_Z;
+        os->width(xSize - 1);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << CUBE_Z;
+        if (legend) { // z arrow
+            os->width(zArrowOffset + 2);
+            *os << EMPTY;
+            os->width(1);
+            *os << "/ " << vars[2];
+        }
+        *os << endl;
+
+        // line 9
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(0).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(1).toChar(true) << endl;
+
+        break;
+    case 2:
+        // line 1
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(2).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(3).toChar(true) << endl;
+
+        // line 2
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y;
+        os->width(xSize);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << endl;
+
+        // line 3
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << "/|\\";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y;
+        os->width(xSize);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << endl;
+
+        // line 4
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << vars[1];
+            *os << "| ";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y;
+        os->width(xSize);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << endl;
+
+        // line 5
+        os->width(offset);
+        *os << EMPTY;
+        os->width(1);
+        if (legend) { // y arrow
+            *os << " | ";
+            os->width(yArrowOffset);
+            *os << EMPTY;
+            os->width(1);
+        }
+        *os << CUBE_Y;
+        os->width(xSize);
+        *os << EMPTY;
+        os->width(1);
+        *os << CUBE_Y << endl;
+
+        // line 6
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(0).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(1).toChar(true) << endl;
+
+        break;
+    case 1:
+        cubeOffset = offset; // no y arrow
+        os->width(cubeOffset);
+        *os << EMPTY;
+        os->width(1);
+        *os << cube->value(0).toChar(true);
+        os->fill(CUBE_X);
+        os->width(xSize);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << cube->value(1).toChar(true) << endl;
+    }
+
+    if (legend) { // x arrow
+        while (--xArrowOffset)
+            *os << endl;
+
+        os->width(cubeOffset + 2);
+        *os << EMPTY;
+        os->fill(CUBE_X);
+        os->width(xSize - 4);
+        *os << CUBE_X;
+        os->fill(EMPTY);
+        os->width(1);
+        *os << '>' << endl;
+
+        os->width(cubeOffset + (xSize / 2));
+        *os << EMPTY;
+        os->width(1);
+        *os << vars[0] << endl;
+    }
+    else
+        *os << endl;
 
 }
 
