@@ -27,6 +27,8 @@
 #include <map>
 #include <string.h>
 
+#define CUBE_TEXTURES 0
+
 #define CONF_FILE "glcube.conf"
 #define CONF_FILE_MAX_ROW 50
 

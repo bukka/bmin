@@ -68,11 +68,13 @@ private:
     QTableView *m_termsView;
     QTableView *m_coversView;
     QCheckBox *m_coversCheckBox;
+#if CUBE_TEXTURES
     QString m_tourStartStr;
     QString m_tourStopStr;
     QPushButton *m_tourBtn;
     QPushButton *m_tourPrevBtn;
     QPushButton *m_tourNextBtn;
+#endif
     QLabel *m_termsLabel;
     QString m_termsStr;
     QString m_mintermsStr;
@@ -84,11 +86,12 @@ public slots:
     void invalidateData();
     void setRepre(bool isSoP);
     void enableCovers(bool show);
+#if CUBE_TEXTURES
     // tour slots
     void startTour(int covers);
     void stopTour();
     void shiftTour(int steps);
-
+#endif
 private slots:
     void selectTerms(const QItemSelection &selected, const QItemSelection &deselected);
     void selectCovers(const QItemSelection &selected, const QItemSelection &deselected);

@@ -120,6 +120,7 @@ CubeWidget::CubeWidget(const QString &name, int pos)
             SIGNAL(selectionChanged(QItemSelection, QItemSelection)),
             this, SLOT(selectCovers(QItemSelection, QItemSelection)));
 
+#if CUBE_TEXTURES
     // covers tour
     m_tourPos = -1;
     QGroupBox *tourGroupBox = new QGroupBox(tr("Covers tour"));
@@ -147,6 +148,7 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     connect(m_drawer, SIGNAL(minStarted(int)), this, SLOT(startTour(int)));
     connect(m_drawer, SIGNAL(minStopped()), this, SLOT(stopTour()));
     connect(m_drawer, SIGNAL(minShifted(int)), this, SLOT(shiftTour(int)));
+#endif
 
     // espresso
     EspressoWidget *espressoWidget = new EspressoWidget;
@@ -156,7 +158,9 @@ CubeWidget::CubeWidget(const QString &name, int pos)
     sideLayout->addWidget(m_termsView);
     sideLayout->addWidget(m_coversCheckBox);
     sideLayout->addWidget(m_coversView);
+#if CUBE_TEXTURES
     sideLayout->addWidget(tourGroupBox);
+#endif
     sideLayout->addWidget(espressoWidget);
     sideLayout->setStretchFactor(m_termsView, 5);
     sideLayout->setStretchFactor(m_coversView, 3);
@@ -195,8 +199,9 @@ void CubeWidget::updateData()
             m_termsView->resizeRowsToContents();
             m_termsView->setColumnWidth(0, m_termsView->width());
             enableCovers(m_coversCheckBox->isChecked());
+#if CUBE_TEXTURES
             m_tourBtn->setEnabled(true);
-
+#endif
             if (formula->getVarsCount() != m_varsCount) {
                 m_varsCount = formula->getVarsCount();
                 deselectAll(m_termsView, m_termsModel);
@@ -211,9 +216,11 @@ void CubeWidget::invalidateData()
     if (m_active) {
         m_termsModel->clearFormula();
         m_coversModel->clearFormula();
+#if CUBE_TEXTURES
         m_tourBtn->setEnabled(false);
         m_tourPrevBtn->setEnabled(false);
         m_tourNextBtn->setEnabled(false);
+#endif
     }
 }
 
@@ -281,6 +288,7 @@ void CubeWidget::selectCovers(const QItemSelection &selected, const QItemSelecti
     m_drawer->redrawCube();
 }
 
+#if CUBE_TEXTURES
 void CubeWidget::startTour(int covers)
 {
     m_tourSteps = covers - 1;
@@ -306,7 +314,7 @@ void CubeWidget::shiftTour(int steps)
         m_tourNextBtn->setEnabled(m_tourPos < m_tourSteps);
     }
 }
-
+#endif
 void CubeWidget::keyPressEvent(QKeyEvent *event)
 {
     m_drawer->cubeKeyPressEvent(event);

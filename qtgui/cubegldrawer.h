@@ -87,10 +87,12 @@ private:
     enum direction {DIRECT_X, DIRECT_Y, DIRECT_Z};
     // actual camera
     enum {CAM_ROTATE, CAM_3D} camera;
+#if CUBE_TEXTURES
     // actual background
     enum {BG_NONE, BG_COMPLETE, BG_PATTERN} background;
     // paint message - when cube is not drawn
     enum {MSG_OVER, MSG_INVALID, MSG_NONE} paintedMsg;
+#endif
     // key timers flags
     enum keyTimerFlag {KTS_FREE, KTS_ACTIVE, KTS_ENQ};
 
@@ -112,8 +114,10 @@ private:
     void getCoverPoint(int cover, GLdouble t, GLdouble &x, GLdouble &y);
     // draws covers
     void drawCovers();
+#if CUBE_TEXTURES
     // draws min box and animated ball
     void drawMin();
+#endif
     // draws cube - makes list
     void drawCube(int n, GLenum mode = GL_RENDER);
     // draws sphere
@@ -126,12 +130,14 @@ private:
     void makeCylinder(int list);
     // makes covers list
     void makeCovers();
+#if CUBE_TEXTURES
     // makes dysplay list
     void makeDisplay();
     // makes msg list
     void makeMsg();
     // makes background list
     void makeBackground();
+#endif
     // makes menu actions
     void makeActions();
     // mekes timers for movement
@@ -142,6 +148,7 @@ private:
     void switchPosLights();
     // figures position of lights
     void figureLights();
+#if CUBE_TEXTURES
     // makes text images and binds them to the texture
     GLuint bindTextTextures(const QString &text, int width, int height,
         int fontSize, const char *fontFamily,
@@ -153,7 +160,7 @@ private:
     void bindTermsTextures();
     // generates dynamic's texture images
     void genDT();
-
+#endif
     bool isInverted3D() { return hAngle3D > 90.0 && hAngle3D < 270.0; }
 
 
@@ -163,8 +170,10 @@ private:
     // kernel cube
     Cube *cube;
 
+#if CUBE_TEXTURES
     // textures with terms' string
     std::vector<GLuint> termsTextures;
+#endif
 
     // FLAGS
     // cube N
@@ -175,16 +184,18 @@ private:
     bool minFceChanged;
     // whether cube tab is showed
     bool isActive;
+#if CUBE_TEXTURES
     // show minimization panel and animation
     bool isMin;
-    // whether show covers
-    bool areCovers;
     // animation effect
     bool showAnimation;
     // actual visible term
     int minPos;
     // for dynamic effect in the begining of the minimization
     int dynamicPos;
+#endif
+    // whether show covers
+    bool areCovers;
     // switch on lights
     bool isLight[4];
     // windows width
@@ -197,7 +208,9 @@ private:
     // Timers setting - for correct pausing in inactive mode
     struct 	{
         bool cube;
+#if CUBE_TEXTURES
         bool min;
+#endif
         bool lights;
     } timersActivity;
 
@@ -233,90 +246,108 @@ private:
     GLfloat hAngle3D;
     GLdouble overlap; // sphere - cylinder overlap
     GLdouble lightsAngle;
+#if CUBE_TEXTURES
     GLdouble animateTime;
+#endif
 
     GLuint cubeListId;
     GLuint sphereListId;
-    GLuint minSphereListId;
     GLuint cylinderListId;
     GLuint coversListId;
+#if CUBE_TEXTURES
+    GLuint minSphereListId;
     GLuint displayListId;
     GLuint bgListId;
     GLuint msgListId;
     GLuint bgTexture[2];
     GLuint msgTexture[2];
     GLuint dynamicTexture[DT_COUNT];
+#endif
     GLUquadricObj *quadric;
 
     QColor bgColor;
     QMenu *cameraMenu;
     QMenu *lightMenu;
+#if CUBE_TEXTURES
     QMenu *bgMenu;
+#endif
     QMenu *effectsMenu;
     QAction *camRotateAct;
     QAction *cam3DAct;
     QAction *lightAct[3];
+#if CUBE_TEXTURES
     QAction *bgNoneAct;
     QAction *bgCompleteAct;
     QAction *bgPatternAct;
     QAction *animationAct;
-    QActionGroup *camGroup;
     QActionGroup *bgGroup;
+#endif
+    QActionGroup *camGroup;
     QMap<int, KeyTimer *> keyMapRotate;
     QMap<int, KeyTimer *> keyMap3D;
     QTimer *cubeTimer;
     QTimer *lightsTimer;
+#if CUBE_TEXTURES
     QTimer *minTimer;
+#endif
 
 signals:
-    // emmited when key M is pushed - minimizing
-    void minRequested();
     // emited when it is clicked on sphere
     void cubeChanged(int, OutputValue &);
     // emitted when showing covers changed
     void showingCoversChanged(bool);
+    // emmited when key M is pushed - minimizing
+    void minRequested();
+#if CUBE_TEXTURES
     // min signals
     void minStarted(int);
     void minStopped();
     void minShifted(int);
+#endif
 
 public slots:
     // formula changed -> reloading cube
     void reloadCube();
-    // when formula is minimized
-    void minimizeCube();
     // when formula is invalid
     void invalidateCube();
     // setting activity
     void setActivity(bool active);
     // setting covers
     void showCovers(bool show);
+    // when formula is minimized
+    void minimizeCube();
+#if CUBE_TEXTURES
     // min slots
     void toggleMin();
     void stopMin();
     void nextMin();
     void prevMin();
+#endif
 
 private slots:
     // slots for menu actions
     void rotateCube();
     void rotateLights();
-    void animateMin();
     void setCamera3D();
     void setCameraRotate();
     void switchLight0();
     void switchLight1();
     void switchLight2();
+#if CUBE_TEXTURES
     void setBgNone();
     void setBgPattern();
     void setBgComplete();
     void setAnimation();
+    void animateMin();
+#endif
     void keyClock();
     void keyTimerStop();
 };
 
+#if CUBE_TEXTURES
 #define IMG_BG1 ":/bits.png"
 #define IMG_BG2 ":/bits_bg.png"
+#endif
 
 #endif // CUBEGLDRAWER_H
 

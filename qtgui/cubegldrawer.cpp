@@ -90,14 +90,16 @@ CubeGLDrawer::CubeGLDrawer(const QGLFormat &format,
     isLight[3] = isLight[1] || isLight[2];
 
     camera = CAM_3D; // default camera
+#if CUBE_TEXTURES
     background = BG_NONE; // default background
     paintedMsg = MSG_INVALID; // default message
+    isMin = false;
+    showAnimation = true;
+    animateTime = 0;
+#endif
     fceChanged = false;
     minFceChanged = false;
     actualCube = -1;
-    animateTime = 0;
-    isMin = false;
-    showAnimation = true;
     areCovers = false;
     termTranslated = 0;
 
@@ -132,19 +134,25 @@ CubeGLDrawer::~CubeGLDrawer()
     glDeleteLists(sphereListId, 1);
     glDeleteLists(cylinderListId, 1);
     glDeleteLists(coversListId, MAX_N);
+#if CUBE_TEXTURES
     glDeleteLists(displayListId, 1);
     glDeleteLists(bgListId, 1);
+#endif
 }
 
 
 void CubeGLDrawer::reloadCube()
 {
     if (isActive) {
+#if CUBE_TEXTURES
         stopMin();
+#endif
         cube->update();
         if (cube->isValid()) {
             makeCurrent();
+#if CUBE_TEXTURES
             paintedMsg = MSG_NONE;
+#endif
             actualCube = cube->getVarsCount();
             drawCube(actualCube);
 
@@ -153,7 +161,9 @@ void CubeGLDrawer::reloadCube()
         }
         else if (cube->getError() == Cube::TOO_MANY_VARS) {
             actualCube = -1;
+#if CUBE_TEXTURES
             paintedMsg = MSG_OVER;
+#endif
         }
         else
             invalidateCube();
@@ -180,6 +190,7 @@ void CubeGLDrawer::minimizeCube()
         if (!cube->isMinimized())
             return;
 
+#if CUBE_TEXTURES
         makeCurrent();
         bindTermsTextures();
 
@@ -190,6 +201,7 @@ void CubeGLDrawer::minimizeCube()
             updateCube();
             emit minStarted(termsTextures.size());
         }
+#endif
     }
     else
         minFceChanged = true;
@@ -200,7 +212,9 @@ void CubeGLDrawer::invalidateCube()
     if (isActive) {
         cube->update();
         actualCube = -1;
+#if CUBE_TEXTURES
         paintedMsg = MSG_INVALID;
+#endif
         updateCube();
     }
     else
@@ -212,8 +226,10 @@ void CubeGLDrawer::setActivity(bool active)
     if ((isActive = active)) {
         if (timersActivity.cube)
             cubeTimer->start(getI(TIMER_CLOCK));
+#if CUBE_TEXTURES
         if (timersActivity.min)
             minTimer->start(getI(TIMER_CLOCK));
+#endif
         if (timersActivity.lights)
             lightsTimer->start(getI(TIMER_CLOCK));
 
@@ -229,11 +245,15 @@ void CubeGLDrawer::setActivity(bool active)
     }
     else {
         timersActivity.cube = cubeTimer->isActive();
+#if CUBE_TEXTURES
         timersActivity.min = minTimer->isActive();
+#endif
         timersActivity.lights = lightsTimer->isActive();
 
         cubeTimer->stop();
+#if CUBE_TEXTURES
         minTimer->stop();
+#endif
         lightsTimer->stop();
     }
 }
@@ -246,6 +266,7 @@ void CubeGLDrawer::showCovers(bool show)
     updateCube();
 }
 
+#if CUBE_TEXTURES
 void CubeGLDrawer::toggleMin()
 {
     if (isMin) {
@@ -361,6 +382,7 @@ void CubeGLDrawer::genDT()
     }
     glDisable(GL_TEXTURE_2D);
 }
+#endif
 
 // cube rotating
 void CubeGLDrawer::rotateCube()
@@ -395,6 +417,7 @@ void CubeGLDrawer::rotateLights()
     updateCube();
 }
 
+#if CUBE_TEXTURES
 // animates minimization
 void CubeGLDrawer::animateMin()
 {
@@ -403,6 +426,7 @@ void CubeGLDrawer::animateMin()
         animateTime -= 1.0;
     updateCube();
 }
+#endif
 
 void CubeGLDrawer::initializeGL()
 {
@@ -457,27 +481,32 @@ void CubeGLDrawer::initializeGL()
     // generating lists
     cubeListId = glGenLists(MAX_N + 1);
     sphereListId = glGenLists(1);
-    minSphereListId = glGenLists(1);
     cylinderListId = glGenLists(2);
     coversListId = glGenLists(MAX_N);
+#if CUBE_TEXTURES
+    minSphereListId = glGenLists(1);
     displayListId = glGenLists(1);
     bgListId = glGenLists(1);
-
+#endif
     // set background color
     qglClearColor(bgColor);
 
+#if CUBE_TEXTURES
     // generate texture
     bgTexture[0] = bindTexture(QPixmap(IMG_BG1));
     bgTexture[1] = bindTexture(QPixmap(IMG_BG2));
     genDT();
+#endif
 
     makeSpheres();
     makeCylinder(0);
     makeCovers();
+#if CUBE_TEXTURES
     makeDisplay();
     makeMsg();
     if (background != BG_NONE)
         makeBackground();
+#endif
 
     for (unsigned i = 0; i <= MAX_N; i++) {
         drawCube(i);
@@ -526,7 +555,26 @@ void CubeGLDrawer::paintGL()
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    if (actualCube < 0) {
+
+    if (actualCube >= 0) {
+        glPushMatrix();
+        transformScene();
+#if CUBE_TEXTURES
+        if (background != BG_NONE && camera == CAM_3D) {
+            glCallList(bgListId);
+        }
+#endif
+        glCallList(cubeListId + actualCube);
+        if (areCovers)
+            drawCovers();
+#if CUBE_TEXTURES
+        if (isMin && minPos >= 0)
+            drawMin();
+#endif
+        glPopMatrix();
+    }
+#if CUBE_TEXTURES
+    else {
         if (paintedMsg != MSG_NONE) { // show message
             glLoadIdentity();
             glTranslatef(0.0, 0.0, -2.0);
@@ -535,19 +583,7 @@ void CubeGLDrawer::paintGL()
             glCallList(msgListId + paintedMsg);
         }
     }
-    else {
-        glPushMatrix();
-        transformScene();
-        if (background != BG_NONE && camera == CAM_3D) {
-            glCallList(bgListId);
-        }
-        glCallList(cubeListId + actualCube);
-        if (areCovers)
-            drawCovers();
-        if (isMin && minPos >= 0)
-            drawMin();
-        glPopMatrix();
-    }
+#endif
 }
 
 void CubeGLDrawer::transformScene()
@@ -807,6 +843,7 @@ void CubeGLDrawer::drawCovers()
     }
 }
 
+#if CUBE_TEXTURES
 void CubeGLDrawer::drawMin()
 {
     glEnable(GL_TEXTURE_2D);
@@ -876,6 +913,7 @@ void CubeGLDrawer::drawMin()
     glPopMatrix();
 
 }
+#endif
 
 void CubeGLDrawer::drawSphere(int idx, GLenum mode, GLdouble x, GLdouble y, GLdouble z)
 {
@@ -1120,12 +1158,14 @@ void CubeGLDrawer::makeSpheres()
     glPopMatrix();
     glEndList();
 
+#if CUBE_TEXTURES
     // animate's sphere
     glNewList(minSphereListId, GL_COMPILE);
     GLfloat diffuse[4] = {1.0, 1.0, 0.0, 1.0};
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse);
     gluSphere(quadric, getD(MIN_SPHERE_R), getI(MIN_SPHERE_STRIPS), getI(MIN_SPHERE_STACKS));
     glEndList();
+#endif
 }
 
 void CubeGLDrawer::makeCylinder(int list)
@@ -1265,6 +1305,7 @@ void CubeGLDrawer::makeCovers()
     }
 }
 
+#if CUBE_TEXTURES
 void CubeGLDrawer::makeDisplay()
 {
     glNewList(displayListId, GL_COMPILE);
@@ -1291,6 +1332,7 @@ void CubeGLDrawer::makeDisplay()
 
     glEndList();
 }
+
 
 void CubeGLDrawer::makeMsg()
 {
@@ -1333,6 +1375,7 @@ void CubeGLDrawer::makeMsg()
         glEndList();
     }
 }
+
 
 void CubeGLDrawer::makeBackground()
 {
@@ -1410,6 +1453,7 @@ void CubeGLDrawer::makeBackground()
 
     glEndList();
 }
+#endif
 
 void CubeGLDrawer::makeTimers()
 {
@@ -1419,11 +1463,15 @@ void CubeGLDrawer::makeTimers()
     connect(cubeTimer, SIGNAL(timeout()), this, SLOT(rotateCube()));
     lightsTimer = new QTimer(this);
     connect(lightsTimer, SIGNAL(timeout()), this, SLOT(rotateLights()));
+#if CUBE_TEXTURES
     minTimer = new QTimer(this);
     connect(minTimer, SIGNAL(timeout()), this, SLOT(animateMin()));
+    // setting default min timer's values
+    timersActivity.min = false;
+#endif
 
     // setting default timers' values
-    timersActivity.cube = timersActivity.min = timersActivity.lights = false;
+    timersActivity.cube = timersActivity.lights = false;
 
     // timers for key's actions
     for (int i = 0; i < KT_COUNT; i++) {
@@ -1636,6 +1684,7 @@ void CubeGLDrawer::cubeKeyPressEvent(QKeyEvent *event)
         showCovers(!areCovers);
         emit showingCoversChanged(areCovers);
         return;
+#if CUBE_TEXTURES
     case Qt::Key_M:
         toggleMin();
         return;
@@ -1645,6 +1694,7 @@ void CubeGLDrawer::cubeKeyPressEvent(QKeyEvent *event)
     case Qt::Key_P:
         prevMin();
         return;
+#endif
     case Qt::Key_R:
         if (camera == CAM_ROTATE) {
             if (cubeTimer->isActive())
@@ -1726,6 +1776,7 @@ void CubeGLDrawer::switchPosLights()
     updateCube();
 }
 
+#if CUBE_TEXTURES
 void CubeGLDrawer::setBgNone()
 {
     background = BG_NONE;
@@ -1750,6 +1801,7 @@ void CubeGLDrawer::setAnimation()
 {
     showAnimation = !showAnimation;
 }
+#endif
 
 void CubeGLDrawer::makeActions()
 {
@@ -1759,8 +1811,7 @@ void CubeGLDrawer::makeActions()
 
     camRotateAct = new QAction(tr("&Rotated"), this);
     camRotateAct->setCheckable(true);
-    connect(camRotateAct, SIGNAL(triggered()),
-        this, SLOT(setCameraRotate()));
+    connect(camRotateAct, SIGNAL(triggered()),  this, SLOT(setCameraRotate()));
 
     camGroup = new QActionGroup(this);
     camGroup->addAction(camRotateAct);
@@ -1768,33 +1819,28 @@ void CubeGLDrawer::makeActions()
 
     lightAct[0] = new QAction(tr("&Reflector"), this);
     lightAct[0]->setCheckable(true);
-    connect(lightAct[0], SIGNAL(triggered()),
-        this, SLOT(switchLight0()));
+    connect(lightAct[0], SIGNAL(triggered()), this, SLOT(switchLight0()));
 
     lightAct[1] = new QAction(tr("Light &1"), this);
     lightAct[1]->setCheckable(true);
-    connect(lightAct[1], SIGNAL(triggered()),
-        this, SLOT(switchLight1()));
+    connect(lightAct[1], SIGNAL(triggered()), this, SLOT(switchLight1()));
 
     lightAct[2] = new QAction(tr("Light &2"), this);
     lightAct[2]->setCheckable(true);
-    connect(lightAct[2], SIGNAL(triggered()),
-        this, SLOT(switchLight2()));
+    connect(lightAct[2], SIGNAL(triggered()), this, SLOT(switchLight2()));
 
+#if CUBE_TEXTURES
     bgNoneAct  = new QAction(tr("&None"), this);
     bgNoneAct->setCheckable(true);
-    connect(bgNoneAct, SIGNAL(triggered()),
-        this, SLOT(setBgNone()));
+    connect(bgNoneAct, SIGNAL(triggered()), this, SLOT(setBgNone()));
 
     bgPatternAct  = new QAction(tr("&Pattern"), this);
     bgPatternAct->setCheckable(true);
-    connect(bgPatternAct, SIGNAL(triggered()),
-        this, SLOT(setBgPattern()));
+    connect(bgPatternAct, SIGNAL(triggered()), this, SLOT(setBgPattern()));
 
     bgCompleteAct  = new QAction(tr("&Complete"), this);
     bgCompleteAct->setCheckable(true);
-    connect(bgCompleteAct, SIGNAL(triggered()),
-        this, SLOT(setBgComplete()));
+    connect(bgCompleteAct, SIGNAL(triggered()), this, SLOT(setBgComplete()));
 
     bgGroup = new QActionGroup(this);
     bgGroup->addAction(bgNoneAct);
@@ -1803,8 +1849,8 @@ void CubeGLDrawer::makeActions()
 
     animationAct  = new QAction(tr("&Animation"), this);
     animationAct->setCheckable(true);
-    connect(animationAct, SIGNAL(triggered()),
-        this, SLOT(setAnimation()));
+    connect(animationAct, SIGNAL(triggered()),  this, SLOT(setAnimation()));
+#endif
 }
 
 void CubeGLDrawer::contextMenuEvent(QContextMenuEvent *event)
@@ -1824,7 +1870,7 @@ void CubeGLDrawer::contextMenuEvent(QContextMenuEvent *event)
         if (i == 0)
             lightMenu->addSeparator();
     }
-
+#if CUBE_TEXTURES
     if (camera == CAM_3D) {
         bgNoneAct->setChecked(background == BG_NONE);
         bgPatternAct->setChecked(background == BG_PATTERN);
@@ -1839,6 +1885,7 @@ void CubeGLDrawer::contextMenuEvent(QContextMenuEvent *event)
     animationAct->setChecked(showAnimation);
     effectsMenu = menu.addMenu(tr("&Effects"));
     effectsMenu->addAction(animationAct);
+#endif
 
     menu.exec(event->globalPos());
 }
@@ -1862,9 +1909,8 @@ void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
     glMatrixMode(GL_PROJECTION);
     glPushMatrix();
     glLoadIdentity();
-    gluPickMatrix((GLdouble) event->x(), (GLdouble)
-        (viewport[3] - event->y()), getD(PICKBOX_A),
-            getD(PICKBOX_A), viewport);
+    gluPickMatrix((GLdouble) event->x(), (GLdouble) (viewport[3] - event->y()),
+                  getD(PICKBOX_A), getD(PICKBOX_A), viewport);
     resizeWin(false);
 
     glMatrixMode(GL_MODELVIEW);
