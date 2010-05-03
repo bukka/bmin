@@ -75,19 +75,19 @@ void EspressoWidget::step(Formula::State state)
 {
     switch (state) {
     case Formula::EXPANDED:
-        emit satusGenerated(expandedStr, STATUS_TIMEOUT);
+        emit satusGenerated(expandedStr, ESPRESSO_STATUS_TIMEOUT);
         break;
     case Formula::IRREDUNDANT:
-        emit satusGenerated(irredundantStr, STATUS_TIMEOUT);
+        emit satusGenerated(irredundantStr, ESPRESSO_STATUS_TIMEOUT);
         break;
     case Formula::REDUCED:
-        emit satusGenerated(reducedStr, STATUS_TIMEOUT);
+        emit satusGenerated(reducedStr, ESPRESSO_STATUS_TIMEOUT);
         break;
     case Formula::MINIMIZED:
         m_leftBtn->setText(startStr);
         m_rightBtn->setEnabled(false);
         m_started = false;
-        emit satusGenerated(minimizedStr, STATUS_TIMEOUT);
+        emit satusGenerated(minimizedStr, ESPRESSO_STATUS_TIMEOUT);
         emit finished();
         break;
     default:

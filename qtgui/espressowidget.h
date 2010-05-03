@@ -34,7 +34,7 @@ class EspressoWidget : public QWidget
     Q_OBJECT
 
 public:
-    static const int STATUS_TIMEOUT = 5000;
+    static const int ESPRESSO_STATUS_TIMEOUT = 5000;
 
     EspressoWidget(QWidget *parent = 0);
 

@@ -118,7 +118,6 @@ class PLAExc : public std::exception
 {
 public:
     enum Error {
-        NO_ERROR,
         SYNTAX,
         BODY,
         VAR_NAME,
