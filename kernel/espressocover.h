@@ -1,5 +1,5 @@
 /*
- *
+ * espressocover.h - terms' container for Espresso algorithm class
  * created date: 4/17/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

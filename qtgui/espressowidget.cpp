@@ -1,5 +1,5 @@
 /*
- *
+ * epsressowidget.cpp - small group widget for Espresso stepping
  * created date: 5/1/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

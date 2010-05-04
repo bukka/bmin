@@ -1,5 +1,5 @@
 /*
- *
+ * cube.cpp - n-Cube generating class
  * created date: 4/4/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

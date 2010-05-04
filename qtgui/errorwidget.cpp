@@ -1,5 +1,5 @@
 /*
- *
+ * errorwidget.cpp - widget with error message
  * created date: 5/4/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

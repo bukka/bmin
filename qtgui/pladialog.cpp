@@ -1,5 +1,5 @@
 /*
- *
+ * pladialog.cpp - dialog for choosing output function from PLA file
  * created date: 3/30/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

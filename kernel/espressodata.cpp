@@ -1,5 +1,5 @@
 /*
- *
+ * espressodata.cpp - data for stepping Espresso
  * created date: 5/1/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.

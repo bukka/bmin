@@ -1,5 +1,5 @@
 /*
- *
+ * plaformat.cpp - PLA file parser
  * created date: 3/16/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.
