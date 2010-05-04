@@ -142,6 +142,10 @@ public slots:
     void setAlgorithm(bool isQM);
     // changes cursor
     void setCursor(const QCursor &cursor);
+    // sets status
+    void setStatus(const QString &str, int t = 0);
+    // clears status
+    void clearStatus();
     // emits espressoStarted signal
     void startEspresso();
     // emits espressoFinished signal

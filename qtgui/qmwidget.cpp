@@ -150,6 +150,7 @@ void QmWidget::showData()
     }
 
     m_gm->setCursor(QCursor(Qt::WaitCursor));
+    m_gm->setStatus(tr("Please wait: Quine-McCluskey Data is generating"));
 
     m_textArea->insertHtml(QString("<br><h2>%1</h2>").arg(
             tr("Finding Prime Implicants ")));
@@ -245,6 +246,7 @@ void QmWidget::showData()
     m_textArea->insertHtml("<br>");
 
     m_gm->setCursor(QCursor(Qt::ArrowCursor));
+    m_gm->clearStatus();
 }
 
 

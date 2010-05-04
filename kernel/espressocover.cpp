@@ -94,7 +94,7 @@ void EspressoCover::sort(SortOrder order)
         if (cover.empty())
             return;
 
-        Term *largest;
+        Term *largest = 0;
         int maxCount = -1;
         for (list<Term>::iterator it = cover.begin(); it != cover.end(); it++) {
             int count = (*it).valuesCount(LiteralValue::MISSING);

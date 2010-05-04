@@ -262,6 +262,17 @@ void GUIManager::setCursor(const QCursor &cursor)
     emit cursorChanged(cursor);
 }
 
+// sets status
+void GUIManager::setStatus(const QString &str, int t)
+{
+    emit statusSet(str, t);
+}
+
+// clears status
+void GUIManager::clearStatus()
+{
+    emit statusSet("", 0);
+}
 
 // loads fce from PLA file
 void GUIManager::loadPLAfile(const QString &fileName)

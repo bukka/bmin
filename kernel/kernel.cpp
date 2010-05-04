@@ -149,6 +149,7 @@ void Kernel::setFormula(Formula *f)
 {
     deleteFormula();
     formula = f;
+    formula->setMinimized(false);
     emitEvent(evtFormulaChanged(f));
 }
 

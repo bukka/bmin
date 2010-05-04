@@ -1218,6 +1218,7 @@ void CubeGLDrawer::makeCovers()
     int stacksArray[3] = {getI(COVER_STACKS_1), getI(COVER_STACKS_2), getI(COVER_STACKS_4)};
     GLdouble r = getD(COVER_R);
     GLdouble stripStep = 2 * PI / strips;
+    vert1 = vert2 = false;
 
     for (unsigned cover = 0; cover < MAX_N; cover++) {
         int stacks = stacksArray[cover];
@@ -1499,8 +1500,8 @@ void CubeGLDrawer::makeTimers()
     // rotation
     keyMap3D[Qt::Key_Left]  = keyMap3D[Qt::Key_A] = &keyTimers[KTR_LEFT];
     keyMap3D[Qt::Key_Right] = keyMap3D[Qt::Key_D] = &keyTimers[KTR_RIGHT];
-    keyMap3D[Qt::Key_E] = &keyTimers[KTR_UP];
-    keyMap3D[Qt::Key_X] = &keyTimers[KTR_DOWN];
+    keyMap3D[Qt::Key_E] = keyMap3D[Qt::Key_PageUp]   = &keyTimers[KTR_UP];
+    keyMap3D[Qt::Key_X] = keyMap3D[Qt::Key_PageDown] = &keyTimers[KTR_DOWN];
     // movement
     keyMap3D[Qt::Key_Up] = keyMap3D[Qt::Key_W] = &keyTimers[KTM_STRAIGHT];
     keyMap3D[Qt::Key_Down] = keyMap3D[Qt::Key_S] = &keyTimers[KTM_BACK];
