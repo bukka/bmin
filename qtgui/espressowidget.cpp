@@ -64,6 +64,7 @@ EspressoWidget::EspressoWidget(QWidget *parent) : QWidget(parent)
     espressoLayout->addWidget(m_rightBtn);
 
     QGroupBox *espressoGroupBox = new QGroupBox(tr("Espresso"));
+    espressoGroupBox->setMinimumWidth(130);
     espressoGroupBox->setLayout(espressoLayout);
 
     QHBoxLayout *mainLayout = new QHBoxLayout;

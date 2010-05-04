@@ -32,6 +32,7 @@ BorderWidget::BorderWidget(const QString &msg, QWidget* parent) :
 {
     ErrorWidget *w = new ErrorWidget(msg);
     QHBoxLayout *layout = new QHBoxLayout;
+    layout->setMargin(0);
     layout->addWidget(w);
     setLayout(layout);
 }
