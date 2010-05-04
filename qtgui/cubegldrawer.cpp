@@ -1890,7 +1890,6 @@ void CubeGLDrawer::contextMenuEvent(QContextMenuEvent *event)
     menu.exec(event->globalPos());
 }
 
-
 void CubeGLDrawer::mousePressEvent(QMouseEvent *event)
 {
     makeCurrent();

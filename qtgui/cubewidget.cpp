@@ -42,6 +42,7 @@
 #include <QGroupBox>
 #include <QBoxLayout>
 #include <QItemSelection>
+#include <QStackedLayout>
 
 CubeWidget::CubeWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
@@ -85,6 +86,13 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 
     BorderWidget *borderWidget = new BorderWidget;
     borderWidget->setLayout(glLayout);
+    BorderWidget *error1Widget = new BorderWidget(tr("No logic function for Cube."));
+    BorderWidget *error2Widget = new BorderWidget(tr("Too many variables (max 3 variables)."));
+    m_stack = new QStackedLayout;
+    m_stack->addWidget(borderWidget);
+    m_stack->addWidget(error1Widget);
+    m_stack->addWidget(error2Widget);
+    m_stack->setCurrentIndex(1);
 
     // terms
     m_termsModel = new TermsModel;
@@ -167,7 +175,8 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 
     QHBoxLayout *mainLayout = new QHBoxLayout;
     mainLayout->setMargin(0);
-    mainLayout->addWidget(borderWidget);
+    //mainLayout->addWidget(borderWidget);
+    mainLayout->addLayout(m_stack);
     mainLayout->addLayout(sideLayout);
 
     setLayout(mainLayout);
@@ -192,9 +201,15 @@ void CubeWidget::updateData()
 {
     if (m_active) {
         Formula *formula = m_gm->getFormula();
-        if (!formula || formula->getVarsCount() > CubeGLDrawer::MAX_N)
+        if (!formula || formula->getVarsCount() > CubeGLDrawer::MAX_N) {
+            if (!formula)
+                m_stack->setCurrentIndex(1);
+            else
+                m_stack->setCurrentIndex(2);
             invalidateData();
+        }
         else {
+            m_stack->setCurrentIndex(0);
             m_termsModel->setFormula(formula);
             m_termsView->resizeRowsToContents();
             m_termsView->setColumnWidth(0, m_termsView->width());
@@ -315,6 +330,7 @@ void CubeWidget::shiftTour(int steps)
     }
 }
 #endif
+
 void CubeWidget::keyPressEvent(QKeyEvent *event)
 {
     m_drawer->cubeKeyPressEvent(event);

@@ -36,6 +36,7 @@ class QCheckBox;
 class QTableView;
 class QAbstractItemModel;
 class QItemSelection;
+class QStackedLayout;
 
 // BooleanCube class - superstructure for cube drawer
 class CubeWidget : public ModuleWidget
@@ -56,12 +57,15 @@ private:
     void deselectAll(QTableView *view, const QAbstractItemModel *model);
 
     bool m_active;
+
     unsigned m_varsCount;
     int m_tourSteps;
     int m_tourPos;
     CubeGLDrawer *m_drawer;
     GUIManager *m_gm;
     Cube *m_cube;
+
+    QStackedLayout *m_stack;
 
     TermsModel *m_termsModel;
     CoversModel *m_coversModel;

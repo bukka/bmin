@@ -51,7 +51,7 @@ EspressoWidget::EspressoWidget(QWidget *parent) : QWidget(parent)
 
 
     m_leftBtn = new QPushButton(startStr);
-    m_leftBtn->setMinimumWidth(25);
+    //m_leftBtn->setMinimumWidth(25);
     if (!m_gm->isCorrectFormula())
         m_leftBtn->setEnabled(false);
     connect(m_leftBtn, SIGNAL(clicked()), this, SLOT(doLeftAction()));

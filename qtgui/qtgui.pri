@@ -25,7 +25,9 @@ SOURCES += mainwindow.cpp \
     coversmodel.cpp \
     colors.cpp \
     pladialog.cpp \
-    espressowidget.cpp
+    espressowidget.cpp \
+    errorwidget.cpp \
+    borderwidget.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -51,5 +53,6 @@ HEADERS += mainwindow.h \
     colors.h \
     pladialog.h \
     borderwidget.h \
-    espressowidget.h
+    espressowidget.h \
+    errorwidget.h
 RESOURCES += resources.qrc

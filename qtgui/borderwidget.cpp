@@ -1,6 +1,6 @@
 /*
- * borderwidget.h - widget with focus border
- * created date: 4/2/2010
+ * borderwidget.cpp - widget with focus border
+ * created date: 5/4/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.
  *
@@ -18,22 +18,25 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BORDERWIDGET_H
-#define BORDERWIDGET_H
+#include "borderwidget.h"
+#include "errorwidget.h"
 
-#include <QScrollArea>
+#include <QHBoxLayout>
+#include <QKeyEvent>
 
-class QKeyEvent;
+BorderWidget::BorderWidget(QWidget* parent) :
+        QScrollArea(parent) {}
 
-class BorderWidget : public QScrollArea
+BorderWidget::BorderWidget(const QString &msg, QWidget* parent) :
+        QScrollArea(parent)
 {
-public:
-    BorderWidget(QWidget* parent = 0);
-    BorderWidget(const QString &msg, QWidget* parent = 0);
+    ErrorWidget *w = new ErrorWidget(msg);
+    QHBoxLayout *layout = new QHBoxLayout;
+    layout->addWidget(w);
+    setLayout(layout);
+}
 
-protected:
-    void keyPressEvent(QKeyEvent *event);
-
-};
-
-#endif // BORDERWIDGET_H
+void BorderWidget::keyPressEvent(QKeyEvent *event)
+{
+    event->setAccepted(false);
+}

@@ -1,6 +1,6 @@
 /*
- * borderwidget.h - widget with focus border
- * created date: 4/2/2010
+ * errorwidget.h - widget with error message
+ * created date: 5/4/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.
  *
@@ -18,22 +18,21 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BORDERWIDGET_H
-#define BORDERWIDGET_H
+#ifndef ERRORWIDGET_H
+#define ERRORWIDGET_H
 
-#include <QScrollArea>
+#include <QWidget>
 
-class QKeyEvent;
-
-class BorderWidget : public QScrollArea
+class ErrorWidget : public QWidget
 {
 public:
-    BorderWidget(QWidget* parent = 0);
-    BorderWidget(const QString &msg, QWidget* parent = 0);
+    ErrorWidget(const QString &msg);
 
 protected:
-    void keyPressEvent(QKeyEvent *event);
+    void paintEvent(QPaintEvent *);
 
+private:
+    QString message;
 };
 
-#endif // BORDERWIDGET_H
+#endif // ERRORWIDGET_H

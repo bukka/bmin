@@ -1,6 +1,6 @@
 /*
- * borderwidget.h - widget with focus border
- * created date: 4/2/2010
+ *
+ * created date: 5/4/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.
  *
@@ -18,22 +18,21 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef BORDERWIDGET_H
-#define BORDERWIDGET_H
+#include "errorwidget.h"
 
-#include <QScrollArea>
+#include <QPainter>
 
-class QKeyEvent;
-
-class BorderWidget : public QScrollArea
+ErrorWidget::ErrorWidget(const QString &msg)
 {
-public:
-    BorderWidget(QWidget* parent = 0);
-    BorderWidget(const QString &msg, QWidget* parent = 0);
+    message = msg;
+}
 
-protected:
-    void keyPressEvent(QKeyEvent *event);
+void ErrorWidget::paintEvent(QPaintEvent *)
+{
+    QPainter painter(this);
+    painter.fillRect(QRect(0, 0, width(), height()), QColor(Qt::black));
 
-};
-
-#endif // BORDERWIDGET_H
+    painter.setPen(QColor(200, 0, 0));
+    painter.setFont(QFont("monspace", 18));
+    painter.drawText(QRect(0, 0, width(), height()), Qt::AlignCenter, message);
+}
