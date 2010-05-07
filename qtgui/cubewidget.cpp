@@ -159,7 +159,7 @@ CubeWidget::CubeWidget(const QString &name, int pos)
 #endif
 
     // espresso
-    EspressoWidget *espressoWidget = new EspressoWidget;
+    EspressoWidget *espressoWidget = new EspressoWidget(CubeGLDrawer::MAX_N);
 
     QVBoxLayout *sideLayout = new QVBoxLayout;
     sideLayout->addWidget(m_termsLabel);

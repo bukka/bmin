@@ -36,7 +36,7 @@ class EspressoWidget : public QWidget
 public:
     static const int ESPRESSO_STATUS_TIMEOUT = 5000;
 
-    EspressoWidget(QWidget *parent = 0);
+    EspressoWidget(unsigned mv, QWidget *parent = 0);
 
 private:
     void step(Formula::State state);
@@ -44,6 +44,8 @@ private:
     GUIManager *m_gm;
     EspressoData *m_data;
     bool m_started;
+    unsigned maxVars;
+    unsigned actualVars;
 
     QString startStr;
     QString finishStr;

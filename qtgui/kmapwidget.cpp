@@ -94,7 +94,7 @@ KMapWidget::KMapWidget(const QString &name, int pos)
     connect(m_coversCheckBox, SIGNAL(toggled(bool)), this, SLOT(enableCovers(bool)));
 
     // espresso
-    EspressoWidget *espressoWidget = new EspressoWidget;
+    EspressoWidget *espressoWidget = new EspressoWidget(KMap::MAX_VARS);
 
     QVBoxLayout *sideLayout = new QVBoxLayout;
     sideLayout->addWidget(m_termsLabel);

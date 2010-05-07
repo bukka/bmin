@@ -27,7 +27,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 
-EspressoWidget::EspressoWidget(QWidget *parent) : QWidget(parent)
+EspressoWidget::EspressoWidget(unsigned mv, QWidget *parent) : QWidget(parent)
 {
     m_gm = GUIManager::instance();
     connect(m_gm, SIGNAL(formulaChanged()), this, SLOT(resetState()));
@@ -40,6 +40,8 @@ EspressoWidget::EspressoWidget(QWidget *parent) : QWidget(parent)
     connect(this, SIGNAL(satusGenerated(QString,int)), m_gm, SIGNAL(statusSet(QString,int)));
 
     m_started = false;
+    maxVars = mv;
+    actualVars = 0;
     startStr = tr("Start");
     finishStr = tr("Finish");
 
@@ -98,7 +100,7 @@ void EspressoWidget::step(Formula::State state)
 
 void EspressoWidget::start()
 {
-    if (!m_started) {
+    if (!m_started && actualVars <= maxVars) {
         m_started = true;
         m_leftBtn->setText(finishStr);
         m_rightBtn->setEnabled(true);
@@ -113,9 +115,15 @@ void EspressoWidget::finish()
 
 void EspressoWidget::resetState()
 {
-    m_started = false;
-    m_leftBtn->setEnabled(true);
-    m_rightBtn->setEnabled(false);
+    actualVars = m_gm->getFormula()->getVarsCount();
+    if (actualVars > maxVars)
+        disableState();
+    else {
+        m_started = false;
+        m_leftBtn->setText(startStr);
+        m_leftBtn->setEnabled(true);
+        m_rightBtn->setEnabled(false);
+    }
 }
 
 void EspressoWidget::disableState()

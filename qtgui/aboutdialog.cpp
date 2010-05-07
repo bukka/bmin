@@ -66,11 +66,12 @@ AboutDialog::AboutDialog(QWidget *parent)
         QTextStream in(&gplFile);
         QString data = in.readAll();
         licenseEdit->insertPlainText(data);
+        licenseEdit->moveCursor(QTextCursor::Start);
     }
     else
         licenseEdit->insertPlainText(tr("No license file"));
 
-    QString licenseDesc(tr("Bmin is free software under GPL 3:"));
+    QString licenseDesc(tr("Bmin is free software under license GPLv3:"));
     QLabel *licenseLabel = new QLabel(licenseDesc);
     licenseLabel->setBuddy(licenseEdit);
 

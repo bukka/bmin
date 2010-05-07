@@ -26,7 +26,7 @@
 #if !KONSOLE_ONLY
 #include "qtgui/mainwindow.h"
 
-#include <QtGui/QApplication>
+#include <QApplication>
 #endif
 
 #include <exception>
@@ -37,7 +37,7 @@ static Options::Definition optsDef[] = {
     {"shell", 's', false},
     {"help", 'h', false},
     {"version", 'v', false},
-    {"file", 'f', true},
+    //  {"file", 'f', true},
     {0, 0, false}
 };
 
@@ -48,14 +48,22 @@ void showHelp(ostream &os)
     os << "  --shell, -s      run shell mode" << endl;
     os << "  --help, -h       show this help" << endl;
     os << "  --version, -v    show version" << endl;
-    os << "  --file=<file>    run script file" << endl;
-    os << "      -f <file>          ''" << endl;
+    //  os << "  --file=<file>    run script file" << endl;
+    //  os << "      -f <file>          ''" << endl;
+}
+
+void showLicense(ostream &os)
+{
+    os << "Copyright (C) 2007-2010 Jakub Zelenka" << endl;
+    os << "License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>" << endl;
+    os << "This is free software: you are free to change and redistribute it." << endl;
+    os << "There is NO WARRANTY, to the extent permitted by law." << endl;
 }
 
 void showVersion(ostream &os)
 {
     os << "Bmin version " << BMIN_VESION_STRING << endl;
-    os << "Copyright (C) 2007-2009 Jakub Zelenka" << endl;
+    showLicense(os);
 }
 
 int main(int argc, char *argv[])
@@ -85,12 +93,14 @@ int main(int argc, char *argv[])
             showVersion(os);
         if (opt.hasOpt("help"))
             showHelp(os);
-        if (opt.hasOpt("file"))
-            os << "file: " << opt.getValue("file") << endl;
+        //if (opt.hasOpt("file"))
+        //    os << "file: " << opt.getValue("file") << endl;
 #if !KONSOLE_ONLY
         if (opt.hasOpt("shell")) {
 #endif
             Konsole konsole;
+            showLicense(os);
+            os << endl;
             konsole.run();
 #if !KONSOLE_ONLY
         }
