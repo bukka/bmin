@@ -41,7 +41,7 @@ using namespace std;
 CreatorDialog::CreatorDialog(bool edit, QWidget *parent)
     : QDialog(parent)
 {
-    setWindowTitle(tr("New logic function..."));
+    setWindowTitle(edit? tr("Edit logic function..."): tr("New logic function..."));
 
     m_gm = GUIManager::instance();
     Formula *formula = (edit? new Formula(*m_gm->getFormula()): 0);
