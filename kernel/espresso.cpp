@@ -43,44 +43,41 @@ Formula *Espresso::minimize(Formula *formula, bool dbg)
     Term *pcube;
 
     // main loop
-    EspressoCover::Cost cost;
-
     of->getCovers(f.cover, d.cover, r.cover);
 
     foreach_cube(f, pcube) {
         pcube->setPrime(false);
     }
 
-    cost = f.cost();
-    expand(f, r);
-    if (debug) {
-        data.init(of);
-        data.add(f, Formula::EXPANDED);
-    }
+    EspressoCover::Cost c1, c2, c3;
+    c1 = c2 = c3 = f.cost();
 
-    irredundant(f, d);
     if (debug)
-        data.add(f, Formula::IRREDUNDANT);
+        data.init(of);
 
-    while (cost != f.cost()) {
-        cost = f.cost();
-
-        reduce(f, d);
-        if (debug)
-            data.add(f, Formula::REDUCED);
-
-        if (cost == f.cost())
-            break;
-
+    while (true) {
         expand(f, r);
         if (debug)
             data.add(f, Formula::EXPANDED);
+        if (c1 == f.cost())
+            break;
+        c1 = f.cost();
 
         irredundant(f, d);
         if (debug)
             data.add(f, Formula::IRREDUNDANT);
-    }
+        if (c2 == f.cost())
+            break;
+        c2 = f.cost();
 
+        reduce(f, d);
+        if (debug)
+            data.add(f, Formula::REDUCED);
+        if (c3 == f.cost())
+            break;
+        c3 = f.cost();
+
+    }
 
     mf = new Formula(*formula, f.cover);
     mf->setMinimized(true);
