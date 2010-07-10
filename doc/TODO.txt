@@ -33,9 +33,7 @@ shell programming language - special bytecode
    espresso ._/
 
 # BUGS --------------------------------------------------------------
-- stop timer after changing mode in 3D cube
-- show message after removing fce in 3D cube
-- freezing in 3D cube
+- freezing in 3D cube (not simulated yet)
 
 # CODE --------------------------------------------------------------
 

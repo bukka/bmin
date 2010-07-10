@@ -1722,6 +1722,10 @@ void CubeGLDrawer::cubeKeyReleaseEvent(QKeyEvent *event)
 
 void CubeGLDrawer::setCamera3D()
 {
+    foreach (KeyTimer *kt, keyMapRotate) {
+        kt->stop->start();
+    }
+
     camera = CAM_3D;
     cubeTimer->stop();
     if (isLight[0])
@@ -1732,6 +1736,10 @@ void CubeGLDrawer::setCamera3D()
 
 void CubeGLDrawer::setCameraRotate()
 {
+    foreach (KeyTimer *kt, keyMap3D) {
+        kt->stop->start();
+    }
+
     camera = CAM_ROTATE;
     glDisable(GL_LIGHT0);
     resizeWin();

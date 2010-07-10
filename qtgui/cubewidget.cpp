@@ -229,6 +229,7 @@ void CubeWidget::updateData()
 void CubeWidget::invalidateData()
 {
     if (m_active) {
+        m_stack->setCurrentIndex(1);
         m_termsModel->clearFormula();
         m_coversModel->clearFormula();
 #if CUBE_TEXTURES
