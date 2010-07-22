@@ -1,5 +1,12 @@
-# object files
+# Linux object files
 *.o
+
+# Windows files
+*.exe
+*.Release
+*.Debug
+release/
+debug/
 
 # pla files
 *.pla
