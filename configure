@@ -1,0 +1,24 @@
+#!/bin/bash
+
+# configure file for Bmin
+
+for arg in $@
+do
+	if [[ $arg =~ ^"--prefix" ]]; then
+		prefix=`echo $arg | cut -d '=' -f 2`
+	elif [[ $arg =~ ^"--bindir" ]]; then
+		bindir=`echo $arg | cut -d '=' -f 2`
+	fi
+done
+
+
+if [ -z $prefix ]; then
+	prefix=/usr
+fi
+
+if [ -z $bindir ]; then
+	bindir=$prefix/bin
+fi
+
+qmake "PREFIX = $prefix" "BINDIR = $bindir" bmin.pro
+
