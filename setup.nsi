@@ -76,21 +76,23 @@ Section "!Bmin executables" SEC_BMIN
     File "${QTLIBDIR}\QtCore4.dll"
     File "${QTLIBDIR}\QtGui4.dll"
     File "${QTLIBDIR}\QtOpenGL4.dll"
-    File license.txt
-    File release\bmin.exe
+    File "qtgui\data\icon.ico"
+    File "license.txt"
+    File "release\bmin.exe"
     WriteRegStr HKLM "${REGKEY}\Components" Bmin 1
 SectionEnd
 
 Section "Create icon on the Desktop" SEC_DESKTOP
-    CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\bmin.exe" "" "$EXEDIR\qtgui\data\icon.ico" "0" SW_SHOWMAXIMIZED
+    CreateShortcut "$DESKTOP\$(^Name).lnk" "$INSTDIR\bmin.exe" "" "$INSTDIR\icon.ico" "0" SW_SHOWMAXIMIZED
     WriteRegStr HKLM "${REGKEY}\Components" Desktop 1
 SectionEnd
 
 Section "Add Bmin to the Start Menu" SEC_START
+    #CreateDirectory "$SMPROGRAMS\$StartMenuGroup"  
     !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
     SetOutPath $SMPROGRAMS\$StartMenuGroup
     CreateShortcut "$SMPROGRAMS\$StartMenuGroup\${UNNAME}.lnk" "$INSTDIR\$(^Name) Uninstall.exe"
-    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\bmin.exe" "" "$EXEDIR\qtgui\data\icon.ico" "0" SW_SHOWNORMAL
+    CreateShortcut "$SMPROGRAMS\$StartMenuGroup\$(^Name).lnk" "$INSTDIR\bmin.exe" "" "$INSTDIR\icon.ico" "0" SW_SHOWNORMAL
     !insertmacro MUI_STARTMENU_WRITE_END
     WriteRegStr HKLM "${REGKEY}\Components" Start 1
 SectionEnd
