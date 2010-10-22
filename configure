@@ -20,5 +20,13 @@ if [ -z $bindir ]; then
 	bindir=$prefix/bin
 fi
 
-qmake "PREFIX = $prefix" "BINDIR = $bindir" bmin.pro
+if which qmake-qt4 &> /dev/null; then 
+	qmake-qt4 "PREFIX = $prefix" "BINDIR = $bindir" bmin.pro
+elif which qmake &> /dev/null; then
+	if ! [[ `qmake -v 2>&1` =~ 4\. ]]; then
+		echo "Warning: executed qmake is not probably for Qt 4"
+	fi
+
+	qmake "PREFIX = $prefix" "BINDIR = $bindir" bmin.pro
+fi
 
