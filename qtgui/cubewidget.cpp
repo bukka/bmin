@@ -201,13 +201,8 @@ void CubeWidget::updateData()
 {
     if (m_active) {
         Formula *formula = m_gm->getFormula();
-        if (!formula || formula->getVarsCount() > CubeGLDrawer::MAX_N) {
-            if (!formula)
-                m_stack->setCurrentIndex(1);
-            else
-                m_stack->setCurrentIndex(2);
+        if (!formula || formula->getVarsCount() > CubeGLDrawer::MAX_N)
             invalidateData();
-        }
         else {
             m_stack->setCurrentIndex(0);
             m_termsModel->setFormula(formula);
@@ -229,7 +224,7 @@ void CubeWidget::updateData()
 void CubeWidget::invalidateData()
 {
     if (m_active) {
-        m_stack->setCurrentIndex(1);
+        m_stack->setCurrentIndex(m_gm->getFormula()? 2: 1);
         m_termsModel->clearFormula();
         m_coversModel->clearFormula();
 #if CUBE_TEXTURES
