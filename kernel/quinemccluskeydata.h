@@ -22,8 +22,8 @@
 #define QUINEMCCLUSKEYDATA_H
 
 #include "term.h"
+#include "termssortlist.h"
 
-#include <list>
 #include <vector>
 #include <set>
 
@@ -42,7 +42,7 @@ public:
     void setCover(int row, int col);
 
     void addImpl(int missings, int explicits, Term *t);
-    std::list<Term> *getImpls(int missings, int explicits);
+    TermsSortList *getImpls(int missings, int explicits);
     void setPrimes(std::vector<Term> primes);
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
@@ -63,7 +63,7 @@ private:
     int maxMissings;
     int coverRowsCount;
     int coverColsCount;
-    std::vector<std::list<Term> > impls;
+    std::vector<TermsSortList> impls;
     std::vector<Term> coverHeadRow;
     std::vector<Term> coverHeadCol;
     std::set<int> coverTable;

@@ -24,10 +24,10 @@
 #include "kmap.h"
 #include "cube.h"
 #include "term.h"
+#include "termssortlist.h"
 
 #include <iostream>
 #include <string>
-#include <list>
 #include <vector>
 #include <cstdio>
 #include <cstring>
@@ -111,35 +111,35 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
     char *msgSizeImpl = new char[strlen(MSG_SIZE_IMPLS) + 8];
     char *msgCube = new char[strlen(MSG_CUBE) + 16];
     char num[16];
-    list<Term> *l;
+    TermsSortList *impls;
 
     int firstImpl = data->firstExplicitTerm();
     int lastImpl = data->lastExplicitTerm();
     int columns = data->getMaxMissings() * 2 + 3;
-    vector<Implicants> impls(columns);
+    vector<Implicants> implsStat(columns);
 
     // Generating data
 
     // head line for first column
     sprintf(msgCube, MSG_CUBE, 0);
-    impls[0].addImpl(data->isSoP()? MSG_NUMBER_OF_1S: MSG_NUMBER_OF_0S);
-    impls[1].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
-    impls[2].addImpl(msgCube);
+    implsStat[0].addImpl(data->isSoP()? MSG_NUMBER_OF_1S: MSG_NUMBER_OF_0S);
+    implsStat[1].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
+    implsStat[2].addImpl(msgCube);
     // another lines for first column
     for (int ones = firstImpl; ones <= lastImpl; ones++) {
-        impls[0].addSep();
-        impls[1].addSep();
-        impls[2].addSep();
-        l = data->getImpls(0, ones);
-        for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-            if (it == l->begin()) {
+        implsStat[0].addSep();
+        implsStat[1].addSep();
+        implsStat[2].addSep();
+        impls = data->getImpls(0, ones);
+        for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+            if (it == impls->begin()) {
                 sprintf(num, "%d", ones);
-                impls[0].addImpl(num);
+                implsStat[0].addImpl(num);
             }
             else
-                impls[0].addEmpty();
-            impls[1].addImpl((*it).toString(Term::SF_SET));
-            impls[2].addImpl((*it).toString());
+                implsStat[0].addEmpty();
+            implsStat[1].addImpl((*it).toString(Term::SF_SET));
+            implsStat[2].addImpl((*it).toString());
         }
     }
 
@@ -148,22 +148,22 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
         int missings = (column - 1) / 2;
         // header
         sprintf(msgCube, MSG_CUBE, missings);
-        impls[column].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
-        impls[column + 1].addImpl(msgCube);
+        implsStat[column].addImpl(data->isSoP()? MSG_MINTERM: MSG_MAXTERM);
+        implsStat[column + 1].addImpl(msgCube);
 
         // body
         for (int ones = firstImpl; ones < lastImpl; ones++) {
-            l = data->getImpls(missings, ones);
-            if (l->empty())
+            impls = data->getImpls(missings, ones);
+            if (impls->empty())
                 break;
 
-            impls[column].addSep();
-            impls[column + 1].addSep();
+            implsStat[column].addSep();
+            implsStat[column + 1].addSep();
 
-            l->sort(greater<Term>());
-            for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                impls[column].addImpl((*it).toString(Term::SF_SET));
-                impls[column + 1].addImpl((*it).toString());
+            impls->sort(greater<Term>());
+            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+                implsStat[column].addImpl((*it).toString(Term::SF_SET));
+                implsStat[column + 1].addImpl((*it).toString());
             }
         }
     }
@@ -175,21 +175,21 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
     os->setf(ios_base::left, ios_base::adjustfield);
     // init
     for (int i = 0; i < columns; i++) {
-        impls[i].frontSep();
-        impls[i].printInit(os, EMPTY, SEP_ROW);
+        implsStat[i].frontSep();
+        implsStat[i].printInit(os, EMPTY, SEP_ROW);
     }
 
     // print head line
     *os << EMPTY; // first col offset
     msgSizeImpl[0] = EMPTY;
     sprintf(msgSizeImpl + 1, MSG_SIZE_IMPLS, 1);
-    os->width(impls[0].getWidth() + impls[1].getWidth() + impls[2].getWidth());
+    os->width(implsStat[0].getWidth() + implsStat[1].getWidth() + implsStat[2].getWidth());
     *os << msgSizeImpl;
     for (int column = 3; column < columns; column += 2) {
         os->width(1);
         *os << SEP_COL;
         sprintf(msgSizeImpl + 1, MSG_SIZE_IMPLS, 1 << ((column - 1) / 2));
-        os->width(impls[column].getWidth() + impls[column + 1].getWidth());
+        os->width(implsStat[column].getWidth() + implsStat[column + 1].getWidth());
         *os << msgSizeImpl;
     }
     os->width(1);
@@ -200,7 +200,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
     while (true) {
         stop = true;
         for (int i = 0; i < columns; i++) {
-            if (impls[i].hasNext()) {
+            if (implsStat[i].hasNext()) {
                 stop = false;
                 break;
             }
@@ -215,7 +215,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
             else if ((i & 1) && i != 1)
                 *os << SEP_COL;
 
-            impls[i].printNext();
+            implsStat[i].printNext();
         }
         *os << endl;
     }

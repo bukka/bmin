@@ -25,6 +25,7 @@
 #include "kernel.h"
 #include "quinemccluskey.h"
 #include "term.h"
+#include "termssortlist.h"
 
 #include <QString>
 #include <QStringList>
@@ -32,12 +33,8 @@
 #include <QVBoxLayout>
 #include <QTextTable>
 
-#include <list>
-#include <algorithm>
-#include <functional>
+#include <vector>
 using namespace std;
-
-#include <iostream>
 
 QmWidget::QmWidget(const QString &name, int pos)
         : ModuleWidget(name, pos)
@@ -161,7 +158,7 @@ void QmWidget::showData()
     int lastImpl = m_data->lastExplicitTerm();
     int rows = varsCount - (firstImpl + (varsCount - lastImpl)) + 3;
 
-    list<Term> *l;
+    TermsSortList *impls;
     QTextCursor cursor(m_textArea->textCursor());
 
     QTextTableFormat tableFormat;
@@ -184,11 +181,11 @@ void QmWidget::showData()
     // first col
     for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
         setCell(table, row, 0, QString::number(explicits));
-        l = m_data->getImpls(0, explicits);
-        if (!l->empty()) {
-            l->sort(greater<Term>());
-            for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                if (it != l->begin()) {
+        impls = m_data->getImpls(0, explicits);
+        if (!impls->empty()) {
+            impls->sort();
+            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+                if (it != impls->begin()) {
                     setCell(table, row, 1, "<br>");
                     setCell(table, row, 2, "<br>");
                 }
@@ -209,10 +206,10 @@ void QmWidget::showData()
 
         // body
         for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
-            l = m_data->getImpls(missings, explicits);
-            l->sort(greater<Term>());
-            for (list<Term>::iterator it = l->begin(); it != l->end(); it++) {
-                if (it != l->begin()) {
+            impls = m_data->getImpls(missings, explicits);
+            impls->sort();
+            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+                if (it != impls->begin()) {
                     setCell(table, row, column, "<br>");
                     setCell(table, row, column + 1, "<br>");
                 }
