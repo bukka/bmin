@@ -20,6 +20,20 @@
 
 #include "termssortlist.h"
 
+TermsSortItem::TermsSortItem(const Term &term) : Term(term)
+{
+}
+
 TermsSortList::TermsSortList()
 {
+}
+
+void TermsSortList::push_back(const Term &term)
+{
+    std::list<TermsSortItem>::push_back(TermsSortItem(term));
+}
+
+void TermsSortList::push_front(const Term &term)
+{
+    std::list<TermsSortItem>::push_front(TermsSortItem(term));
 }

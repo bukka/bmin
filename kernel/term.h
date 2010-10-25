@@ -159,7 +159,7 @@ public:
     static void expandTerm(std::vector<Term> &v, const Term &t);
     static void expandTerm(std::list<Term> &l, const Term &t);
 
-private:
+protected:
     // term initialization
     void init(term_t lit, term_t mis, unsigned s, int flg);
 

@@ -27,7 +27,9 @@
 
 class TermsSortItem : public Term
 {
+public:
     TermsSortItem() {}
+    TermsSortItem(const Term &term);
 };
 
 
@@ -36,7 +38,8 @@ class TermsSortList : public std::list<TermsSortItem>
 public:
     TermsSortList();
 
-
+    void push_back(const Term &term);
+    void push_front(const Term &term);
 };
 
 #endif // TERMSSORTLIST_H
