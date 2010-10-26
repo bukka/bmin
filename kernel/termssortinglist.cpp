@@ -1,5 +1,5 @@
 /*
- * termssortlist.h - specila terms list for fast sorting of terms
+ * termssortlist.cpp - specila terms list for fast sorting of terms
  * created date: 10/25/2010
  *
  * Copyright (C) 2010 Jakub Zelenka.
@@ -18,28 +18,22 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef TERMSSORTLIST_H
-#define TERMSSORTLIST_H
+#include "termssortinglist.h"
 
-#include "term.h"
-
-#include <list>
-
-class TermsSortItem : public Term
+TermsSortingItem::TermsSortingItem(const Term &term) : Term(term)
 {
-public:
-    TermsSortItem() {}
-    TermsSortItem(const Term &term);
-};
+}
 
-
-class TermsSortList : public std::list<TermsSortItem>
+TermsSortingList::TermsSortingList()
 {
-public:
-    TermsSortList();
+}
 
-    void push_back(const Term &term);
-    void push_front(const Term &term);
-};
+void TermsSortingList::push_back(const Term &term)
+{
+    std::list<TermsSortingItem>::push_back(TermsSortingItem(term));
+}
 
-#endif // TERMSSORTLIST_H
+void TermsSortingList::push_front(const Term &term)
+{
+    std::list<TermsSortingItem>::push_front(TermsSortingItem(term));
+}

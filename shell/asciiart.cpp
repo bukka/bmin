@@ -24,7 +24,7 @@
 #include "kmap.h"
 #include "cube.h"
 #include "term.h"
-#include "termssortlist.h"
+#include "termssortinglist.h"
 
 #include <iostream>
 #include <string>
@@ -111,7 +111,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
     char *msgSizeImpl = new char[strlen(MSG_SIZE_IMPLS) + 8];
     char *msgCube = new char[strlen(MSG_CUBE) + 16];
     char num[16];
-    TermsSortList *impls;
+    TermsSortingList *impls;
 
     int firstImpl = data->firstExplicitTerm();
     int lastImpl = data->lastExplicitTerm();
@@ -131,7 +131,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
         implsStat[1].addSep();
         implsStat[2].addSep();
         impls = data->getImpls(0, ones);
-        for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+        for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
             if (it == impls->begin()) {
                 sprintf(num, "%d", ones);
                 implsStat[0].addImpl(num);
@@ -161,7 +161,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
             implsStat[column + 1].addSep();
 
             impls->sort(greater<Term>());
-            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+            for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 implsStat[column].addImpl((*it).toString(Term::SF_SET));
                 implsStat[column + 1].addImpl((*it).toString());
             }

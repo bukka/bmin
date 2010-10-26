@@ -16,7 +16,7 @@ SOURCES += formula.cpp \
     espressocover.cpp \
     quinemccluskeydata.cpp \
     espressodata.cpp \
-    termssortlist.cpp
+    termssortinglist.cpp
 HEADERS += formula.h \
     term.h \
     kernelexc.h \
@@ -34,4 +34,4 @@ HEADERS += formula.h \
     espressocover.h \
     quinemccluskeydata.h \
     espressodata.h \
-    termssortlist.h
+    termssortinglist.h

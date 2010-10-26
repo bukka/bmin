@@ -25,7 +25,7 @@
 #include "kernel.h"
 #include "quinemccluskey.h"
 #include "term.h"
-#include "termssortlist.h"
+#include "termssortinglist.h"
 
 #include <QString>
 #include <QStringList>
@@ -158,7 +158,7 @@ void QmWidget::showData()
     int lastImpl = m_data->lastExplicitTerm();
     int rows = varsCount - (firstImpl + (varsCount - lastImpl)) + 3;
 
-    TermsSortList *impls;
+    TermsSortingList *impls;
     QTextCursor cursor(m_textArea->textCursor());
 
     QTextTableFormat tableFormat;
@@ -184,7 +184,7 @@ void QmWidget::showData()
         impls = m_data->getImpls(0, explicits);
         if (!impls->empty()) {
             impls->sort();
-            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+            for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 if (it != impls->begin()) {
                     setCell(table, row, 1, "<br>");
                     setCell(table, row, 2, "<br>");
@@ -208,7 +208,7 @@ void QmWidget::showData()
         for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
             impls = m_data->getImpls(missings, explicits);
             impls->sort();
-            for (TermsSortList::iterator it = impls->begin(); it != impls->end(); it++) {
+            for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 if (it != impls->begin()) {
                     setCell(table, row, column, "<br>");
                     setCell(table, row, column + 1, "<br>");

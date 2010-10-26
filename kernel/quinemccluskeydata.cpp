@@ -20,7 +20,7 @@
 
 #include "quinemccluskeydata.h"
 #include "term.h"
-#include "termssortlist.h"
+#include "termssortinglist.h"
 
 #include <vector>
 #include <set>
@@ -37,7 +37,7 @@ void QuineMcCluskeyData::initImpls(int vars, bool sp)
     empty = false;
     varsCount = vars;
     maxMissings = 0;
-    impls = vector<TermsSortList>((vars + 1) * (vars + 1));
+    impls = vector<TermsSortingList>((vars + 1) * (vars + 1));
     sop = sp;
 }
 
@@ -61,7 +61,7 @@ void QuineMcCluskeyData::setPrimes(vector<Term> primes)
 {
     vector<Term>::iterator prime;
     for (int i = impls.size() - 1; i >= 0; i--) {
-        for (TermsSortList::iterator it = impls[i].begin(); it != impls[i].end(); it++) {
+        for (TermsSortingList::iterator it = impls[i].begin(); it != impls[i].end(); it++) {
             if ((prime = find(primes.begin(), primes.end(), *it)) != primes.end()) {
                 (*it).setPrime(true);
                 primes.erase(prime);
@@ -72,7 +72,7 @@ void QuineMcCluskeyData::setPrimes(vector<Term> primes)
     }
 }
 
-TermsSortList *QuineMcCluskeyData::getImpls(int missings, int explicits)
+TermsSortingList *QuineMcCluskeyData::getImpls(int missings, int explicits)
 {
     return &impls[getImplsIdx(missings, explicits)];
 }
