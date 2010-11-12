@@ -160,7 +160,7 @@ void AsciiArt::showQmImpls(QuineMcCluskeyData *data)
             implsStat[column].addSep();
             implsStat[column + 1].addSep();
 
-            impls->sort(greater<Term>());
+            impls->sort();
             for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 implsStat[column].addImpl((*it).toString(Term::SF_SET));
                 implsStat[column + 1].addImpl((*it).toString());

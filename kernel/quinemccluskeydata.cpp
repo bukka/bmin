@@ -27,9 +27,20 @@
 #include <algorithm>
 using namespace std;
 
-QuineMcCluskeyData::QuineMcCluskeyData() : varsCount(0)
+QuineMcCluskeyData::QuineMcCluskeyData()
+    : varsCount(0), impls(0), implsSize(0) {}
+
+QuineMcCluskeyData::QuineMcCluskeyData(const QuineMcCluskeyData &qmd)
 {
-    impls.clear();
+    implsSize = qmd.implsSize;
+    impls = new TermsSortingList[implsSize];
+    for (size_t i = 0; i < implsSize; i++)
+        impls[i] = qmd.impls[i];
+}
+
+QuineMcCluskeyData::~QuineMcCluskeyData()
+{
+    delete [] impls;
 }
 
 void QuineMcCluskeyData::initImpls(int vars, bool sp)
@@ -37,7 +48,10 @@ void QuineMcCluskeyData::initImpls(int vars, bool sp)
     empty = false;
     varsCount = vars;
     maxMissings = 0;
-    impls = vector<TermsSortingList>((vars + 1) * (vars + 1));
+    TermsSortingList list = TermsSortingList();
+    implsSize = (vars + 1) * (vars + 1);
+
+    impls = new TermsSortingList[implsSize];
     sop = sp;
 }
 
@@ -60,7 +74,7 @@ void QuineMcCluskeyData::addImpl(int missings, int explicits, Term *t)
 void QuineMcCluskeyData::setPrimes(vector<Term> primes)
 {
     vector<Term>::iterator prime;
-    for (int i = impls.size() - 1; i >= 0; i--) {
+    for (int i = implsSize - 1; i >= 0; i--) {
         for (TermsSortingList::iterator it = impls[i].begin(); it != impls[i].end(); it++) {
             if ((prime = find(primes.begin(), primes.end(), *it)) != primes.end()) {
                 (*it).setPrime(true);

@@ -477,7 +477,24 @@ ostream & operator<<(ostream & os, const Term & term)
     return os << term.toString();
 }
 
-// expands term t to all minterms
+// expands term t to all minterms and save their indexes to v
+void Term::expandTerm(std::vector<int> &v, const Term &t)
+{
+    Term *pt;
+
+    if (t.valuesCount(LiteralValue::MISSING) == 0)
+        v.push_back(t.getIdx());
+    else {
+        pt = t.expandMissingValue();
+        if (pt) {
+            expandTerm(v, pt[0]);
+            expandTerm(v, pt[1]);
+            delete [] pt;
+        }
+    }
+}
+
+// expands term t to all minterms and saves minterms (maxterms) to vector v
 void Term::expandTerm(vector<Term> &v, const Term &t)
 {
     Term *pt;
@@ -494,7 +511,7 @@ void Term::expandTerm(vector<Term> &v, const Term &t)
     }
 }
 
-// expands term t to all minterms
+// expands term t to all minterms and saves minterms (maxterms) to list l
 void Term::expandTerm(list<Term> &l, const Term &t)
 {
     Term *pt;

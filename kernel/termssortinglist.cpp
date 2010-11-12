@@ -20,20 +20,68 @@
 
 #include "termssortinglist.h"
 
-TermsSortingItem::TermsSortingItem(const Term &term) : Term(term)
+#include <list>
+#include <vector>
+using namespace std;
+
+TermsSortingItem::TermsSortingItem()
 {
+    isize = 0;
+    indexes = 0;
 }
 
-TermsSortingList::TermsSortingList()
+TermsSortingItem::TermsSortingItem(const Term *term) : Term(*term)
 {
+    vector<int> v;
+    Term::expandTerm(v, *term);
+    isize = v.size();
+    indexes = new int[isize];
+    for (unsigned i = 0; i < isize; i++) {
+        indexes[i] = v[i];
+    }
+}
+
+TermsSortingItem::TermsSortingItem(const TermsSortingItem &tsi) : Term(tsi)
+{
+    isize = tsi.isize;
+    indexes = new int[isize];
+    for (unsigned i = 0; i < isize; i++)
+        indexes[i] = tsi.indexes[i];
+}
+
+TermsSortingItem::~TermsSortingItem()
+{
+    if (indexes) {
+        delete [] indexes;
+        indexes = 0;
+    }
+}
+
+bool TermsSortingItem::operator<(const TermsSortingItem &tsi) const
+{
+    for (unsigned i = 0; i < isize; i++) {
+        if (indexes[i] != tsi.indexes[i])
+            return indexes[i] > tsi.indexes[i]; // descending
+    }
+    return false;
+}
+
+bool TermsSortingItem::operator>(const TermsSortingItem &tsi) const
+{
+    return !operator<(tsi);
+}
+
+void TermsSortingList::sort()
+{
+    std::list<TermsSortingItem>::sort();
 }
 
 void TermsSortingList::push_back(const Term &term)
 {
-    std::list<TermsSortingItem>::push_back(TermsSortingItem(term));
+    std::list<TermsSortingItem>::push_back(TermsSortingItem(&term));
 }
 
 void TermsSortingList::push_front(const Term &term)
 {
-    std::list<TermsSortingItem>::push_front(TermsSortingItem(term));
+    std::list<TermsSortingItem>::push_front(TermsSortingItem(&term));
 }

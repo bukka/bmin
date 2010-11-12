@@ -183,7 +183,7 @@ void QmWidget::showData()
         setCell(table, row, 0, QString::number(explicits));
         impls = m_data->getImpls(0, explicits);
         if (!impls->empty()) {
-            impls->sort();
+            //impls->sort();
             for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 if (it != impls->begin()) {
                     setCell(table, row, 1, "<br>");

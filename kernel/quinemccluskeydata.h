@@ -31,6 +31,8 @@ class QuineMcCluskeyData
 {
 public:
     QuineMcCluskeyData();
+    QuineMcCluskeyData(const QuineMcCluskeyData &qmd);
+    ~QuineMcCluskeyData();
     // initialization
     void initImpls(int vars, bool sp);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
@@ -63,7 +65,8 @@ private:
     int maxMissings;
     int coverRowsCount;
     int coverColsCount;
-    std::vector<TermsSortingList> impls;
+    TermsSortingList *impls;
+    size_t implsSize;
     std::vector<Term> coverHeadRow;
     std::vector<Term> coverHeadCol;
     std::set<int> coverTable;

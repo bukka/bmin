@@ -24,22 +24,35 @@
 #include "term.h"
 
 #include <list>
+#include <vector>
 
 class TermsSortingItem : public Term
 {
 public:
-    TermsSortingItem() {}
-    TermsSortingItem(const Term &term);
+    TermsSortingItem();
+    TermsSortingItem(const Term *term);
+    TermsSortingItem(const TermsSortingItem &tsi);
+    virtual ~TermsSortingItem();
+
+    // comparing
+    bool operator<(const TermsSortingItem &tsi) const;
+    bool operator>(const TermsSortingItem &tsi) const;
+
+private:
+    unsigned isize;
+    int *indexes;
 };
 
 
 class TermsSortingList : public std::list<TermsSortingItem>
 {
 public:
-    TermsSortingList();
+    TermsSortingList() : std::list<TermsSortingItem>() {}
 
     void push_back(const Term &term);
     void push_front(const Term &term);
+
+    void sort();
 };
 
 #endif // TERMSSORTINGLIST_H
