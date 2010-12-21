@@ -27,7 +27,8 @@ SOURCES += mainwindow.cpp \
     pladialog.cpp \
     espressowidget.cpp \
     errorwidget.cpp \
-    borderwidget.cpp
+    borderwidget.cpp \
+    qmwebkitwidget.cpp
 HEADERS += mainwindow.h \
     guimanager.h \
     controlwidget.h \
@@ -54,5 +55,6 @@ HEADERS += mainwindow.h \
     pladialog.h \
     borderwidget.h \
     espressowidget.h \
-    errorwidget.h
+    errorwidget.h \
+    qmwebkitwidget.h
 RESOURCES += resources.qrc

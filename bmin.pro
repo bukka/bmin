@@ -6,7 +6,7 @@ lessThan(QT_VERSION, 4.5) {
 
 TEMPLATE = app
 CONFIG += qt warn_on
-QT += opengl
+QT += opengl webkit
 
 TARGET = bmin
 
