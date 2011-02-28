@@ -207,6 +207,8 @@ void QmWebkitWidget::showData()
     }
 
     html.append("</table>");
+    showFooter(html);
+    m_view->setHtml(html.join("\n"), QUrl(":/"));
 
     /*
     // Table
