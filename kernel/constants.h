@@ -24,7 +24,7 @@
 // version
 #define BMIN_VERSION_MAJOR   1
 #define BMIN_VERSION_MINOR   0
-#define BMIN_VERSION_RELEASE 0
+#define BMIN_VERSION_RELEASE 1
 
 #define STRINGIFY_INTERNAL(_s) #_s
 #define STRINGIFY(_s) STRINGIFY_INTERNAL(_s)
