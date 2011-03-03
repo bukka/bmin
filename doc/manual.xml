@@ -1,0 +1,519 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE bukka SYSTEM 'mandtd/bukka.dtd'>
+
+<bukka>
+	<h1>Bmin 1.0.0</h1>
+	<toc/>
+	
+	<h2 name="install">Installation</h2>
+	<p>
+		Application is supported for Windows and Linux.  The installation depends on the platform.
+	</p>
+	
+	<h3 name="win">Windows</h3>
+	<p>
+		For Windows the installer <a href="sources/bmin-1.0.0-win32.exe">bmin-1.0.0-win32.exe</a> is available. After
+		executing the installer it is necessary to agree to the GPL version 3 license agreement. Then it is possible to
+		create a shortcut in the <c>Start menu</c> as well as on the desktop. It is also possible to choose the install
+		location (default is set to <c>C:\Program Files\Bmin</c>) and the name of the folder in the Start menu (default
+		is <c>Bmin</c>). After installing the application it can be launched straight from the installer.
+	</p>
+	<p>
+		During the installation the uninstaller is simultaneously created. The uninstaller is located in the same folder
+		where the application was installed and called <c>Bmin Uninstall</c>. When creating a folder in the Start menu the
+		uninstallation shortcut is located here.
+	</p>
+	
+	<h3 name="linux">Linux</h3>
+	<p>
+		It is necessary to download the source code for Linux (<a href="sources/bmin-1.0.0.tgz">bmin-1.0.0.tgz</a>). The
+		application depends on Qt library. This requires at least version 4.5 (version earlier than 4.5 will probably
+		not compile).  Qt library must be installed even if the application only runs in a shell mode. The Mesa library
+		version 7.8 (or later) and xorg-server version 1.7 or later must be also installed. 
+	</p>
+	<p>
+		First, you need to unpack the gzip archive. The translation is done in two steps. First, in the directory with
+		unpacked source code, run the <c>configure</c> file. It creates a <c>Makefile</c> and it can pass the arguments
+		presented in the following table.
+		<table type="examtable">
+			<tr>
+				<th>Option</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>--prefix=<val>PATH</val></c></td>
+				<td>Set installation directory prefix. Default value is <c>/usr</c></td>
+			</tr>
+			<tr>
+				<td><c>--bindir=<val>PATH</val></c></td>
+				<td>
+					Set directory containing the application files Default value <c>$PREFIX/usr</c>,
+					where <c>$PREFIX</c> is installation directory prefix.
+				</td>
+			</tr>
+		</table>
+		After creating a <c>Makefile</c> you need to call the <c>make</c> command and then <c>make install</c> to save the executable
+		file <c>bmin</c> into place. The whole process might look like this: 
+		<exam>
+			<row># tar -xzf bmin-1.0.0.tgz</row>
+			<row># cd bmin-1.0.0</row>
+			<row># ./configure --prefix=/usr/local</row>
+			<row># make</row>
+			<row># make install</row>
+			<row># bmin</row>
+		</exam>
+		The last command applies only if the program is intended to run in GUI mode. 
+	</p>
+	
+	<h3 name="executing">Executing</h3>
+	<p>
+		The application has two modes. The first is the <b>Qt GUI mode</b> and the second is <b>Shell mode</b> that can
+		be run using the option <c>--shell</c> or short <c>-s</c>. The Shell mode is available only for Linux. You can
+		specify the startup option <c>--help</c> or <c>-h</c> for short which displays help. The last option is
+		the <c>--version</c> or <c>-v</c> for short that displays the version number.
+	</p>
+	
+	
+	<h2 name="qtgui">Qt GUI mode</h2>
+	<p>
+		As the name suggests, the <b>Qt GUI mode</b> is executing in a graphical environment. After its launch it
+		displays the main window with the menu bar, the main layout and the status bar. The main layout is divided into
+		two parts - <b>top</b> and <b>bottom</b>.
+	</p>
+	<p>
+		The <b>top part</b> is used for setting a Boolean function in its complete form and displaying the resulting
+		minimized form of the function. The function can be entered directly into a text box or it can be used to create
+		a function wizard (see below), which appears when you click on the button <c>New...</c>. If the specified
+		function is set then the button <c>New...</c> is changed to <c>Edit...</c> and after clicking on it the function
+		can be edited. The representation of logic functions can be set in a selection box <c>Representation of logic
+			function:</c> where is the choice of the <c>Sum of Products</c>, which is a <b>DNF</b> (Disjunctive Normal
+		Form), 	and <c>Products of Sums</c>, which is a <b>CNF</b> (Conjunctive Normal Form). The Minimize button is
+		used to start the minimization. The resulting minimized function is displayed in the box <c>Minimal form:</c>
+		which is read only.
+	</p>
+	<p>
+		The <b>bottom part</b> contains four buttons on the left side. They are used for switching mode. The name of
+		each mode is written on the button. The button with the current mode has black letters on white background. The
+		easiest way to switch modes is to click on the button. The graphical application has four modes. The first is
+		the Welcome mode which allows you to select another mode or open the About dialog. The other three modes are
+		used for demonstration of the minimization of Boolean functions. Specifically, the Karnaugh map (K-map), the
+		Boolean n-cube and of course the Quine-McCluskey algorithm. The following subsections describe how to set the
+		Boolean function, above modes and some other functions.
+	</p>
+	
+	<h3 name="fce">Setting Boolean function</h3>
+	
+	<h4 name="fce_direct">Direct setting</h4>
+	<p>	
+		Setting the function into the text field can take two forms. In the case of the Sum of Products representation
+		the form is following:
+
+		<exam>f(variable_list) = sum m(on_set) [ + sum d(dont_care_set)]</exam>
+
+		where <c>variable_list</c> is the comma separated list of letters and <c>on_set</c> and <c>dont_care_set</c> are
+		lists of numbers separated by commas. The list <c>on_set</c> is used to place the indexes of minterms with
+		output value <c>1</c> (true state) and the list <c>dont_care_set</c> is for minterms whose output value is
+		irrelevant (it is a forbidden state and such term is called <i>don't care term</i>). Square brackets indicate
+		that the setting of these states is optional. But setting the true states is always required. If the function
+		contains only false states then the list is empty. It writes as <c>m()</c>. Extra spaces and tabs are
+		ignored. The specified function may therefore have the following form:
+
+		<exam>f(d,c,b,a) = sum m(1,3,5,12,13) + sum d(2,10)</exam>
+
+		In the case of Product of Sums representation the form is following:
+
+		<exam>f(variable_list) = prod m(off_set) [ * prod d(dont_care_set)]</exam>
+
+		Everything is basically the same as the Sum of Products representation, up to the fact that there are no
+		minterms but maxterms, the middle sign is <c>*</c> instead of <c>+</c> and the list <c>off_set</c> is a comma
+		separated list of indexes of the maxterms with output value <c>0</c> (false state). 
+	</p>
+	
+	<h4 name="fce_wizard">Creating wizard</h4>
+	<p>
+		There is also a wizard for creating a logic function. The top four items are for setting the function name,
+		selecting a representation and the number of variables and possibly enter the names of variables. After setting
+		the number of variables the truth table is generated. There it is possible to change the output values in the
+		column titled <c>Output</c> in several ways. The first way is by double clicking on the cell in
+		the <c>Output</c> column and then a combo box will appear, and from there you can select the desired output
+		value. The second way is selecting the desired output cell and then pressing the key with desired value (for
+		example pressing key <c>1</c> for changing to output value 1). Another way is selecting the group of output
+		cells and then open the context menu by clicking the right mouse button. There it is possible to set the output
+		values for selected or all output values.  The function is saved by clicking on the <c>OK</c> button (or
+		pressing <c>Enter</c> on the keyboard). Alternatively the function can be canceled by pressing the <c>Cancel</c>
+		button (or pressing <c>Escape</c> on the keyboard).
+	</p>
+	
+	<h3 name="map">Karnaugh map</h3>
+	<p>
+		The Karnaugh map is a tool for minimizing logic functions. It can be described as a two-dimensional array whose
+		values are either 1 (true state) or 0 (false state) or X (forbidden state).  The position of each value is
+		determined by the state of the function. It means that the position is uniquely determined for each minterm
+		(maxterm) so that the minterms (maxterms) which differ in one variable are neighboring cells on the map. It
+		makes it possible to cover all minimal terms. A more detailed description can be found
+		on <a href="http://en.wikipedia.org/wiki/Karnaugh_map"> Wikipedia.org</a>.		
+	</p>
+	<p>
+		The Karnaugh map in Bmin is drawn up to <b>6 variables</b>. The layout is divided into two parts. The left side
+		displays the map and the right side displays the lists for displaying minterms (maxterms) and covers (more
+		specifically terms of minimum coverage). These are only displayed if the checkbox <c>Show Covers</c> is
+		marked. The map  is drawn once the function is set. There are two modes for the description of variables. The
+		first shows the distribution in binary form and the second shows lines representing negations. Modes can be
+		changed in the context menu by right clicking on the description of variables. You can also change the output
+		values of terms by left clicking on the appropriate place on the map. The map changes are also directly
+		displayed in the assignment of functions in the text box. The map is also linked with the list of the minterms
+		(maxterms) and covers on the right side. Each selected minterm (maxterm) will change background color on its
+		position on the map. Each selected cover highlights all minterms (maxterms) which are covered by it. The covers
+		are also marked on the map using color boxes. The form of terms depends on the representation of the
+		function. Accordingly, it also determines whether the terms are minterms or maxterms.
+	</p>
+	
+	<h3 name="cube">Boolean n-cube</h3>
+	<p>
+		The Boolean n-cube is often called hypercube. It is an n-dimensional analogue of a square (n = 2), a cube (n =
+		3) and a tesseract (n = 4). The number of dimensions is equal to the number of variables and the number of
+		vertexes is equal to the number of minterms (maxterms). Every neighboring minterms (maxterms), which differs in
+		only one variable, are connected by an edge.
+	</p>
+	<p>
+		The Boolean n-cube in Bmin is created using OpenGL. Therefore, the n-cube is displayed in 3D space and offers
+		two views. The first is the <i>3D view</i> which allows you to browse inside the cube. The second is
+		the <i>Rotating view</i> which allows you to rotate with the n-cube. You can view a n-cube up to a maximum of
+		<b>3 variables</b>. The vertexes are shown as spheres and the minterms (maxterms) with the same output value have
+		the same color. So they are defined as three colors for each output value one:
+		<ul>
+			<li><span class="bold cyan">cyan</span> - false state</li>
+			<li><span class="bold red">red</span> - true state</li>
+			<li><span class="bold magenta">magenta</span> - forbidden state</li>
+		</ul>
+		The edges connecting the vertices are displayed as a tight cylinder. Minimized terms are clearly displayed as
+		the yellow loop-line which circulates the covered minterms (maxterms).
+	</p>
+	<h4 name="cube_ctrl">Control</h4>
+	<p>
+		Boolean n-cube can be controlled only if it is active. The user can use both the mouse and keyboard.
+	</p>
+	<p>
+		The output value of the minterm (maxterm) can be changed by left clicking the mouse. In addition, the context
+		menu can be opened by right clicking the mouse. The following table lists the various menu items and their
+		description:
+		<table type="examtable">
+			<tr>
+				<th>Item</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>Camera</c></td>
+				<td>
+					Allows you to select one of two views - 3D view (<c>3D</c>) Rotating view (<c>Rotated</c>).
+				</td>
+			</tr>
+			<tr>
+				<td><c>Lights</c></td>
+				<td>
+					Allows you to determine which lights will be lit. There is one special source light for 3D view. The
+					name of this light is reflector (<c>Reflector</c>). In addition, there are two indicator lights -
+					front (<c>Light 1</c>) and back (<c>Light 2</c>).
+				</td>
+			</tr>
+		</table>
+	</p>
+	<p>
+		Using the keyboard you can control many different elements. Options are divided into three groups. First, a
+		common option for both views and the options that are specific to the concrete view. The following table
+		describes in detail all of the options.
+	</p>
+	<p>
+		<b>Table of common options:</b>
+		<table type="examtable">
+			<tr>
+				<th>Key</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>1</c></td>
+				<td>Set 3D view</td>
+			</tr>
+			<tr>
+				<td><c>2</c></td>
+				<td>Set Rotate view</td>
+			</tr>
+			<tr>
+				<td><c>L</c></td>
+				<td>Automatic motion of lights</td>
+			</tr>
+			<tr>
+				<td><c>C</c></td>
+				<td>show / hide the loops of the minimized terms</td>
+			</tr>
+		</table>
+	</p>
+	<p>
+		<b>Table of 3D view options:</b>
+		<table type="examtable">
+			<tr>
+				<th>Key</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>W (forward arrow)</c></td>
+				<td>move forward</td>
+			</tr>
+			<tr>
+				<td><c>S (back arrow)</c></td>
+				<td>move backward</td>
+			</tr>
+			<tr>
+				<td><c>A (left arrow)</c></td>
+				<td>turn left</td>
+			</tr>
+			<tr>
+				<td><c>D (right arrow)</c></td>
+				<td>turn right</td>
+			</tr>
+			<tr>
+				<td><c>E (Page Up)</c></td>
+				<td>turn up</td>
+			</tr>
+			<tr>
+				<td><c>X (Page Down)</c></td>
+				<td>turn down</td>
+			</tr>
+			<tr>
+				<td><c>T</c></td>
+				<td>move up</td>
+			</tr>
+			<tr>
+				<td><c>G</c></td>
+				<td>move down</td>
+			</tr>
+			<tr>
+				<td><c>F</c></td>
+				<td>move left</td>
+			</tr>
+			<tr>
+				<td><c>H</c></td>
+				<td>move right</td>
+			</tr>
+			<tr>
+				<td><c>R</c></td>
+				<td>turn on the reflector</td>
+			</tr>
+		</table>
+	</p>
+	<p>
+		<b>Table of Rotating view options:</b>
+		<table type="examtable">
+			<tr>
+				<th>Key</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td>arrows</td>
+				<td>rotating of the n-cube</td>
+			</tr>
+			<tr>
+				<td><c>+</c></td>
+				<td>zoom in the n-cube</td>
+			</tr>
+			<tr>
+				<td><c>-</c></td>
+				<td>zoom out the n-cube</td>
+			</tr>
+			<tr>
+				<td><c>R</c></td>
+				<td>automatic rotation</td>
+			</tr>
+		</table>
+	</p>
+	
+	<p>
+		The layout is divided into two parts as well as the layout for the Karnaugh map. It is possible to select
+		minterms (maxterms) and covers which are connected to the n-cube.
+	</p>
+	
+	<h3 name="qm">Running of the Quine-McCluskey algorithm.</h3>
+	
+	<p>
+		The Quine-McCluskey algorithm is one of the most known algorithms for minimizing logic function. Its description
+		is out of scope in this manual. The detailed description can be found
+		at <a href="http://en.wikipedia.org/wiki/Quine-McCluskey_algorithm">Wikipedia.org</a>.
+	</p>
+
+	<p>
+		This mode in Bmin shows the statement of running of the Quine-McCluskey algorithm. There is the table which
+		shows the finding of prime implicants and the covering table. When you change the function the tables reflect
+		this change automatically. The chosen minimized terms naturally depend on the representation of the function.
+	</p>
+	
+	<h3 name="menu">Top menu bar</h3>    
+	<p>
+		The top menu contains two menus - <c>File</c> and <c>Help</c>. The <c>Help</c> menu contains only one
+		action <c>About Bmin</c> which opens the <i>About dialog</i>. The dialog shows basic information about Bmin and
+		the GPL version 3 license agreement. More interesting is the <c>File</c> menu. This menu contains several
+		actions that are reported below. There are all the items, including the shortcuts which alternatively invoke the
+		action and descriptions of all actions. It should be noted that it can be created with more output functions by
+		loading PLA file. In the case when the dialogue is displayed one selection must be made, which becomes the
+		current function. It is because Bmin supports only single output value functions. In addition, note that the
+		file which contains program settings is in a hidden directory <c>config</c> in the user's home directory. This
+		setting is used to <c>Store</c> and <c>Load</c> actions.
+
+		<table type="examtable">
+			<tr>
+				<th>Item</th>
+				<th>Shortcut</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>New...</c></td>
+				<td><c>Ctrl+N</c></td>
+				<td>
+					Invoke a dialog for creating a new logic function.
+				</td>
+			</tr>
+			<tr>
+				<td><c>Edit...</c></td>
+				<td><c>Ctrl+E</c></td>
+				<td>
+					Invoke a dialog for editing a new logic function (only if the current function is set).
+				</td>
+			</tr>
+			<tr>
+				<td><c>Open...</c></td>
+				<td><c>Ctrl+O</c></td>
+				<td>
+					Load logic function from PLA file, which is chosen from the open file dialog.
+				</td>
+			</tr>
+			<tr>
+				<td><c>Save As...</c></td>
+				<td><c>Ctrl+S</c></td>
+				<td>
+					Save the current function to the PLA file. The path is chosen in the save file dialog.
+				</td>
+			</tr>
+			<tr>
+				<td><c>Load</c></td>
+				<td><c>Ctrl+L</c></td>
+				<td>
+					Load current function from the settings.
+				</td>
+			</tr>
+			<tr>
+				<td><c>Store</c></td>
+				<td><c>Ctrl+W</c></td>
+				<td>
+					Save the current function to the settings. 
+				</td>
+			</tr>
+			<tr>
+				<td><c>Exit</c></td>
+				<td><c>Ctrl+Q</c></td>
+				<td>
+					Exit the Bmin.
+				</td>
+			</tr>
+		</table>	
+
+	</p>	
+	
+	<h2 name="shell">Shell mode</h2>
+	<p>
+		The second mode is the <b>Shell mode</b>, which is available only for Linux, started when you set the command
+		line option <c>-s</c> or <c>--shell</c>. It is a terminal application which after its launch shows a few lines
+		about the rights and license agreement and then prints out the line starting with character '<c>&gt;</c>'. It
+		symbolizes the command line, where you can type the commands described below or set the function. This is done
+		in the same way as described in the section <a href="#fce_direct">Direct setting</a>. After writing the function
+		it is necessary to press <c>Enter</c> to set the function as current.
+	</p>
+	
+	<h3 name="shell_cmd">Commands</h3>
+	<p>
+		All commands are listed in the following table. A special command is the <c>show</c> that takes one or zero
+		argument. Each argument is therefore placed in a separate box in the table.
+		
+		<table type="examtable">
+			<tr>
+				<th>Command</th>
+				<th>Description</th>
+			</tr>
+			<tr>
+				<td><c>exit</c></td>
+				<td>
+					Exit the Bmin.
+				</td>
+			</tr>
+			<tr>
+				<td><c>minimize</c></td>
+				<td>
+					Minimize the current logic function.
+				</td>
+			</tr>
+			<tr>
+				<td><c>qm</c></td>
+				<td>
+					Switch the minimizing algorithm to Quine-McCluskey.
+				</td>
+			</tr>
+			<tr>
+				<td><c>espresso</c></td>
+				<td>
+					Switch the minimizing algorithm to Espresso.
+				</td>
+			</tr>
+			<tr>
+				<td><c>sop</c></td>
+				<td>
+					Set representation of the logic function to DNF (Disjunctive Normal Form).
+				</td>
+			</tr>
+			<tr>
+				<td><c>pos</c></td>
+				<td>
+					Set representation of the logic function to CNF (Conjunctive Normal Form).
+				</td>
+			</tr>
+			<tr>
+				<td><c>show</c></td>
+				<td>
+					Show the current logic function.
+				</td>
+			</tr>
+			<tr>
+				<td><c>show qm</c></td>
+				<td>
+					Show running of the Quine-McCluskey algorithm.
+				</td>
+			</tr>
+			<tr>
+				<td><c>show espresso</c></td>
+				<td>
+					Show running of the Espresso algorithm.
+				</td>
+			</tr>
+			<tr>
+				<td><c>show kmap</c></td>
+				<td>
+					Show the Karnaugh map
+				</td>
+			</tr>
+		</table>
+	</p>
+	
+	
+	<h2 name="contribution">Contributing</h2>
+	<p>
+		It is possible to contribute to Bmin. It is necessary to have an account
+		at <a href="http://gitorious.org/">gitorious.org</a> . At first you have to
+		fork <a href="http://gitorious.org/bmin">http://gitorious.org/bmin</a>. After making changes send a merge request
+		(click on the <c>Request merge</c> button) and then just wait for the acceptance.
+	</p>
+	<p>
+		To checkout a copy of the source execute the following command
+		<exam>$ git clone git://gitorious.org/bmin/bmin.git bmin</exam>
+	</p>
+	<p>
+		Everyone who would like to contribute to the project is welcome.
+	</p>
+	
+</bukka>

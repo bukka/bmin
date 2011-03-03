@@ -1,0 +1,126 @@
+<!-- bukka.dtd .......................................................... -->
+<!-- Copyright (C) 2009 Jakub Zelenka ................................... -->
+<!-- DTD for bukka.eu include files - projects' documentation ............-->
+
+<!--================ Character mnemonic entities =========================-->
+
+<!-- XHTML entities -->
+<!ENTITY % HTMLlat1 PUBLIC "-//W3C//ENTITIES Latin 1 for XHTML//EN" "xhtml-lat1.ent">
+%HTMLlat1;
+
+<!ENTITY % HTMLsymbol
+		 PUBLIC "-//W3C//ENTITIES Symbols for XHTML//EN" "xhtml-symbol.ent">
+%HTMLsymbol;
+
+<!ENTITY % HTMLspecial
+		 PUBLIC "-//W3C//ENTITIES Special for XHTML//EN" "xhtml-special.ent">
+%HTMLspecial;
+
+
+<!--================ Bukka elements ======================================-->
+
+<!-- root element -->
+<!ELEMENT bukka (toc?, (h1 | h2 | h3 | h4 | p | div | img)*)>
+
+<!-- menu generating element -->
+<!ELEMENT toc EMPTY>
+
+<!-- header elements -->
+<!ENTITY % headers.children "(#PCDATA)">
+
+<!ELEMENT h1 %headers.children;>
+<!ELEMENT h2 %headers.children;>
+<!ELEMENT h3 %headers.children;>
+<!ELEMENT h4 %headers.children;>
+
+<!ENTITY % h.atts "name NMTOKEN #IMPLIED class NMTOKENS #IMPLIED">
+<!ATTLIST h2 %h.atts;>
+<!ATTLIST h3 %h.atts;>
+<!ATTLIST h4 %h.atts;>
+
+
+
+<!-- text formator elements -->
+<!ENTITY % text.form "c | b | i | a | val | nobr | span">
+
+
+<!-- paragraph element -->
+<!ELEMENT p (#PCDATA | %text.form; | exam | args | ul | ol | table | div)*>
+
+
+<!-- font elements -->
+<!ENTITY % font.children "(#PCDATA)">
+
+<!-- code -->
+<!ELEMENT c (#PCDATA | val)*>
+
+<!-- bold -->
+<!ELEMENT b %font.children;>
+
+<!-- italic -->
+<!ELEMENT i %font.children;>
+
+<!-- value -->
+<!ELEMENT val %font.children;>
+
+<!-- no breaking line -->
+<!ELEMENT nobr (#PCDATA | %text.form;)*>
+
+<!-- arguments -->
+<!ELEMENT args %font.children;>
+
+<!-- html div -->
+<!ELEMENT div (#PCDATA | %text.form; | div)*>
+<!ATTLIST div id ID #IMPLIED
+              class NMTOKENS #IMPLIED>
+
+<!-- html span -->
+<!ELEMENT span %font.children;>
+<!ATTLIST span id ID #IMPLIED
+               class NMTOKENS #IMPLIED>
+
+<!-- sup a sub -->
+<!ELEMENT sup (#PCDATA)>
+<!ELEMENT sub (#PCDATA)>
+
+<!-- html br - break line -->
+<!ELEMENT br EMPTY>
+
+<!-- exam element - usualy code exams -->
+<!ELEMENT exam (#PCDATA | row)*>
+<!ELEMENT row (#PCDATA)>
+
+<!-- list element -->
+<!-- unordinary -->
+<!ELEMENT ul (li+)>
+<!-- ordinary -->
+<!ELEMENT ol (li+)>
+<!-- list item -->
+<!ELEMENT li (#PCDATA | %text.form;)*>
+
+
+<!-- table elemnt -->
+<!ELEMENT table (tr+)>
+<!ATTLIST table type (examtable | opttable | params | data) "examtable">
+<!ATTLIST table class NMTOKENS #IMPLIED>
+
+<!ELEMENT tr ((th | td)+)>
+<!ATTLIST tr class NMTOKENS #IMPLIED>
+
+<!ENTITY % cell.children "(#PCDATA | %text.form; | ul | ol)*">
+<!ELEMENT th %cell.children;>
+<!ELEMENT td %cell.children;>
+<!ATTLIST th class NMTOKENS #IMPLIED>
+<!ATTLIST td class NMTOKENS #IMPLIED>
+
+
+<!-- anchor (link) element -->
+<!ELEMENT a (#PCDATA)>
+<!ATTLIST a href CDATA #REQUIRED>
+<!ATTLIST a class NMTOKENS #IMPLIED>
+
+
+<!-- image element -->
+<!ELEMENT img EMPTY>
+<!ATTLIST img src CDATA #REQUIRED
+              alt CDATA #IMPLIED>

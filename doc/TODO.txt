@@ -3,37 +3,26 @@
 	
 # FEATURES ----------------------------------------------------------
 
-speed up debugging of Quine-McCluskey
+speed up the debugging of the Quine-McCluskey algorithm
 settings: last open dir, kmap covers and lines, sop
-vars redundant name checking
+checking for variables redundant names
 improving appearance - more icons and images...
 algorithm testing interface - measure time
 more containers - comparing, testing
 optimize Quine-McCluskey algorithm
 better error (exception) information
-better behavior of parsing fce - idx precedence (diff to old formula)
+better behavior of the function parsing - idx precedence (diff to old formula)
 Quine-McCluskey widget improvement - Model & View
-more formulas
+more formulas - multivalued output function
 inlining short functions
-using better types for some situation (unsigned, long...)
-create iterator for formula terms; iterating in const methods 
-parsing all file (no every row standalone)
+using better types in some situation (unsigned, long...)
+create iterator for formula terms; iterating const methods 
+parsing the whole file (not every row standalone)
 shell programming language - special bytecode
 
 
--- Completed
-   kernel events ._/
-   Quine-McCluskey debugging info ._/
-   ASCII art - Quine-McCluskey, K-map, Cube
-   treating products of sums ._/
-   creating formula dialog ._/
-   K-map rewritten ._/
-   Cube rewritten ._/
-   PLA format ._/
-   espresso ._/
-
 # BUGS --------------------------------------------------------------
-- freezing in 3D cube (not simulated yet)
+- freezing in the 3D cube (not simulated yet)
 
 # CODE --------------------------------------------------------------
 
