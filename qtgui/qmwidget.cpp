@@ -73,8 +73,12 @@ void QmWidget::setActivity(bool a)
     if (a) {
         if (!m_gm->isQM())
             showBadAlgorithm();
-        else if (m_gm->isCorrectFormula())
+        else if (m_gm->isCorrectFormula()) {
             m_gm->minimizeFormula(true);
+            // in case of more qm widgets
+            if (m_data != m_gm->getQmData())
+                setMinimizedData();
+        }
         else
             showNothing();
     }

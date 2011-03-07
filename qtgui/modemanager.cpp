@@ -54,7 +54,7 @@ ModeManager::ModeManager()
     // Quine-McCluskey
     m_qmw = new QmWebkitWidget(tr("QM Webkit"), ID_QM_WEBKIT);
     m_modules << m_qmw;
-    connect(this, SIGNAL(qmwActivated(bool)), m_qm, SLOT(setActivity(bool)));
+    connect(this, SIGNAL(qmwActivated(bool)), m_qmw, SLOT(setActivity(bool)));
 
 #if CUBE3D
     // Boolean n-cube
@@ -99,7 +99,7 @@ void ModeManager::setMode(int modeId)
 {
     emit kmapActivated(modeId == ID_KMAP);
     emit qmActivated(modeId == ID_QM);
-    emit qmActivated(modeId == ID_QM_WEBKIT);
+    emit qmwActivated(modeId == ID_QM_WEBKIT);
 #if CUBE3D
     emit cubeActivated(modeId == ID_CUBE);
 #endif

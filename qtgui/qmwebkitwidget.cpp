@@ -27,6 +27,9 @@
 #include "term.h"
 #include "termssortinglist.h"
 
+#include <vector>
+using namespace std;
+
 #include "QWebView"
 #include "QVBoxLayout"
 
@@ -58,8 +61,12 @@ void QmWebkitWidget::setActivity(bool a)
     if (a) {
         if (!m_gm->isQM())
             showInvalidAlgorithm();
-        else if (m_gm->isCorrectFormula())
+        else if (m_gm->isCorrectFormula()) {
             m_gm->minimizeFormula(true);
+            // in case of more qm widgets
+            if (m_data != m_gm->getQmData())
+                setMinimizedData();
+        }
         else
             showNothing();
     }
@@ -91,7 +98,7 @@ void QmWebkitWidget::checkAlgorithm(bool isQM)
         showInvalidAlgorithm();
 }
 
-void QmWebkitWidget::showHeader(QStringList &html)
+void QmWebkitWidget::appendHeader(QStringList &html)
 {
     html.append("<html>");
     html.append("<head>");
@@ -101,31 +108,38 @@ void QmWebkitWidget::showHeader(QStringList &html)
     html.append("</style>");
     html.append("</head>");
     html.append("<body>");
+    html.append(QString("<h1>%1</h1>").arg("Quine-McCluskey algorithm"));
 }
 
-void QmWebkitWidget::showFooter(QStringList &html)
+void QmWebkitWidget::appendFooter(QStringList &html)
 {
     html.append("</body>");
     html.append("</html>");
 }
 
+void QmWebkitWidget::show(QStringList &body)
+{
+    QStringList header;
+    appendHeader(header);
+    body.prepend(header.join("\n"));
+    appendFooter(body);
+    m_view->setHtml(body.join("\n"), QUrl(":/"));
+}
+
+void QmWebkitWidget::show(const QString &str)
+{
+    QStringList strList(str);
+    show(strList);
+}
+
 void QmWebkitWidget::showNothing()
 {
-    QStringList html;
-    showHeader(html);
-    html.append(QString("<div id=\"error\">%1</div>").arg(tr("No logic function.")));
-    showFooter(html);
-    m_view->setHtml(html.join("\n"), QUrl(":/"));
+    show(QString("<div id=\"error\">%1</div>").arg(tr("No logic function.")));
 }
 
 void QmWebkitWidget::showInvalidAlgorithm()
 {
-    QStringList html;
-    showHeader(html);
-    html.append(QString("<div id=\"error\">%1</div>").arg(
-            tr("You must set Quine-McCluskey algorithm.")));
-    showFooter(html);
-    m_view->setHtml(html.join("\n"), QUrl(":/"));
+    show(QString("<div id=\"error\">%1</div>").arg(tr("You must set Quine-McCluskey algorithm.")));
 }
 
 void QmWebkitWidget::appendCell(QStringList &html, const QString &msg, bool head, int colspan)
@@ -139,11 +153,10 @@ void QmWebkitWidget::appendCell(QStringList &html, const QString &msg, bool head
 
 void QmWebkitWidget::showData()
 {
-    QStringList html;
-    showHeader(html);
+    QStringList body;
 
     if (m_data->isEmpty()) {
-        html.append(QString("<h2>%1</h2>").arg(
+        body.append(QString("<h2>%1</h2>").arg(
                 QString(tr("Function is %1 (no terms for Quine-McCluskey algorithm).")).arg(
                         m_data->isSoP()? tr("contradiction"): tr("tautology"))));
         return;
@@ -152,9 +165,9 @@ void QmWebkitWidget::showData()
     m_gm->setCursor(QCursor(Qt::WaitCursor));
     m_gm->setStatus(tr("Please wait: Quine-McCluskey Data is generating"));
 
-    html.append(QString("<h2>%1</h2>").arg(tr("Finding Prime Implicants ")));
+    body.append(QString("<h2>%1</h2>").arg(tr("Finding Prime Implicants ")));
 
-    html.append("<table id=\"finding_primes\">");
+    body.append("<table id=\"finding_primes\">");
 
     int maxMissings = m_data->getMaxMissings();
     int columns = (maxMissings * 2) + 3;
@@ -168,26 +181,26 @@ void QmWebkitWidget::showData()
     QString term = m_data->isSoP()? tr("Minterm"): tr("Maxterm");
 
     // first header row
-    html.append("<tr>");
+    body.append("<tr>");
     for (int i = 0; i < maxMissings; i++)
-        appendCell(html, headStr.arg(1 << i), true, i? 2: 3);
-    html.append("</tr>");
+        appendCell(body, headStr.arg(1 << i), true, i? 2: 3);
+    body.append("</tr>");
 
     // second header row
-    html.append("<tr>");
-    appendCell(html, tr("Number of %1s").arg(m_data->isSoP()? "1": "0"), true);
+    body.append("<tr>");
+    appendCell(body, tr("Number of %1s").arg(m_data->isSoP()? "1": "0"), true);
     for (int i = 0; i < maxMissings; i++) {
-        appendCell(html, term);
-        appendCell(html, cubeStr.arg(i));
+        appendCell(body, term);
+        appendCell(body, cubeStr.arg(i));
     }
-    html.append("</tr>");
+    body.append("</tr>");
 
 
     TermsSortingList *impls;
     for (int row = 2, explicits = firstImpl; row < rows; row++, explicits++) {
         // first coll
-        html.append("<tr>");
-        appendCell(html, QString::number(explicits));
+        body.append("<tr>");
+        appendCell(body, QString::number(explicits));
         impls = m_data->getImpls(0, explicits);
 
         for (int column = 1; column < columns; column += 2) {
@@ -200,39 +213,44 @@ void QmWebkitWidget::showData()
                 setStr.append(QString::fromStdString((*it).toString(Term::SF_SET)));
                 binStr.append(QString::fromStdString((*it).toString()));
             }
-            appendCell(html, setStr.join("<br />"));
-            appendCell(html, binStr.join("<br />"));
+            appendCell(body, setStr.join("<br />"));
+            appendCell(body, binStr.join("<br />"));
         }
-        html.append("</tr>");
+        body.append("</tr>");
     }
 
-    html.append("</table>");
-    showFooter(html);
-    m_view->setHtml(html.join("\n"), QUrl(":/"));
+    body.append("</table>");
 
-    /*
-    // Table
-    m_textArea->insertHtml(QString("<br><h2>%1</h2>").arg(
-            tr("Prime Implicants Table")));
+
+    // Prime Implicants table
+    body.append(QString("<h2>%1</h2>").arg(tr("Prime Implicants Table")));
 
     vector<Term> *headRow = m_data->getCoverHeadRow();
     vector<Term> *headCol = m_data->getCoverHeadCol();
 
-    table = m_textArea->textCursor().insertTable(headRow->size() + 1, headCol->size() + 1, tableFormat);
+    body.append("<table id=\"prime_implicants\">");
 
-    for (unsigned i = 1; i <= headRow->size(); i++)
-        appendCell(table, i, 0, QString::fromStdString(headRow->at(i-1).toString(Term::SF_SET)));
+    // first row
+    body.append("<tr>");
+    body.append("<th>&nbsp;</th>"); // corner
     for (unsigned j = 1; j <= headCol->size(); j++)
-        appendCell(table, 0, j, QString::number(headCol->at(j-1).getIdx()));
+        body.append(QString("<th>%1</th>").arg(QString::number(headCol->at(j-1).getIdx())));
+    body.append("</tr>");
 
-    for (unsigned i = 1; i <= headRow->size(); i++) {
-        for (unsigned j = 1; j <= headCol->size(); j++) {
-            if (m_data->isCovered(i - 1, j - 1))
-                appendCell(table, i, j, "X");
-        }
+    // table body
+    for (unsigned i = 0; i < headRow->size(); i++) {
+        body.append("<tr>");
+        body.append(QString("<th>%1</th>").arg(
+                QString::fromStdString(headRow->at(i).toString(Term::SF_SET))));
+        // draw X for covered terms
+        for (unsigned j = 0; j < headCol->size(); j++)
+            body.append(QString("<td>%1</td>").arg(m_data->isCovered(i, j)? "X": "&nbsp;"));
+        body.append("</tr>");
     }
-    m_textArea->insertHtml("<br>");
-    */
+    body.append("</table>");
+
+    show(body);
+
     m_gm->setCursor(QCursor(Qt::ArrowCursor));
     m_gm->clearStatus();
 }

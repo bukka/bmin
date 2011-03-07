@@ -39,11 +39,13 @@ public:
     QmWebkitWidget(const QString &name, int pos);
 
 private:
-    void showHeader(QStringList &html);
-    void showFooter(QStringList &html);
+    void appendHeader(QStringList &html);
+    void appendFooter(QStringList &html);
     void appendCell(QStringList &html, const QString &msg,
                     bool head = false, int colspan = 1);
 
+    void show(QStringList &html);
+    void show(const QString &str);
     void showNothing();
     void showInvalidAlgorithm();
     void showData();
