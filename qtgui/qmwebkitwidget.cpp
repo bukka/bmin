@@ -46,6 +46,7 @@ QmWebkitWidget::QmWebkitWidget(const QString &name, int pos)
 
     m_view = new QWebView;
     m_view->show();
+
     showNothing();
 
     QVBoxLayout *mainLayout = new QVBoxLayout;
@@ -104,7 +105,18 @@ void QmWebkitWidget::appendHeader(QStringList &html)
     html.append("<head>");
     html.append("<title>Quine-McCluskey</title>");
     html.append("<style type=\"text/css\">");
-    html.append("#error { color: red; }");
+    html.append(
+            "body, h1, h2, h3, div { font: 14px Helvetice, sans-serif; }"
+            "h1 { width: 100%; text-align: center; font-size: 1.8em; margin: 0; padding: 0 }"
+            "h2 { font-size: 1.5em; margin: 20px 0 5px; }"
+            "table { border: 1px solid #aaa; border-width: 1px 1px 0 0}"
+            "th, td { font: 14px Courier, monospace; padding: 2px 5px; vertical-align: top;"
+            "         border: 1px solid #aaa; border-width: 0 0 1px 1px; }"
+            "th { background: #ffd; font-weight: bold; }"
+            "#error { color: red; font-size: 1.5em; "
+            "         width: 100%; text-align: center; margin-top: 20px; }"
+
+            );
     html.append("</style>");
     html.append("</head>");
     html.append("<body>");
@@ -134,12 +146,12 @@ void QmWebkitWidget::show(const QString &str)
 
 void QmWebkitWidget::showNothing()
 {
-    show(QString("<div id=\"error\">%1</div>").arg(tr("No logic function.")));
+    show(QString("<div id=\"error\">%1</div>").arg(tr("No logic function")));
 }
 
 void QmWebkitWidget::showInvalidAlgorithm()
 {
-    show(QString("<div id=\"error\">%1</div>").arg(tr("You must set Quine-McCluskey algorithm.")));
+    show(QString("<div id=\"error\">%1</div>").arg(tr("You must set Quine-McCluskey algorithm")));
 }
 
 void QmWebkitWidget::appendCell(QStringList &html, const QString &msg, bool head, int colspan)
@@ -167,7 +179,7 @@ void QmWebkitWidget::showData()
 
     body.append(QString("<h2>%1</h2>").arg(tr("Finding Prime Implicants ")));
 
-    body.append("<table id=\"finding_primes\">");
+    body.append("<table id=\"finding_primes\" cellpadding=\"0\" cellspacing=\"0\">");
 
     int maxMissings = m_data->getMaxMissings();
     int columns = (maxMissings * 2) + 3;
@@ -182,16 +194,16 @@ void QmWebkitWidget::showData()
 
     // first header row
     body.append("<tr>");
-    for (int i = 0; i < maxMissings; i++)
+    for (int i = 0; i <= maxMissings; i++)
         appendCell(body, headStr.arg(1 << i), true, i? 2: 3);
     body.append("</tr>");
 
     // second header row
     body.append("<tr>");
     appendCell(body, tr("Number of %1s").arg(m_data->isSoP()? "1": "0"), true);
-    for (int i = 0; i < maxMissings; i++) {
-        appendCell(body, term);
-        appendCell(body, cubeStr.arg(i));
+    for (int i = 0; i <= maxMissings; i++) {
+        appendCell(body, term, true);
+        appendCell(body, cubeStr.arg(i), true);
     }
     body.append("</tr>");
 
@@ -228,7 +240,7 @@ void QmWebkitWidget::showData()
     vector<Term> *headRow = m_data->getCoverHeadRow();
     vector<Term> *headCol = m_data->getCoverHeadCol();
 
-    body.append("<table id=\"prime_implicants\">");
+    body.append("<table id=\"prime_implicants\" cellpadding=\"0\" cellspacing=\"0\">");
 
     // first row
     body.append("<tr>");
