@@ -4,5 +4,6 @@
         <file alias="bits_bg.png">data/bits_bg.png</file>
         <file alias="gpl.txt">data/gpl.txt</file>
         <file alias="icon.png">data/icon.png</file>
+        <file>scripts/qm.js</file>
     </qresource>
 </RCC>

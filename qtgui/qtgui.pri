@@ -58,3 +58,4 @@ HEADERS += mainwindow.h \
     errorwidget.h \
     qmwebkitwidget.h
 RESOURCES += resources.qrc
+OTHER_FILES += scripts/qm.js

@@ -25,11 +25,21 @@
 #include "termssortinglist.h"
 
 #include <vector>
+#include <list>
 #include <set>
 
 class QuineMcCluskeyData
 {
 public:
+    struct Combination
+    {
+        Combination(Term *pleft, Term *pright, Term *pcombined) :
+                left(*pleft), right(*pright), combined(*pcombined) {}
+        Term left;
+        Term right;
+        Term combined;
+    };
+
     QuineMcCluskeyData();
     QuineMcCluskeyData(const QuineMcCluskeyData &qmd);
     ~QuineMcCluskeyData();
@@ -45,6 +55,8 @@ public:
 
     void addImpl(int missings, int explicits, Term *t);
     TermsSortingList *getImpls(int missings, int explicits);
+    void addCombination(Term *left, Term *right, Term *combined);
+    std::list<Combination> *getCombinations();
     void setPrimes(std::vector<Term> primes);
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
@@ -70,6 +82,7 @@ private:
     std::vector<Term> coverHeadRow;
     std::vector<Term> coverHeadCol;
     std::set<int> coverTable;
+    std::list<Combination> combinations;
 };
 
 #endif // QUINEMCCLUSKEYDATA_H

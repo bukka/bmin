@@ -91,6 +91,16 @@ TermsSortingList *QuineMcCluskeyData::getImpls(int missings, int explicits)
     return &impls[getImplsIdx(missings, explicits)];
 }
 
+void QuineMcCluskeyData::addCombination(Term *left, Term *right, Term *combined)
+{
+    combinations.push_back(Combination(left, right, combined));
+}
+
+list<QuineMcCluskeyData::Combination> *QuineMcCluskeyData::getCombinations()
+{
+    return &combinations;
+}
+
 int QuineMcCluskeyData::firstExplicitTerm()
 {
     int first = 0;

@@ -28,10 +28,13 @@
 #include "termssortinglist.h"
 
 #include <vector>
+#include <list>
 using namespace std;
 
 #include "QWebView"
+#include "QWebFrame"
 #include "QVBoxLayout"
+#include "QFile"
 
 QmWebkitWidget::QmWebkitWidget(const QString &name, int pos)
     : ModuleWidget(name, pos)
@@ -46,6 +49,8 @@ QmWebkitWidget::QmWebkitWidget(const QString &name, int pos)
 
     m_view = new QWebView;
     m_view->show();
+
+    connect(m_view, SIGNAL(loadFinished(bool)), this, SLOT(loadScript(bool)));
 
     showNothing();
 
@@ -99,6 +104,17 @@ void QmWebkitWidget::checkAlgorithm(bool isQM)
         showInvalidAlgorithm();
 }
 
+void QmWebkitWidget::loadScript(bool pageLoadOk)
+{
+    if (!m_active || !pageLoadOk)
+        return;
+    QFile file(":/scripts/qm.js");
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+    QString script = file.readAll();
+    m_view->page()->mainFrame()->evaluateJavaScript(script);
+}
+
 void QmWebkitWidget::appendHeader(QStringList &html)
 {
     html.append("<html>");
@@ -112,10 +128,16 @@ void QmWebkitWidget::appendHeader(QStringList &html)
             "table { border: 1px solid #aaa; border-width: 1px 1px 0 0}"
             "th, td { font: 14px Courier, monospace; padding: 2px 5px; vertical-align: top;"
             "         border: 1px solid #aaa; border-width: 0 0 1px 1px; }"
+            "td > div { font: inherit; }"
             "th { background: #ffd; font-weight: bold; }"
             "#error { color: red; font-size: 1.5em; "
             "         width: 100%; text-align: center; margin-top: 20px; }"
-
+            "#fpi-buttons input { width: 100px; padding: 2px auto; "
+            "    border-width: 1px; margin-bottom: 5px;  "
+            "    background: -webkit-gradient(linear, left top, left bottom, "
+            "                 color-stop(0%,#ddd), color-stop(50%,#eee), color-stop(100%,#ddd)); }"
+            "#fpi-buttons input:hover { background:-webkit-gradient(linear, left top, left bottom,"
+            "     color-stop(0%,#ddd), color-stop(50%,#fff), color-stop(100%,#ddd)); }"
             );
     html.append("</style>");
     html.append("</head>");
@@ -133,9 +155,9 @@ void QmWebkitWidget::show(QStringList &body)
 {
     QStringList header;
     appendHeader(header);
-    body.prepend(header.join("\n"));
+    body.prepend(header.join(""));
     appendFooter(body);
-    m_view->setHtml(body.join("\n"), QUrl(":/"));
+    m_view->setHtml(body.join(""), QUrl(":/"));
 }
 
 void QmWebkitWidget::show(const QString &str)
@@ -163,6 +185,24 @@ void QmWebkitWidget::appendCell(QStringList &html, const QString &msg, bool head
     html.append(QString("<%1%2>%3</%1>").arg(tag, colspanStr, msg));
 }
 
+void QmWebkitWidget::appendCombinations(QStringList &html)
+{
+    html.append("<script type=\"text/javascript\">");
+    html.append("window.combinations = [");
+
+    QStringList combinationsStrList;
+    list<QuineMcCluskeyData::Combination> *combinations = m_data->getCombinations();
+    list<QuineMcCluskeyData::Combination>::iterator it;
+    for (it = combinations->begin(); it != combinations->end(); it++) {
+        combinationsStrList.append(QString("{ left: '%1', right: '%2', combined: '%3' }").arg(
+                QString::fromStdString((*it).left.toString()),
+                QString::fromStdString((*it).right.toString()),
+                QString::fromStdString((*it).combined.toString())));
+    }
+    html.append(combinationsStrList.join(","));
+    html.append("]</script>");
+}
+
 void QmWebkitWidget::showData()
 {
     QStringList body;
@@ -177,7 +217,14 @@ void QmWebkitWidget::showData()
     m_gm->setCursor(QCursor(Qt::WaitCursor));
     m_gm->setStatus(tr("Please wait: Quine-McCluskey Data is generating"));
 
+
+    appendCombinations(body);
     body.append(QString("<h2>%1</h2>").arg(tr("Finding Prime Implicants ")));
+
+    body.append("<div id=\"fpi-buttons\">");
+    body.append(QString("<input type=\"button\" id=\"fpi-simulate\" value=\"%1\"/>").arg(
+            tr("Simulate")));
+    body.append("</div>");
 
     body.append("<table id=\"finding_primes\" cellpadding=\"0\" cellspacing=\"0\">");
 
@@ -219,14 +266,16 @@ void QmWebkitWidget::showData()
             int missings = (column - 1) / 2;
             impls = m_data->getImpls(missings, explicits);
             impls->sort();
-            QStringList setStr;
-            QStringList binStr;
+            QStringList setStrList;
+            QStringList binStrList;
             for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
-                setStr.append(QString::fromStdString((*it).toString(Term::SF_SET)));
-                binStr.append(QString::fromStdString((*it).toString()));
+                QString binStr = QString::fromStdString((*it).toString());
+                QString divStr = QString("<div id=\"%1_") + binStr + QString("\">%2</div>");
+                setStrList.append(divStr.arg("m", QString::fromStdString((*it).toString(Term::SF_SET))));
+                binStrList.append(divStr.arg("b", binStr));
             }
-            appendCell(body, setStr.join("<br />"));
-            appendCell(body, binStr.join("<br />"));
+            appendCell(body, setStrList.join(""));
+            appendCell(body, binStrList.join(""));
         }
         body.append("</tr>");
     }

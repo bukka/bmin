@@ -43,6 +43,7 @@ private:
     void appendFooter(QStringList &html);
     void appendCell(QStringList &html, const QString &msg,
                     bool head = false, int colspan = 1);
+    void appendCombinations(QStringList &html);
 
     void show(QStringList &html);
     void show(const QString &str);
@@ -62,6 +63,7 @@ public slots:
     void updateData();
     void setMinimizedData();
     void checkAlgorithm(bool isQM);
+    void loadScript(bool pageLoadOk);
 };
 
 #endif // QMWEBKITWIDGET_H
