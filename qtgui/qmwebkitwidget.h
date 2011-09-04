@@ -43,7 +43,7 @@ private:
     void appendFooter(QStringList &html);
     void appendCell(QStringList &html, const QString &msg,
                     bool head = false, int colspan = 1);
-    void appendCombinations(QStringList &html);
+    void appendScriptData(QStringList &html);
 
     void show(QStringList &html);
     void show(const QString &str);
@@ -56,6 +56,7 @@ private:
     QuineMcCluskeyData *m_data;
     QWebView *m_view;
     QStringList m_html;
+    QString m_simulationBtnStr;
 
 
 public slots:
@@ -63,7 +64,7 @@ public slots:
     void updateData();
     void setMinimizedData();
     void checkAlgorithm(bool isQM);
-    void loadScript(bool pageLoadOk);
+    void loadScript(bool pageLoadOk = true);
 };
 
 #endif // QMWEBKITWIDGET_H

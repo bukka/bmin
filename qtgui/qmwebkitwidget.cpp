@@ -35,12 +35,14 @@ using namespace std;
 #include "QWebFrame"
 #include "QVBoxLayout"
 #include "QFile"
+#include "QAction"
 
 QmWebkitWidget::QmWebkitWidget(const QString &name, int pos)
     : ModuleWidget(name, pos)
 {
     m_data = 0;
     m_gm = GUIManager::instance();
+    m_simulationBtnStr = tr("Simulate");
 
     connect(m_gm, SIGNAL(formulaMinimized()), this, SLOT(setMinimizedData()));
     connect(m_gm, SIGNAL(formulaInvalidated()), this, SLOT(setMinimizedData()));
@@ -51,6 +53,8 @@ QmWebkitWidget::QmWebkitWidget(const QString &name, int pos)
     m_view->show();
 
     connect(m_view, SIGNAL(loadFinished(bool)), this, SLOT(loadScript(bool)));
+    connect(m_view->pageAction(QWebPage::Reload), SIGNAL(triggered()),
+            this, SLOT(loadScript()));
 
     showNothing();
 
@@ -127,17 +131,19 @@ void QmWebkitWidget::appendHeader(QStringList &html)
             "h2 { font-size: 1.5em; margin: 20px 0 5px; }"
             "table { border: 1px solid #aaa; border-width: 1px 1px 0 0}"
             "th, td { font: 14px Courier, monospace; padding: 2px 5px; vertical-align: top;"
-            "         border: 1px solid #aaa; border-width: 0 0 1px 1px; }"
+            "         border: 1px solid #aaa; border-width: 0 0 1px 1px; white-space: nowrap; }"
             "td > div { font: inherit; }"
-            "th { background: #ffd; font-weight: bold; }"
+            "th { background: #eee; font-weight: bold; }"
             "#error { color: red; font-size: 1.5em; "
             "         width: 100%; text-align: center; margin-top: 20px; }"
-            "#fpi-buttons input { width: 100px; padding: 2px auto; "
+            "#fpi-buttons { height: 30px; vertical-align: top; }"
+            "#fpi-buttons input { width: 130px; padding: 2px 1px 2px; margin-right: 10px; "
             "    border-width: 1px; margin-bottom: 5px;  "
             "    background: -webkit-gradient(linear, left top, left bottom, "
             "                 color-stop(0%,#ddd), color-stop(50%,#eee), color-stop(100%,#ddd)); }"
             "#fpi-buttons input:hover { background:-webkit-gradient(linear, left top, left bottom,"
             "     color-stop(0%,#ddd), color-stop(50%,#fff), color-stop(100%,#ddd)); }"
+            "#fpi-buttons input:active { padding: 3px 0 1px 2px; margin-top: 1px;}"
             );
     html.append("</style>");
     html.append("</head>");
@@ -185,11 +191,23 @@ void QmWebkitWidget::appendCell(QStringList &html, const QString &msg, bool head
     html.append(QString("<%1%2>%3</%1>").arg(tag, colspanStr, msg));
 }
 
-void QmWebkitWidget::appendCombinations(QStringList &html)
+void QmWebkitWidget::appendScriptData(QStringList &html)
 {
+    // script tag
     html.append("<script type=\"text/javascript\">");
-    html.append("window.combinations = [");
 
+    // bmin object
+    html.append("window.bmin = new Object();");
+
+    // append translations values
+    QStringList translationsStrList;
+    translationsStrList.append(QString("simulate: '%1'").arg(m_simulationBtnStr));
+    translationsStrList.append(QString("stopSimulation: '%1'").arg(tr("Stop Simulation")));
+    translationsStrList.append(QString("nextStep: '%1'").arg(tr("Next Step")));
+    translationsStrList.append(QString("prevStep: '%1'").arg(tr("Previous Step")));
+    html.append("window.bmin.translations = {" + translationsStrList.join(",") + "};");
+
+    // append combinations
     QStringList combinationsStrList;
     list<QuineMcCluskeyData::Combination> *combinations = m_data->getCombinations();
     list<QuineMcCluskeyData::Combination>::iterator it;
@@ -199,8 +217,10 @@ void QmWebkitWidget::appendCombinations(QStringList &html)
                 QString::fromStdString((*it).right.toString()),
                 QString::fromStdString((*it).combined.toString())));
     }
-    html.append(combinationsStrList.join(","));
-    html.append("]</script>");
+    html.append("window.bmin.combinations = [" + combinationsStrList.join(",") + "];");
+
+    // script tag end
+    html.append("</script>");
 }
 
 void QmWebkitWidget::showData()
@@ -217,8 +237,9 @@ void QmWebkitWidget::showData()
     m_gm->setCursor(QCursor(Qt::WaitCursor));
     m_gm->setStatus(tr("Please wait: Quine-McCluskey Data is generating"));
 
+    // append JavaScript data
+    appendScriptData(body);
 
-    appendCombinations(body);
     body.append(QString("<h2>%1</h2>").arg(tr("Finding Prime Implicants ")));
 
     body.append("<div id=\"fpi-buttons\">");
@@ -266,13 +287,17 @@ void QmWebkitWidget::showData()
             int missings = (column - 1) / 2;
             impls = m_data->getImpls(missings, explicits);
             impls->sort();
+            QString classStr = (column >= 3)? " class=\"sim\"": "";
             QStringList setStrList;
             QStringList binStrList;
             for (TermsSortingList::iterator it = impls->begin(); it != impls->end(); it++) {
                 QString binStr = QString::fromStdString((*it).toString());
-                QString divStr = QString("<div id=\"%1_") + binStr + QString("\">%2</div>");
-                setStrList.append(divStr.arg("m", QString::fromStdString((*it).toString(Term::SF_SET))));
-                binStrList.append(divStr.arg("b", binStr));
+                QString divStr = QString("<div id=\"%1_")
+                                 + binStr.left(varsCount)
+                                 + QString("\"%2>%3</div>");
+                setStrList.append(divStr.arg(
+                        "m", classStr, QString::fromStdString((*it).toString(Term::SF_SET))));
+                binStrList.append(divStr.arg("b", classStr, binStr));
             }
             appendCell(body, setStrList.join(""));
             appendCell(body, binStrList.join(""));
