@@ -28,18 +28,29 @@ Combinations.prototype.ok = function () {
 
 // set activity for the one implicant in the table
 Combinations.prototype.active = function (comb, isActive, isNext) {
-    var mTerm, bTerm;
+    var mTerm, bTerm, visibility, aColor, nColor;
+    if (isNext) {
+        visibility = "visible";
+        aColor = "#f30";
+        nColor = "#000";
+    }
+    else {
+        visibility = "hidden";
+        aColor = "#000";
+        nColor = "#f30";
+    }
+
     for (var type in comb) {
         mTerm = document.getElementById("m_" + comb[type]);
         bTerm = document.getElementById("b_" + comb[type]);
         if (mTerm && bTerm) {
             if (isActive) {
                 if (type == "combined")
-                    bTerm.style.visibility = mTerm.style.visibility = isNext? "visible": "hidden";
-                bTerm.style.color = mTerm.style.color  = isNext? "#f30": "#000";
+                    bTerm.style.visibility = mTerm.style.visibility = visibility;
+                bTerm.style.color = mTerm.style.color = aColor;
             }
             else {
-                bTerm.style.color = mTerm.style.color  = isNext? "#000": "#f30";
+                bTerm.style.color = mTerm.style.color = nColor;
             }
         }
     }
@@ -157,9 +168,10 @@ function fnStopSimulation() {
     fnRemoveButton(parent, "fpi-next");
 }
 
-// check if the combinations object is correctly inicialized
+// get similation button and if exists then initialize the script
 var simBtn = document.getElementById("fpi-simulate");
 if (simBtn) {
+    // check if the combinations object is correctly inicialized
     if (combinations.ok())
         fnStopSimulation.call(simBtn);
     else

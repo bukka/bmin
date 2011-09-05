@@ -112,6 +112,8 @@ void QmWebkitWidget::loadScript(bool pageLoadOk)
 {
     if (!m_active || !pageLoadOk)
         return;
+
+    // the script for simulation
     QFile file(":/scripts/qm.js");
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return;
@@ -134,6 +136,7 @@ void QmWebkitWidget::appendHeader(QStringList &html)
             "         border: 1px solid #aaa; border-width: 0 0 1px 1px; white-space: nowrap; }"
             "td > div { font: inherit; }"
             "th { background: #eee; font-weight: bold; }"
+            "th.minterms { text-align: left; }"
             "#error { color: red; font-size: 1.5em; "
             "         width: 100%; text-align: center; margin-top: 20px; }"
             "#fpi-buttons { height: 30px; vertical-align: top; }"
@@ -326,7 +329,7 @@ void QmWebkitWidget::showData()
     // table body
     for (unsigned i = 0; i < headRow->size(); i++) {
         body.append("<tr>");
-        body.append(QString("<th>%1</th>").arg(
+        body.append(QString("<th class=\"minterms\">%1</th>").arg(
                 QString::fromStdString(headRow->at(i).toString(Term::SF_SET))));
         // draw X for covered terms
         for (unsigned j = 0; j < headCol->size(); j++)
