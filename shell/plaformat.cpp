@@ -58,7 +58,7 @@ void PLAFormat::create(std::ostream &os, Formula *formula)
     formula->itInit();
     while (formula->itHasNext()) {
         Term &t = formula->itNext();
-        os << t.toString() << ' ' << (t.isDC()? '-': '1') << endl;
+        os << t.toString(Term::SF_BIN, false) << ' ' << (t.isDC()? '-': '1') << endl;
     }
 
     // end

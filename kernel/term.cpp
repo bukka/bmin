@@ -439,7 +439,7 @@ void Term::setValueAt(unsigned position, const LiteralValue &value)
 }
 
 // term to string
-string Term::toString(StringForm sf) const
+string Term::toString(StringForm sf, bool showPrime) const
 {
     if (sf == SF_SET) {
         char type = isOne()? 'm': 'M';
@@ -465,7 +465,7 @@ string Term::toString(StringForm sf) const
         string s;
         for (int i = size - 1; i >= 0; i--)
             s += operator[](i).toString();
-        if (isPrime())
+        if (showPrime && isPrime())
             s += "*";
         return s;
     }

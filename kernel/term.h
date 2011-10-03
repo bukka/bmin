@@ -151,7 +151,7 @@ public:
     void setValueAt(unsigned position, const LiteralValue &value);
     
     // term to string
-    std::string toString(StringForm sf = SF_BIN) const;
+    std::string toString(StringForm sf = SF_BIN, bool showPrime = true) const;
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 
