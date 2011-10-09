@@ -155,11 +155,14 @@ public:
     // friend function to place term to ostream
     friend std::ostream & operator<<(std::ostream & os, const Term & t);
 
-    // expands term t to all minterms
+    // expands term t to all minterms and saves their indexes to vector v
+    static void expandTerm(std::vector<int> &v, const Term &t);
+    // expands term t to all minterms and saves minterms (maxterms) to vector v
     static void expandTerm(std::vector<Term> &v, const Term &t);
+    // expands term t to all minterms and saves minterms (maxterms) to list l
     static void expandTerm(std::list<Term> &l, const Term &t);
 
-private:
+protected:
     // term initialization
     void init(term_t lit, term_t mis, unsigned s, int flg);
 

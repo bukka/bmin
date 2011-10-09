@@ -1,8 +1,8 @@
 /*
- * qmwidget.h - drawing running of Quine-McCluskey algorithm
- * created date: 11/30/2009
+ * qmwebkitwidget.h - drawing running of Quine-McCluskey algorithm using Webkit
+ * created date: 11/13/2010
  *
- * Copyright (C) 2009-2010 Jakub Zelenka.
+ * Copyright (C) 2010 Jakub Zelenka.
  *
  * Bmin is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public
@@ -18,42 +18,53 @@
  * along with Bmin; if not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef QUINEMCCLUSKEYWIDGET_H
-#define QUINEMCCLUSKEYWIDGET_H
+#ifndef QMWEBKITWIDGET_H
+#define QMWEBKITWIDGET_H
 
 #include "modulewidget.h"
+
+#include "QStringList"
 
 class GUIManager;
 class QuineMcCluskeyData;
 
 class QString;
-class QTextEdit;
-class QTextTable;
+class QWebView;
 
-class QmWidget : public ModuleWidget
+class QmWebkitWidget : public ModuleWidget
 {
     Q_OBJECT
 
 public:
-    QmWidget(const QString &name, int pos);
+    QmWebkitWidget(const QString &name, int pos);
 
 private:
-    void showHeader();
+    void appendHeader(QStringList &html);
+    void appendFooter(QStringList &html);
+    void appendCell(QStringList &html, const QString &msg,
+                    bool head = false, int colspan = 1);
+    void appendScriptData(QStringList &html);
+
+    void show(QStringList &html);
+    void show(const QString &str);
     void showNothing();
-    void showBadAlgorithm();
+    void showInvalidAlgorithm();
     void showData();
-    void setCell(QTextTable *table, int row, int col, const QString &html);
 
     bool m_active;
     GUIManager *m_gm;
     QuineMcCluskeyData *m_data;
-    QTextEdit *m_textArea;
+    QWebView *m_view;
+    QStringList m_html;
+    QString m_simulationBtnStr;
+
 
 public slots:
     void setActivity(bool a);
     void updateData();
     void setMinimizedData();
     void checkAlgorithm(bool isQM);
+    void loadScript(bool pageLoadOk = true);
 };
 
-#endif // QUINEMCCLUSKEYWIDGET_H
+#endif // QMWEBKITWIDGET_H

@@ -31,6 +31,7 @@ class WelcomeWidget;
 class KMapWidget;
 class CubeWidget;
 class QmWidget;
+class QmWebkitWidget;
 
 struct Mode {
     Mode() : id(-1) {}
@@ -54,14 +55,16 @@ public:
 
 
     // modes' identifiers
-    static const int ID_WELCOME = 0;
-    static const int ID_KMAP    = 1;
+    static const int ID_WELCOME   = 0;
+    static const int ID_KMAP      = 1;
 #if CUBE3D
-    static const int ID_CUBE    = 2;
-    static const int ID_QM      = 3;
+    static const int ID_CUBE      = 2;
+# define CUBE_MODE_SHIFT 1
 #else
-    static const int ID_QM      = 2;
+# define CUBE_MODE_SHIFT 0
 #endif
+    static const int ID_QM_WEBKIT = 2 + CUBE_MODE_SHIFT;
+    static const int ID_QM        = 3 + CUBE_MODE_SHIFT;
 
     // return modules
     QList<ModuleWidget *> getModules() const { return m_modules; }
@@ -76,6 +79,7 @@ private:
     WelcomeWidget *m_welcome;
     KMapWidget *m_kmap;
     QmWidget *m_qm;
+    QmWebkitWidget *m_qmw;
 #if CUBE3D
     CubeWidget *m_cube;
 #endif
@@ -89,6 +93,7 @@ signals:
     void modeChanged(int);
     void kmapActivated(bool);
     void qmActivated(bool);
+    void qmwActivated(bool);
 #if CUBE3D
     void cubeActivated(bool);
 #endif

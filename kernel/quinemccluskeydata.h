@@ -22,15 +22,27 @@
 #define QUINEMCCLUSKEYDATA_H
 
 #include "term.h"
+#include "termssortinglist.h"
 
-#include <list>
 #include <vector>
+#include <list>
 #include <set>
 
 class QuineMcCluskeyData
 {
 public:
+    struct Combination
+    {
+        Combination(Term *pleft, Term *pright, Term *pcombined) :
+                left(*pleft), right(*pright), combined(*pcombined) {}
+        Term left;
+        Term right;
+        Term combined;
+    };
+
     QuineMcCluskeyData();
+    QuineMcCluskeyData(const QuineMcCluskeyData &qmd);
+    ~QuineMcCluskeyData();
     // initialization
     void initImpls(int vars, bool sp);
     void initCover(std::vector<Term> *row, std::vector<Term> *col);
@@ -42,7 +54,9 @@ public:
     void setCover(int row, int col);
 
     void addImpl(int missings, int explicits, Term *t);
-    std::list<Term> *getImpls(int missings, int explicits);
+    TermsSortingList *getImpls(int missings, int explicits);
+    void addCombination(Term *left, Term *right, Term *combined);
+    std::list<Combination> *getCombinations();
     void setPrimes(std::vector<Term> primes);
     int getVarsCount() { return varsCount; }
     int getMaxMissings() { return maxMissings; }
@@ -63,10 +77,12 @@ private:
     int maxMissings;
     int coverRowsCount;
     int coverColsCount;
-    std::vector<std::list<Term> > impls;
+    TermsSortingList *impls;
+    size_t implsSize;
     std::vector<Term> coverHeadRow;
     std::vector<Term> coverHeadCol;
     std::set<int> coverTable;
+    std::list<Combination> combinations;
 };
 
 #endif // QUINEMCCLUSKEYDATA_H

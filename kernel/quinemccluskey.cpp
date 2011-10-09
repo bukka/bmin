@@ -116,6 +116,7 @@ void QuineMcCluskey::findPrimeImplicants()
                             if (debug) {
                                 combined->setOne(sop);
                                 data.addImpl(missings + 1, explicits, combined);
+                                data.addCombination(*lit, *rit, combined);
                             }
                         }
 
