@@ -46,22 +46,22 @@ ModeManager::ModeManager()
     m_modules << m_kmap;
     connect(this, SIGNAL(kmapActivated(bool)), m_kmap, SLOT(setActivity(bool)));
 
-    // Quine-McCluskey
-    m_qm = new QmWidget(tr("QM"), ID_QM);
-    m_modules << m_qm;
-    connect(this, SIGNAL(qmActivated(bool)), m_qm, SLOT(setActivity(bool)));
-
-    // Quine-McCluskey
-    m_qmw = new QmWebkitWidget(tr("QM Webkit"), ID_QM_WEBKIT);
-    m_modules << m_qmw;
-    connect(this, SIGNAL(qmwActivated(bool)), m_qmw, SLOT(setActivity(bool)));
-
 #if CUBE3D
     // Boolean n-cube
     m_cube = new CubeWidget(tr("n-Cube"), ID_CUBE);
     m_modules << m_cube;
     connect(this, SIGNAL(cubeActivated(bool)), m_cube, SLOT(setActivity(bool)));
 #endif
+
+    // Quine-McCluskey - webkit
+    m_qmw = new QmWebkitWidget(tr("Quine-McCluskey"), ID_QM_WEBKIT);
+    m_modules << m_qmw;
+    connect(this, SIGNAL(qmwActivated(bool)), m_qmw, SLOT(setActivity(bool)));
+
+    // Quine-McCluskey - text widget
+    // m_qm = new QmWidget(tr("QM"), ID_QM);
+    // m_modules << m_qm;
+    // connect(this, SIGNAL(qmActivated(bool)), m_qm, SLOT(setActivity(bool)));
 }
 
 // return instance of ModeManager
@@ -86,11 +86,11 @@ QList<Mode> ModeManager::modes()
     QList<Mode> modesList;
     modesList << Mode(ID_WELCOME, tr("Welcome"));
     modesList << Mode(ID_KMAP, tr("Karnaugh Map"));
-    modesList << Mode(ID_QM, tr("Quine-McCluskey"));
-    modesList << Mode(ID_QM_WEBKIT, tr("QM Webkit"));
 #if CUBE3D
     modesList << Mode(ID_CUBE, tr("Boolean n-Cube"));
 #endif
+    modesList << Mode(ID_QM_WEBKIT, tr("QM Webkit"));
+    // modesList << Mode(ID_QM, tr("Quine-McCluskey"));
     return modesList;
 }
 
@@ -98,7 +98,7 @@ QList<Mode> ModeManager::modes()
 void ModeManager::setMode(int modeId)
 {
     emit kmapActivated(modeId == ID_KMAP);
-    emit qmActivated(modeId == ID_QM);
+    // emit qmActivated(modeId == ID_QM);
     emit qmwActivated(modeId == ID_QM_WEBKIT);
 #if CUBE3D
     emit cubeActivated(modeId == ID_CUBE);

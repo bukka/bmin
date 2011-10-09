@@ -63,8 +63,8 @@ public:
 #else
 # define CUBE_MODE_SHIFT 0
 #endif
-    static const int ID_QM        = 2 + CUBE_MODE_SHIFT;
-    static const int ID_QM_WEBKIT = 3 + CUBE_MODE_SHIFT;
+    static const int ID_QM_WEBKIT = 2 + CUBE_MODE_SHIFT;
+    static const int ID_QM        = 3 + CUBE_MODE_SHIFT;
 
     // return modules
     QList<ModuleWidget *> getModules() const { return m_modules; }
