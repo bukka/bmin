@@ -9,7 +9,6 @@ SOURCES += formula.cpp \
     kernel.cpp \
     termscontainer.cpp \
     outputvalue.cpp \
-    events.cpp \
     kmap.cpp \
     cube.cpp \
     espresso.cpp \

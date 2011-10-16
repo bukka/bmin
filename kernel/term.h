@@ -60,18 +60,19 @@ public:
     // returns full position
     static term_t getFullLiters(unsigned size);
 
-    // constructor - the term of size s with all variables setted to missing value
+    // constructor - the term of size s with all variables set on missing value
     Term(unsigned s = 0, bool isDC = false);
-    // constructor - makes the variables array with size s by index idx
+    // constructor - makes the variables array of the size s by the index idx
     Term(int idx, unsigned s, bool isDC = false);
-    // constructor - internal usage
+    // constructor - for the internal usage
     Term(term_t lit, term_t miss, unsigned s, int flg = ONE);
-    // constructor - from string
+    // constructor - parsed from the string str
     Term(const std::string &str, unsigned s = 0) throw(InvalidTermExc);
 
     // FLAGS methods
     // sets certain flag
     void setFlag(int flag, bool is = true);
+    // finds out if the flag flg is set
     inline bool hasFlags(int flg) const { return (flags & flg); }
 
     inline bool isOne() const { return hasFlags(ONE); }
@@ -94,9 +95,9 @@ public:
     inline bool isValid() const { return !hasFlags(INVALID); }
     inline void setInvalid(bool is = true)  { setFlag(INVALID, is); }
 
-    // returns size of term, if all is false returns size reduced of dont cares
+    // returns size of term, if the all is false returns size reduced of dont cares
     unsigned getSize(bool all = true) const;
-    // returns terms index of boolean function
+    // returns index of the boolean function for the term
     int getIdx() const;
     // returns liters
     term_t getLiters() { return liters; }

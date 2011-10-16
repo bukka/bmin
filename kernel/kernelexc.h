@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 
+// abstract Bmin Kernel exception class
 class KernelExc : public std::exception
 {
 public:
@@ -48,7 +49,6 @@ public:
     ~InvalidVarsExc() throw() {}
     virtual Type getType() { return VARS; }
     const char *what() const throw();
-    // invalid variables names
 
 private:
     std::vector<char> invalidNames;

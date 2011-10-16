@@ -22,6 +22,7 @@
 
 #include <string>
 
+// constructor - value from character
 OutputValue::OutputValue(char ch) throw(InvalidValueExc)
 {
     switch (ch) {
@@ -41,6 +42,7 @@ OutputValue::OutputValue(char ch) throw(InvalidValueExc)
     }
 }
 
+// get next output value of the value ov (0 -> 1 -> 2 -> 0 -> ...)
 OutputValue OutputValue::getNextValue(const OutputValue &ov)
 {
     switch (ov.getValue()) {
@@ -53,18 +55,7 @@ OutputValue OutputValue::getNextValue(const OutputValue &ov)
     }
 }
 
-std::string OutputValue::toString(bool crossDC) const
-{
-    switch (value) {
-    case ZERO:
-        return "0";
-    case ONE:
-        return "1";
-    default: // dont care value
-        return  crossDC? "X": "-";
-    }
-}
-
+// converts the current value to char
 char OutputValue::toChar(bool crossDC) const
 {
     switch (value) {
@@ -74,5 +65,18 @@ char OutputValue::toChar(bool crossDC) const
         return '1';
     default: // dont care value
         return crossDC? 'X': '-';
+    }
+}
+
+// converts the current value to string
+std::string OutputValue::toString(bool crossDC) const
+{
+    switch (value) {
+    case ZERO:
+        return "0";
+    case ONE:
+        return "1";
+    default: // dont care value
+        return  crossDC? "X": "-";
     }
 }

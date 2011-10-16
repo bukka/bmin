@@ -38,12 +38,16 @@ class QuineMcCluskeyData;
 class KMap;
 class Cube;
 
+// Bmin Kernel class - events manager
 class Kernel
 {
 public:
+    // available minimizing algorithms
     enum Algorithm { QM, ESPRESSO };
 
+    // returns instance of the Kernel class - singleton pattern
     static Kernel *instance();
+    // deletes kernel instance
     static void destroy();
 
     static const char CURRENT_FCE_NAME = '\0';
@@ -127,7 +131,9 @@ public:
     void showFce(char name = CURRENT_FCE_NAME);
 
 private:
+    // private default constructor - singleton
     Kernel();
+    // private default destructor - singleton
     ~Kernel();
 
      // static instance
@@ -139,23 +145,27 @@ private:
     // representation of logic function (Sum of Products, Product of Sums)
     Formula::Repre repre;
 
-    Formula *formula;     // original formula
-    Formula *minFormula;  // minimized formula
-    Formula *tempFormula; // temporary formula (place for minFormula)
+    // original formula
+    Formula *formula;
+    // minimized formula
+    Formula *minFormula;
+    // temporary formula (place for minFormula)
+    Formula *tempFormula;
 
-    std::vector<Formula *> formulas; // formulas container
+    // formulas container
+    std::vector<Formula *> formulas;
 
     // minimizing algorithm
     Algorithm algorithm;
-    // minimizing algorithm class
+    // minimizing algorithm instance
     MinimizingAlgorithm *ma;
-    // Espresso algorithm class
+    // Espresso algorithm instance
     Espresso *espresso;
-    // Quine-McCluskey algorithm class
+    // Quine-McCluskey algorithm instance
     QuineMcCluskey *qm;
-    // Karnaugh map class
+    // Karnaugh map instance
     KMap *kmap;
-    // Cube class
+    // Cube instance
     Cube *cube;
 };
 

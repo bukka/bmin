@@ -159,7 +159,7 @@ Formula::~Formula()
     delete terms;
 }
 
-// finds out whether formula is tautology
+// finds out if the formula is a tautology
 bool Formula::isTautology() const
 {
     if (repre == REP_SOP) {
@@ -170,7 +170,7 @@ bool Formula::isTautology() const
         return terms->getSize() == 0;
 }
 
-// finds out whether formula is contradiction
+// finds out if the formula is a contradiction
 bool Formula::isContradiction() const
 {
     if (repre == REP_POS) {
@@ -201,13 +201,13 @@ void Formula::removeTerm(int idx) throw(InvalidIndexExc)
         minimized = false;
 }
 
-// finds out whether term t is in TermsContainer
+// finds out if the term t is in the TermsContainer
 bool Formula::hasTerm(const Term &t) const
 {
     return terms->hasTerm(t);
 }
 
-// sets term with idx to value
+// sets the term t to the value val
 void Formula::setTermValue(int idx, OutputValue val) throw(InvalidIndexExc)
 {
     if (idx > maxIdx)
@@ -224,19 +224,19 @@ void Formula::setTermValue(const Term &t, OutputValue val)
         minimized = false;
 }
 
-// returns value of term with idx
+// returns value of the term with index idx
 OutputValue Formula::getTermValue(int idx) const
 {
     return terms->getTermValue(idx);
 }
 
-// returns terms id with val from original terms
+// returns terms indices that have output value equal to val
 vector<int> Formula::getTermsIdx(int val) const
 {
     return terms->getTermsIdx(val);
 }
 
-// returns terms id with val from original terms (without creating new vector)
+// returns terms indices that have output value equal to val (without creating new vector)
 vector<int> &Formula::getTermsIdx(int val, vector<int> &idxs) const
 {
     return terms->getTermsIdx(val, idxs);
@@ -293,28 +293,31 @@ const Term &Formula::getTermAt(unsigned pos) const
     return terms->at(pos);
 }
 
-// returns number of terms
+// returns the number of terms
 unsigned Formula::getSize() const
 {
     return terms->getSize();
 }
 
-// returns maximal number of terms (by tautology or contradiction)
+// returns the maximal number of terms (by tautology or contradiction)
 unsigned Formula::getMaxSize() const
 {
     return 1 << getVarsCount();
 }
 
+// initializes iterating
 void Formula::itInit()
 {
     terms->itInit();
 }
 
+// finds out if there is another term
 bool Formula::itHasNext()
 {
     return terms->itHasNext();
 }
 
+// moves to the next term
 Term &Formula::itNext()
 {
     return terms->itNext();

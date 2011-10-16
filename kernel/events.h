@@ -30,50 +30,88 @@ class QuineMcCluskeyData;
 class KMap;
 class Cube;
 
+// Minimize event class
 class MinimizeEvent
 {
 public:
-    static const int FORMULA  = 1;  // Some formula is set
-    static const int DEBUG    = 2;  // Minimized in debug mode
-    static const int RUN      = 4;  // Minimizing was run
-    static const int ESPRESSO = 8;  // Espresso algorithm
+    // Some formula is set
+    static const int FORMULA  = 1;
+    // Minimized in debug mode
+    static const int DEBUG    = 2;
+    // Minimizing was run
+    static const int RUN      = 4;
+    // Espresso algorithm
+    static const int ESPRESSO = 8;
 
+    // constructor
     MinimizeEvent(int f = 0) : flags(f) {}
 
+    // enables FORMULA flag
     void enableFormula() { flags |= FORMULA; }
+    // enables DEBUG flag
     void enableDebug() { flags |= DEBUG; }
+    // enables RUN flag
     void enableRun() { flags |= RUN; }
+    // enables ESPRESSO flag
     void enableEspresso() { flags |= ESPRESSO; }
 
+    // whether FORMULA flag is set
     bool isFormula() { return flags & FORMULA; }
+    // whether DEBUG flag is set
     bool isDebug() { return flags & DEBUG; }
+    // whether RUN flag is set
     bool isRun() { return flags & RUN; }
+    // whether ESPRESSO flag is set
+    bool isEspresso() { return flags & ESPRESSO; }
 
-
+    // event flags
     int flags;
-protected:
 };
 
+// Events class - superclass
 class Events
 {
 public:
-    Events();
-    virtual ~Events();
+    // event constructor
+    Events()
+    {
+        Kernel::instance()->registerEvents(this);
+    }
+
+    // event destructor
+    virtual ~Events()
+    {
+        Kernel::instance()->unregisterEvents(this);
+    }
 
 protected:
+    // actual formula is changed
     virtual void evtFormulaChanged(Formula *) {}
+    // actual formula is removed
     virtual void evtFormulaRemoved() {}
+    // actual formula is minimized
     virtual void evtFormulaMinimized(Formula *, MinimizeEvent &) {}
+    // actual minimized formula is changed
     virtual void evtMinimalFormulaChanged(Formula *) {}
+    // new formulas are set
     virtual void evtFormulasSet(unsigned) {}
+    // minimizing algorithm is changed
     virtual void evtAlgorithmChanged(Kernel::Algorithm) {}
+    // error invoked
     virtual void evtError(std::exception &) {}
+    // bmin exit
     virtual void evtExit() {}
+    // help request
     virtual void evtHelp() {}
+    // Espresso algorithm data required
     virtual void evtShowEspresso(EspressoData *) {}
+    // Quine-McCluskey algorithm data required
     virtual void evtShowQm(QuineMcCluskeyData *) {}
+    // Karnaugh map data requiered
     virtual void evtShowKMap(KMap *) {}
+    // Boolean cobe data required
     virtual void evtShowCube(Cube *) {}
+    // Formula print request
     virtual void evtShowFce(Formula *, Formula *) {}
 
 

@@ -29,6 +29,7 @@
 
 using namespace std;
 
+// main contructor
 TermsContainer::TermsContainer(int varsCount, TermsType tt, ContainerType ct)
 {
     termVarsCount = varsCount;
@@ -41,11 +42,13 @@ TermsContainer::TermsContainer(int varsCount, TermsType tt, ContainerType ct)
     termsVector = (ttype == MINTERMS)? termsVectorOnes: termsVectorZeros;
 }
 
+// copy constructor
 TermsContainer::TermsContainer(const TermsContainer &tc)
 {
     copy(tc);
 }
 
+// assignment operator
 TermsContainer &TermsContainer::operator=(const TermsContainer &tc)
 {
     if (this == &tc)
@@ -58,6 +61,7 @@ TermsContainer &TermsContainer::operator=(const TermsContainer &tc)
     return *this;
 }
 
+// internal copying
 void TermsContainer::copy(const TermsContainer &tc)
 {
     termVarsCount = tc.termVarsCount;
@@ -70,12 +74,14 @@ void TermsContainer::copy(const TermsContainer &tc)
     termsVector = (ttype == MINTERMS)? termsVectorOnes: termsVectorZeros;
 }
 
+// destructor
 TermsContainer::~TermsContainer()
 {
     delete termsVectorOnes;
     delete termsVectorZeros;
 }
 
+// sets container
 void TermsContainer::setContainer(vector<Term> &v)
 {
     delete termsVector;
@@ -87,6 +93,7 @@ void TermsContainer::setContainer(vector<Term> &v)
     changed = true;
 }
 
+// sets terms type
 void TermsContainer::setTermsType(TermsType tt)
 {
     if (tt != ttype) {
@@ -96,11 +103,13 @@ void TermsContainer::setTermsType(TermsType tt)
     }
 }
 
+// returns the number of elements in the container
 unsigned TermsContainer::getSize() const
 {
     return termsVector->size();
 }
 
+// pushes new term to the container by idx
 bool TermsContainer::pushTerm(int idx, bool isDC)
 {
     for (vector<Term>::iterator it = termsVector->begin(); it != termsVector->end(); it++) {
@@ -117,6 +126,7 @@ bool TermsContainer::pushTerm(int idx, bool isDC)
     return (changed = true);
 }
 
+// pushes term t to the container
 bool TermsContainer::pushTerm(const Term &t)
 {
     if (find(termsVector->begin(), termsVector->end(), t) == termsVector->end()) {
@@ -126,6 +136,7 @@ bool TermsContainer::pushTerm(const Term &t)
     return false;
 }
 
+// removes term from the container by idx
 bool TermsContainer::removeTerm(int idx)
 {
     for (vector<Term>::iterator it = termsVector->begin(); it != termsVector->end(); it++) {
@@ -137,6 +148,7 @@ bool TermsContainer::removeTerm(int idx)
     return false;
 }
 
+// removes term t from the container
 bool TermsContainer::removeTerm(const Term &t)
 {
     vector<Term>::iterator it;
@@ -147,6 +159,7 @@ bool TermsContainer::removeTerm(const Term &t)
     return false;
 }
 
+// finds out whether term t is in the container
 bool TermsContainer::hasTerm(const Term &t) const
 {
     if (termsVector->empty() || termsVector->at(0).getSize() != t.getSize())
@@ -154,6 +167,7 @@ bool TermsContainer::hasTerm(const Term &t) const
     return find(termsVector->begin(), termsVector->end(),t) != termsVector->end();
 }
 
+// sets value of the term with idx to val
 bool TermsContainer::setTermValue(int idx, OutputValue val)
 {
     if (val.isDC())
@@ -164,6 +178,7 @@ bool TermsContainer::setTermValue(int idx, OutputValue val)
         return removeTerm(idx);
 }
 
+// sets value of the term t to val
 bool TermsContainer::setTermValue(const Term &t, OutputValue val)
 {
     if (val.isDC() && !t.isDC()) {
@@ -177,6 +192,7 @@ bool TermsContainer::setTermValue(const Term &t, OutputValue val)
         return removeTerm(t);
 }
 
+ // returns value of the term with idx
 OutputValue TermsContainer::getTermValue(int idx) const
 {
     for (unsigned i = 0; i < termsVector->size(); i++) {
@@ -195,22 +211,26 @@ OutputValue TermsContainer::getTermValue(int idx) const
         return OutputValue::ONE;
 }
 
+// returns term at the position pos
 const Term &TermsContainer::at(unsigned pos) const
 {
     return termsVector->at(pos);
 }
 
+// returns actual terms
 std::vector<Term> TermsContainer::getTerms()
 {
     return *termsVector;
 }
 
+// returns actual terms (copies result to idxs)
 std::vector<Term> &TermsContainer::getTerms(std::vector<Term> &terms)
 {
     terms = *termsVector;
     return terms;
 }
 
+// returns actual minterms (copies result to idxs)
 vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms)
 {
     minterms.clear();
@@ -228,12 +248,14 @@ vector<Term> &TermsContainer::getMinterms(vector<Term> &minterms)
     return minterms;
 }
 
+// returns actual minterms
 vector<Term> TermsContainer::getMinterms()
 {
     vector<Term> minterms;
     return getMinterms(minterms);
 }
 
+// returns actual maxterms (copies result to idxs)
 vector<Term> &TermsContainer::getMaxterms(vector<Term> &maxterms)
 {
     maxterms.clear();
@@ -251,12 +273,14 @@ vector<Term> &TermsContainer::getMaxterms(vector<Term> &maxterms)
     return maxterms;
 }
 
+// returns actual maxterms
 vector<Term> TermsContainer::getMaxterms()
 {
     vector<Term> maxterms;
     return getMaxterms(maxterms);
 }
 
+// returns on-set, off-set and dc-set covers
 void TermsContainer::getCovers(list<Term> &f, list<Term> &d, list<Term> &r)
 {
     vector<Term> minterms = getMinterms();
@@ -279,7 +303,7 @@ void TermsContainer::getCovers(list<Term> &f, list<Term> &d, list<Term> &r)
     }
 }
 
-
+// returns terms id for terms with value equal to val (copies result to idxs)
 vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs)
 {
     OutputValue value(val);
@@ -308,6 +332,7 @@ vector<int> &TermsContainer::getTermsIdx(int val, vector<int> &idxs)
     return idxs;
 }
 
+// returns terms id for terms with value equal to val
 vector<int> TermsContainer::getTermsIdx(int val)
 {
     vector<int> idxs;
@@ -315,8 +340,7 @@ vector<int> TermsContainer::getTermsIdx(int val)
     return idxs;
 }
 
-
-
+// removes all terms from the container
 void TermsContainer::clear()
 {
     termsVector->clear();
@@ -336,11 +360,13 @@ bool TermsContainer::operator==(const TermsContainer &tc) const
     return true;
 }
 
+// nonequality
 bool TermsContainer::operator!=(const TermsContainer &tc) const
 {
     return !operator==(tc);
 }
 
+// makes complement terms
 void TermsContainer::setComplement()
 {
     if (changed) {
@@ -374,6 +400,7 @@ void TermsContainer::setComplement()
     }
 }
 
+// expandes all terms to the base term
 void TermsContainer::toBaseTerms()
 {
     vector<Term> v;
@@ -383,20 +410,20 @@ void TermsContainer::toBaseTerms()
     *termsVector = vector<Term>(v.begin(), v.end());
 }
 
+// iterating initialization
 void TermsContainer::itInit()
 {
     itPos = 0;
 }
 
-
+// iterating next checking
 bool TermsContainer::itHasNext()
 {
     return termsVector->size() != itPos;
 }
 
+// iterating next shift
 Term &TermsContainer::itNext()
 {
     return termsVector->at(itPos++);
 }
-
-

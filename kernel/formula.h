@@ -36,6 +36,7 @@ class OutputValue;
 class TermsContainer;
 class Term;
 
+// formula declaration
 struct FormulaDecl
 {
     FormulaDecl(std::vector<char> *v = 0, char n = 'f') : vars(v), name(n) {}
@@ -44,6 +45,7 @@ struct FormulaDecl
     char name;
 };
 
+// formula specification - using sets
 struct FormulaSpec
 {
     FormulaSpec(std::set<int> *_f = 0, std::set<int> *_d = 0, std::set<int> *_r = 0)
@@ -65,10 +67,14 @@ public:
     // minimization state
     enum State { COMPLETE, MINIMIZED, EXPANDED, IRREDUNDANT, REDUCED };
 
-    static const char DEFAULT_NAME      = 'f';
+    // default function name
+    static const char DEFAULT_NAME = 'f';
+    // default variable name for the first variable
     static const char DEFAULT_FIRST_VAR = 'a';
-    static const Repre DEFAULT_REP      = REP_SOP;
-    static const unsigned MAX_VARS      = 10;
+    // default formula representation
+    static const Repre DEFAULT_REP = REP_SOP;
+    // maximal number of variables
+    static const unsigned MAX_VARS = 10;
 
     // Constructors
     Formula(unsigned vc, char fn = DEFAULT_NAME, Repre rep = DEFAULT_REP,
@@ -83,21 +89,21 @@ public:
     // Destructor
     ~Formula();
 
-    // finds out whether formula is tautology
+    // finds out if the formula is a tautology
     bool isTautology() const;
-    // finds out whether formula is contradiction
+    // finds out if the formula is a contradiction
     bool isContradiction() const;
-    // finds out whether term t is in TermsContainer
+    // finds out if the term t is in the TermsContainer
     bool hasTerm(const Term &t) const;
-    // sets term with idx to value
+    // sets the term with index idx to the value val
     void setTermValue(int idx, OutputValue val) throw(InvalidIndexExc);
-    // sets term t to value
+    // sets the term t to the value val
     void setTermValue(const Term &t, OutputValue val);
-    // returns value of term with idx
+    // returns value of the term with index idx
     OutputValue getTermValue(int idx) const;
-    // returns terms id with val from original terms
+    // returns terms indices that have output value equal to val
     std::vector<int> getTermsIdx(int val) const;
-    // returns terms id with val from original terms (without creating new vector)
+    // returns terms indices that have output value equal to val (without creating new vector)
     std::vector<int> &getTermsIdx(int val, std::vector<int> &idxs) const;
     // returns actual terms
     std::vector<Term> getTerms() const;
@@ -115,15 +121,17 @@ public:
     void getCovers(std::list<Term> &f, std::list<Term> &d, std::list<Term> &r);
     // returns term at position pos
     const Term &getTermAt(unsigned pos) const;
-    // returns number of terms
+    // returns the number of terms
     unsigned getSize() const;
-    // returns maximal number of terms (by tautology or contradiction)
+    // returns the maximal number of terms (by tautology or contradiction)
     unsigned getMaxSize() const;
 
 
-    // iterating
+    // initializes iterating
     void itInit();
+    // finds out if there is another term
     bool itHasNext();
+    // moves to the next term
     Term &itNext();
 
     // whether formula is minimized

@@ -49,7 +49,7 @@ void Term::init(term_t lit, term_t mis, unsigned s, int flg)
     flags = flg;
 }
 
-// default constructor - the term of size s with all variables setted to dont care
+// default constructor - the term of size s with all variables set on missing value
 Term::Term(unsigned s, bool isDC)
 {
     int flag = ONE;
@@ -60,7 +60,7 @@ Term::Term(unsigned s, bool isDC)
 }
 
 
-// constructor - makes the variables array with size s by idx (index of boolean function)
+// constructor - makes the variables array of the size s by the index idx (index of the boolean function)
 Term::Term(int idx, unsigned s, bool isDC)
 {
     if (idx == MISSING_ALL)
@@ -74,13 +74,13 @@ Term::Term(int idx, unsigned s, bool isDC)
     }
 }
 
-// constructor - internal usage
+// constructor - for the internal usage
 Term::Term(term_t lit, term_t miss, unsigned s, int flg)
 {
     init(lit, miss, s, flg);
 }
 
-// constructor - from string
+// constructor - parsed from the string str
 Term::Term(const std::string &str, unsigned s) throw(InvalidTermExc)
 {
     if (s && str.size() != s)
@@ -226,13 +226,13 @@ bool Term::implies(Term & t) const
     return !((t.liters ^ liters) & ~missing);
 }
 
-// size of term. when all is false, than without missing values
+// returns size of term, if the all is false returns size reduced of dont cares
 unsigned Term::getSize(bool all) const
 {
     return all? size: size - valuesCount(LiteralValue::MISSING);
 }
 
-// returns index of minterm
+// returns index of the boolean function for the term
 int Term::getIdx() const
 {
     return missing? -1: int(liters);

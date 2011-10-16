@@ -39,7 +39,7 @@ for (list<Events *>::iterator _it = events.begin(); _it != events.end(); _it++) 
 // preinicialize static instance
 Kernel *Kernel::s_instance = 0;
 
-// return instance of GUIManager
+// return instance of Kernel class
 Kernel *Kernel::instance()
 {
     if (s_instance == 0)
@@ -48,12 +48,14 @@ Kernel *Kernel::instance()
     return s_instance;
 }
 
+// deletes kernel instance
 void Kernel::destroy()
 {
     delete s_instance;
     s_instance = 0;
 }
 
+// constructor
 Kernel::Kernel()
 {
     formula = minFormula = tempFormula = 0;
@@ -72,6 +74,7 @@ Kernel::Kernel()
     }
 }
 
+// destructor
 Kernel::~Kernel()
 {
     deleteFormula();

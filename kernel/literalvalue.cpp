@@ -22,6 +22,7 @@
 
 #include <string>
 
+// gets next literal value of the value lv (0 -> 1 -> 2 -> 0 -> ...)
 LiteralValue LiteralValue::getNextValue(const LiteralValue &lv)
 {
     switch (lv.getValue()) {
@@ -34,6 +35,7 @@ LiteralValue LiteralValue::getNextValue(const LiteralValue &lv)
     }
 }
 
+// constructor - value from character
 LiteralValue::LiteralValue(char c) throw(InvalidValueExc)
 {
     switch (c) {
@@ -52,6 +54,7 @@ LiteralValue::LiteralValue(char c) throw(InvalidValueExc)
     }
 }
 
+// converts the current value to characte
 char LiteralValue::toChar() const
 {
     switch (value) {
@@ -64,6 +67,7 @@ char LiteralValue::toChar() const
     }
 }
 
+// converts the current value to string
 std::string LiteralValue::toString() const
 {
     switch (value) {
